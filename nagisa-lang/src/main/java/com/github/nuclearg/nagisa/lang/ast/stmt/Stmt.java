@@ -23,12 +23,16 @@ public abstract class Stmt extends AstNode {
 
     private static Stmt resolveStmt(SyntaxTreeNode node) {
         switch (node.ruleName) {
+            case "EmptyStmt":
+                return new EmptyStmt();
             case "VariableSetStmt":
                 return new VariableSetStmt(node);
             case "IfStmt":
                 return new IfStmt(node);
             case "ForStmt":
                 return new ForStmt(node);
+            case "WhileStmt":
+                return new WhileStmt(node);
             default:
                 throw new UnsupportedOperationException();
         }

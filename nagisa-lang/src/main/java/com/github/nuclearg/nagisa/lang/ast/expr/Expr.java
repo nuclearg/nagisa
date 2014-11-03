@@ -12,7 +12,7 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 public abstract class Expr extends AstNode {
 
     public static Expr resolveExpr(SyntaxTreeNode syntaxTreeNode) {
-        System.out.println(syntaxTreeNode.tokens);
+//        System.out.println(syntaxTreeNode.tokens);
         // 重整优先级
         return null;
     }

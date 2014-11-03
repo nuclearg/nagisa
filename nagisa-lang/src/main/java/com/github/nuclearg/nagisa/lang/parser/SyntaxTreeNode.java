@@ -1,5 +1,6 @@
 package com.github.nuclearg.nagisa.lang.parser;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -9,40 +10,39 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
 import com.github.nuclearg.nagisa.lang.parser.rule.NullRule;
 import com.github.nuclearg.nagisa.lang.parser.rule.SyntaxRule;
-import com.github.nuclearg.nagisa.lang.util.ListUtils;
 import com.github.nuclearg.nagisa.lang.util.Range;
 
 /**
- * 语法树节点
+ * 璇硶鏍戣妭鐐�
  * 
  * @author ng
  *
  */
 public class SyntaxTreeNode {
     /**
-     * 对应的语法元素
+     * 瀵瑰簲鐨勮娉曞厓绱�
      */
     public final SyntaxRule rule;
     /**
-     * 对应的语法元素的名称
+     * 瀵瑰簲鐨勮娉曞厓绱犵殑鍚嶇О
      */
     public final String ruleName;
     /**
-     * 对应的词法元素
+     * 瀵瑰簲鐨勮瘝娉曞厓绱�
      */
     public final List<LexToken> tokens;
     /**
-     * 子元素，可能为null
+     * 瀛愬厓绱狅紝鍙兘涓簄ull
      */
     public final List<SyntaxTreeNode> children;
     /**
-     * 在源文件中的位置
+     * 鍦ㄦ簮鏂囦欢涓殑浣嶇疆
      */
     public final Range range;
 
     public SyntaxTreeNode(SyntaxRule rule, LexToken token) {
         this.rule = rule;
-        this.ruleName = token.type.name();
+        this.ruleName = null;
         this.tokens = Arrays.asList(token);
         this.children = null;
         this.range = token.range;
@@ -51,7 +51,12 @@ public class SyntaxTreeNode {
     public SyntaxTreeNode(SyntaxRule rule, List<SyntaxTreeNode> children) {
         this.rule = rule;
         this.ruleName = null;
-        this.tokens = children.stream().map(e -> e.tokens).reduce(Collections.emptyList(), ListUtils::union);
+        this.tokens = children.stream().map(e -> e.tokens).reduce(Collections.emptyList(), (a, b) -> {
+            List<LexToken> list = new ArrayList<>();
+            list.addAll(a);
+            list.addAll(b);
+            return list;
+        });
         this.children = Collections.unmodifiableList(children);
 
         if (!this.children.isEmpty()) {

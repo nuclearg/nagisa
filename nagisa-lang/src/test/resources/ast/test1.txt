@@ -5,10 +5,11 @@ let i=1
 
 while i<100
 	if i%2 == 0 then
-		even = even + i
+		let even = even + i
 	else
-		odd = odd + i
+		let odd = odd + i
 	endif
+	let i=i+1
 wend
 
 let sum = even + odd

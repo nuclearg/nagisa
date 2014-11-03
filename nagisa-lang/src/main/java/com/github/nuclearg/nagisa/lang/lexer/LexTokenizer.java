@@ -22,17 +22,22 @@ public class LexTokenizer {
     private final String text;
 
     /**
+     * 读取完前一个词之后的快照
+     */
+    private LexTokenizerSnapshot prevSnapshot;
+
+    /**
      * 当前字符位置
      */
-    private int currentPos;
+    private int pos;
     /**
      * 当前行号
      */
-    private int currentRow;
+    private int row;
     /**
      * 当前列号
      */
-    private int currentColumn;
+    private int column;
 
     public LexTokenizer(LexDefinition definition, String text) {
         this.definition = definition;
@@ -43,7 +48,7 @@ public class LexTokenizer {
      * 判断是否已经读到了末尾
      */
     public boolean eof() {
-        return this.currentPos >= this.text.length();
+        return this.pos >= this.text.length();
     }
 
     /**
@@ -65,31 +70,32 @@ public class LexTokenizer {
      */
     public LexToken next() {
         if (this.eof())
-            return new LexToken(null, null, new Range(this.currentRow, this.currentColumn, this.currentRow, this.currentColumn));
+            return new LexToken(null, null, new Range(this.row, this.column, this.row, this.column));
 
         LexToken token = null;
+        this.prevSnapshot = new LexTokenizerSnapshot(this, this.pos, this.row, this.column);
 
         // 遍历所有词法规则进行匹配
         for (LexTokenType type : this.definition.types) {
             Matcher m = type.regex().matcher(this.text);
-            if (m.find(this.currentPos) && m.start() == this.currentPos) {
+            if (m.find(this.pos) && m.start() == this.pos) {
                 // 正则匹配成功
                 String str = this.text.substring(m.start(), m.end());
-                this.currentPos += m.end() - m.start();
+                this.pos += m.end() - m.start();
 
                 // 处理行号和列号
                 String copy = str.replaceAll("\\r\\n|\\r", "\n");
-                int oldRow = this.currentRow;
-                int oldColumn = this.currentColumn;
+                int oldRow = this.row;
+                int oldColumn = this.column;
 
-                this.currentRow += copy.chars().filter(ch -> ch == '\n').count();
-                if (this.currentRow != oldRow)
-                    this.currentColumn += copy.length() - copy.lastIndexOf('\n');
+                this.row += copy.chars().filter(ch -> ch == '\n').count();
+                if (this.row != oldRow)
+                    this.column = copy.length() - copy.lastIndexOf('\n');
                 else
-                    this.currentColumn += str.length();
+                    this.column += str.length();
 
                 // 构造词法元素
-                Range range = new Range(oldRow, oldColumn, this.currentRow, this.currentColumn);
+                Range range = new Range(oldRow, oldColumn, this.row, this.column);
                 token = new LexToken(type, str, range);
                 break;
             }
@@ -97,7 +103,7 @@ public class LexTokenizer {
 
         // 如果无法与任何词法规则匹配则抛异常
         if (token == null)
-            throw new NagisaException("词法分析失败。遇到无法解析的字符。row: " + this.currentRow + ", column: " + this.currentColumn);
+            throw new NagisaException("词法分析失败。遇到无法解析的字符。row: " + this.row + ", column: " + this.column);
 
         if (token.type.transparent())
             return this.next();
@@ -111,7 +117,14 @@ public class LexTokenizer {
      * @return 当前的快照
      */
     public LexTokenizerSnapshot snapshot() {
-        return new LexTokenizerSnapshot(this, this.currentPos, this.currentRow, this.currentColumn);
+        return new LexTokenizerSnapshot(this, this.pos, this.row, this.column);
+    }
+
+    /**
+     * 获取读取当前词之前的快照
+     */
+    public LexTokenizerSnapshot prevSnapshot() {
+        return this.prevSnapshot;
     }
 
     /**
@@ -120,12 +133,14 @@ public class LexTokenizer {
      * @param snapshot
      *            要恢复的快照
      */
-    public void restore(LexTokenizerSnapshot snapshot) {
-        if (snapshot.host != this)
-            throw new NagisaException("snapshot not from this tokenizer");
+    private void restore(LexTokenizerSnapshot snapshot) {
+        this.pos = snapshot.pos;
+        this.row = snapshot.row;
+        this.column = snapshot.column;
+    }
 
-        this.currentPos = snapshot.pos;
-        this.currentRow = snapshot.row;
-        this.currentColumn = snapshot.column;
+    @Override
+    public String toString() {
+        return "[" + this.row + ":" + this.column + "] " + this.peek().toString();
     }
 }

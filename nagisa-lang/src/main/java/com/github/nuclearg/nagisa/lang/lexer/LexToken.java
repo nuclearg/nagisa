@@ -1,5 +1,6 @@
 package com.github.nuclearg.nagisa.lang.lexer;
 
+import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition.NagisaLexTokenType;
 import com.github.nuclearg.nagisa.lang.util.Range;
 
 /**
@@ -30,6 +31,9 @@ public class LexToken {
 
     @Override
     public String toString() {
-        return this.text + " [" + this.type + "]";
+        if (this.type == NagisaLexTokenType.EOL)
+            return "[EOL]";
+        else
+            return this.text + " [" + this.type + "]";
     }
 }

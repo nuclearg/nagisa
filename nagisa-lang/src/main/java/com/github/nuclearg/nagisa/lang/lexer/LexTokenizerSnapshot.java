@@ -31,4 +31,8 @@ public class LexTokenizerSnapshot {
         this.column = column;
     }
 
+    @Override
+    public String toString() {
+        return "[" + (this.row + 1) + ":" + (this.column + 1) + "]";
+    }
 }

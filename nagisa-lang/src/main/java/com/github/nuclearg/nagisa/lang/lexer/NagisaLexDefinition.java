@@ -85,10 +85,6 @@ public class NagisaLexDefinition extends LexDefinition {
         STRING("\"([^\"]|\\\\\")+\""),
 
         /**
-         * 赋值
-         */
-        OPERATOR_LET("="),
-        /**
          * 加号
          */
         OPERATOR_ADD("\\+"),
@@ -163,7 +159,12 @@ public class NagisaLexDefinition extends LexDefinition {
         /**
          * 右中括号
          */
-        OPERATOR_BRACKET_RIGHT("\\]"), ;
+        OPERATOR_BRACKET_RIGHT("\\]"),
+
+        /**
+         * 赋值
+         */
+        OPERATOR_LET("="), ;
 
         private final Pattern regex;
         private final boolean transparent;

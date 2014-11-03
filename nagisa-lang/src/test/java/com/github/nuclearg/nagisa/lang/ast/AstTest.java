@@ -1,5 +1,9 @@
 package com.github.nuclearg.nagisa.lang.ast;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -7,14 +11,41 @@ import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
 import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition;
 import com.github.nuclearg.nagisa.lang.parser.NagisaSyntaxDefinition;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxErrorReporter;
+import com.github.nuclearg.nagisa.lang.util.InputStreamUtils;
 
 public class AstTest {
     @Test
-    public void test() {
-        test("let a=1\nlet b=2\nfor i=0 to 5\n let a=3\nlet b=4\nlet c=a+b\nif i>3 then \nlet d=i\n if c>3 then\n if d>5 then  \n let a=a+b\nlet b=a+b\n endif\n endif\n endif\n next\n");
+    public void test1() throws IOException {
+        test("test1.txt");
     }
 
-    private void test(String code) {
+    @Test
+    public void testLet() throws IOException {
+        test("let.txt");
+    }
+
+    @Test
+    public void testIf() throws IOException {
+        test("if.txt");
+    }
+
+    @Test
+    public void testFor() throws IOException {
+        test("for.txt");
+    }
+
+    @Test
+    public void testWhile() throws IOException {
+        test("while.txt");
+    }
+
+    private void test(String filename) throws IOException {
+        System.out.println("AST test: " + filename);
+
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream("ast/" + filename);
+
+        String code = InputStreamUtils.read(is, Charset.forName("utf-8"));
+
         LexTokenizer lexer = new LexTokenizer(new NagisaLexDefinition(), code);
 
         NagisaSyntaxDefinition definition = new NagisaSyntaxDefinition();
@@ -24,6 +55,5 @@ public class AstTest {
         System.out.println(cu);
 
         Assert.assertTrue(lexer.eof());
-
     }
 }

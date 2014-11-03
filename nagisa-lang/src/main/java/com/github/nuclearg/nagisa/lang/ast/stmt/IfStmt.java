@@ -21,12 +21,17 @@ public class IfStmt extends Stmt {
     /**
      * 判断成功的操作
      */
-    public final List<Stmt> stmts;
+    public final List<Stmt> thenStmts;
+    /**
+     * 判断失败的操作
+     */
+    public final List<Stmt> elseStmts;
 
     IfStmt(SyntaxTreeNode node) {
         this.condition = Expr.resolveExpr(node.children.get(1));
 
-        this.stmts = Stmt.resolveStmts(node.children.get(3).children.get(1).children);
+        this.thenStmts = Stmt.resolveStmts(node.children.get(4).children);
+        this.elseStmts = null;
     }
 
     @Override
@@ -34,11 +39,11 @@ public class IfStmt extends Stmt {
         StringBuilder builder = new StringBuilder();
         builder.append(prefix).append("IF ").append(this.condition).append(" THEN");
 
-        if (this.stmts.size() == 1)
-            builder.append(" ").append(this.stmts.get(0));
+        if (this.thenStmts.size() == 1)
+            builder.append(" ").append(this.thenStmts.get(0));
         else {
             builder.append(SystemUtils.LINE_SEPARATOR);
-            for (Stmt stmt : this.stmts)
+            for (Stmt stmt : this.thenStmts)
                 builder.append(stmt.toString(prefix + "    "));
             builder.append(prefix).append("ENDIF").append(SystemUtils.LINE_SEPARATOR);
         }

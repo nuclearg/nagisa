@@ -3,7 +3,7 @@ package com.github.nuclearg.nagisa.lang.parser.rule;
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
-import com.github.nuclearg.nagisa.lang.lexer.LexTokenizerSnapshot;
+import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
@@ -25,16 +25,23 @@ public class LexRule implements SyntaxRule {
 
     @Override
     public SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
-        LexTokenizerSnapshot snapshot = lexer.snapshot();
-
         LexToken token = lexer.next();
 
-        if (token.type != this.tokenType) {
-            errorReporter.error("token类型不匹配", lexer, this);
-            lexer.restore(snapshot);
-            return null;
-        }
+        // 正常情况，词法分析器给出的词与期望的类型一致
+        if (token.type == this.tokenType)
+            return new SyntaxTreeNode(this, token);
 
+        // 错误处理，遇到不匹配的词就直接忽略掉往后看
+        while (token.type != this.tokenType) {
+            errorReporter.error("遇到意外的符号 " + token + "，期望 " + this.tokenType, lexer.prevSnapshot());
+
+            if (token.type == null)// EOF
+                return null;
+            if (token.type == NagisaLexDefinition.NagisaLexTokenType.EOL)// EOL
+                return null;
+
+            token = lexer.next();
+        }
         return new SyntaxTreeNode(this, token);
     }
 

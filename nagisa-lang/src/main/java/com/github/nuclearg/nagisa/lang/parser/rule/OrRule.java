@@ -33,7 +33,8 @@ public class OrRule implements SyntaxRule {
             if (rule.tryToken(token.type))
                 return rule.parse(lexer, errorReporter);
 
-        errorReporter.error("找不到合适的语法规则", lexer, this);
+        // 错误处理
+        errorReporter.error("找不到合适的语法规则，遇到意外的符号 " + token, lexer.snapshot());
         return null;
     }
 

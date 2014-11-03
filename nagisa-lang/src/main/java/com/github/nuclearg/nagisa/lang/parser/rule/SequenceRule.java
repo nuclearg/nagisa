@@ -34,18 +34,19 @@ public class SequenceRule implements SyntaxRule {
     public SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         List<SyntaxTreeNode> children = new ArrayList<>();
 
-        LexTokenizerSnapshot snapshot = lexer.snapshot();
-
         for (SyntaxRule rule : this.rules) {
+            LexTokenizerSnapshot snapshot = lexer.snapshot();
+
             // 尝试解析下一个元素
             SyntaxTreeNode node = rule.parse(lexer, errorReporter);
 
-            if (node == null) {
-                errorReporter.error("Syntax error. expected:  " + rule + ", but: " + lexer.next(), lexer, this);
-                lexer.restore(snapshot);
-                return null;
+            // 正常情况，语法树节点成功构建
+            if (node != null) {
+                children.add(node);
+            } else {
+                // 错误处理，跳过当前的词向后看
+                errorReporter.error("语法子树构建失败。当前符号：" + lexer.peek() + ". 期望 " + rule, snapshot);
             }
-            children.add(node);
         }
 
         return new SyntaxTreeNode(this, children);
