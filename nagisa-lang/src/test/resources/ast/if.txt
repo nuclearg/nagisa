@@ -4,9 +4,9 @@ endif
 
 if a<b then
 
-	if a then
+	if a==1 then
 
-		if b then
+		if b==1 then
 
 		endif
 

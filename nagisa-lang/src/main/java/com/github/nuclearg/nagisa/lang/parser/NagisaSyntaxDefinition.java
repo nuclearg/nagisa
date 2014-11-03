@@ -11,44 +11,118 @@ import static com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition.NagisaLe
 public class NagisaSyntaxDefinition extends SyntaxDefinition {
 
     public NagisaSyntaxDefinition() {
-        define("ExprElement",
+        // 数学运算表达式
+        define("NumberExprElement",
                 or(
-                        lex(INTEGER), // 整数字面量
-                        lex(STRING), // 字符串字面量
-                        lex(SYMBOL), // 变量调用
+                        lex(INTEGER),
+                        lex(SYMBOL),
                         seq(lex(OPERATOR_PARENTHESE_LEFT), ref("Expr"), lex(OPERATOR_PARENTHESE_RIGHT))));
-        define("Expr", or(
-                seq(lex(OPERATOR_SUB), ref("Expr")), // 取负数
-                seq(lex(OPERATOR_NOT), ref("Expr")), // 取逻辑反
-                seq(ref("ExprElement"), or(
-                        // 算术运算
-                        seq(or(lex(OPERATOR_ADD), lex(OPERATOR_SUB), lex(OPERATOR_MUL), lex(OPERATOR_DIV), lex(OPERATOR_MOD)), ref("Expr")),
-                        // 比较运算
-                        seq(or(lex(OPERATOR_EQ), lex(OPERATOR_NEQ), lex(OPERATOR_GT), lex(OPERATOR_GTE), lex(OPERATOR_LT), lex(OPERATOR_LTE)), ref("Expr")),
-                        // 逻辑运算
-                        seq(or(lex(OPERATOR_AND), lex(OPERATOR_OR)), ref("Expr")),
-                        nul()))));
+        define("NumberMulDivModExprTerm",
+                seq(
+                        ref("NumberExprElement"),
+                        or(
+                                seq(
+                                        or(
+                                                lex(OPERATOR_MUL),
+                                                lex(OPERATOR_DIV),
+                                                lex(OPERATOR_MOD)),
+                                        ref("NumberMulDivModExprTerm")),
+                                nul())));
+        define("NumberExpr",
+                or(
+                        seq(lex(OPERATOR_SUB), ref("NumberExpr")),
+                        seq(
+                                ref("NumberMulDivModExprTerm"),
+                                or(
+                                        seq(
+                                                or(
+                                                        lex(OPERATOR_ADD),
+                                                        lex(OPERATOR_SUB)),
+                                                ref("NumberExpr")),
+                                        nul()))));
 
-        define("EmptyStmt", lex(EOL)); // 空语句
+        // 字符串运算表达式
+        define("StringExprElement",
+                or(
+                        lex(STRING),
+                        lex(STRING_SYMBOL),
+                        seq(lex(OPERATOR_PARENTHESE_LEFT), ref("StringExpr"), lex(OPERATOR_PARENTHESE_RIGHT))));
+        define("StringExpr",
+                seq(
+                        ref("StringExprElement"),
+                        or(
+                                seq(lex(OPERATOR_ADD), ref("StringExpr")),
+                                nul())));
 
-        define("VariableSetStmt", // 赋值语句
-                seq(lex(KEYWORD_LET), lex(SYMBOL), lex(OPERATOR_LET), ref("Expr"), lex(EOL)));
+        // 逻辑运算表达式
+        define("BooleanExprElement",
+                or(
+                        seq(
+                                ref("NumberExpr"),
+                                or(
+                                        lex(OPERATOR_EQ),
+                                        lex(OPERATOR_NEQ),
+                                        lex(OPERATOR_GT),
+                                        lex(OPERATOR_GTE),
+                                        lex(OPERATOR_LT),
+                                        lex(OPERATOR_LTE)),
+                                ref("NumberExpr")),
+                        seq(
+                                ref("StringExpr"),
+                                or(
+                                        lex(OPERATOR_EQ),
+                                        lex(OPERATOR_NEQ),
+                                        lex(OPERATOR_GT),
+                                        lex(OPERATOR_GTE),
+                                        lex(OPERATOR_LT),
+                                        lex(OPERATOR_LTE)),
+                                ref("StringExpr")),
+                        seq(lex(OPERATOR_PARENTHESE_LEFT), ref("BooleanExpr"), lex(OPERATOR_PARENTHESE_RIGHT))));
+        define("BooleanExpr",
+                or(
+                        seq(lex(OPERATOR_NOT), ref("BooleanExpr")),
+                        seq(
+                                ref("BooleanExprElement"),
+                                or(
+                                        seq(
+                                                or(
+                                                        lex(OPERATOR_AND),
+                                                        lex(OPERATOR_OR)),
+                                                ref("BooleanExpr")),
+                                        nul()))));
 
-        define("IfStmt", // if...else...endif语句
-                seq(lex(KEYWORD_IF), ref("Expr"), lex(KEYWORD_THEN), lex(EOL), rep(ref("Stmt")), or(seq(lex(KEYWORD_ELSE), lex(EOL), rep(ref("Stmt"))), nul()), lex(KEYWORD_ENDIF), lex(EOL)));
+        // 空语句
+        define("EmptyStmt",
+                lex(EOL));
 
-        define("ForStmt", // for...next语句
-                seq(lex(KEYWORD_FOR), lex(SYMBOL), lex(OPERATOR_LET), ref("Expr"), lex(KEYWORD_TO), ref("Expr"), lex(EOL), rep(ref("Stmt")), lex(KEYWORD_NEXT), lex(EOL)));
+        // 赋值语句
+        define("VariableSetStmt",
+                seq(
+                        lex(KEYWORD_LET),
+                        or(
+                                seq(lex(SYMBOL), lex(OPERATOR_LET), ref("NumberExpr"), lex(EOL)),
+                                seq(lex(STRING_SYMBOL), lex(OPERATOR_LET), ref("StringExpr"), lex(EOL)))));
 
-        define("WhileStmt", // while...wend语句
-                seq(lex(KEYWORD_WHILE), ref("Expr"), lex(EOL), rep(ref("Stmt")), lex(KEYWORD_WEND), lex(EOL)));
+        // if...else...endif
+        define("IfStmt",
+                seq(lex(KEYWORD_IF), ref("BooleanExpr"), lex(KEYWORD_THEN), lex(EOL), rep(ref("Stmt")), or(seq(lex(KEYWORD_ELSE), lex(EOL), rep(ref("Stmt"))), nul()), lex(KEYWORD_ENDIF), lex(EOL)));
 
-        define("Stmt", or( // 一条语句
-                ref("EmptyStmt"),
-                ref("VariableSetStmt"),
-                ref("IfStmt"),
-                ref("ForStmt"),
-                ref("WhileStmt")));
+        // for...next
+        define("ForStmt",
+                seq(lex(KEYWORD_FOR), lex(SYMBOL), lex(OPERATOR_LET), ref("NumberExpr"), lex(KEYWORD_TO), ref("NumberExpr"), lex(EOL), rep(ref("Stmt")), lex(KEYWORD_NEXT), lex(EOL)));
+
+        // while...wend
+        define("WhileStmt",
+                seq(lex(KEYWORD_WHILE), ref("BooleanExpr"), lex(EOL), rep(ref("Stmt")), lex(KEYWORD_WEND), lex(EOL)));
+
+        // 一条语句
+        define("Stmt",
+                or(
+                        ref("EmptyStmt"),
+                        ref("VariableSetStmt"),
+                        ref("IfStmt"),
+                        ref("ForStmt"),
+                        ref("WhileStmt")));
 
         define("CompilationUnit", rep(ref("Stmt")));
     }

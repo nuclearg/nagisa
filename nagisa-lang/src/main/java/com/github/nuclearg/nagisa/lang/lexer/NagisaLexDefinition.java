@@ -72,6 +72,10 @@ public class NagisaLexDefinition extends LexDefinition {
         KEYWORD_WEND("(?i)WEND"),
 
         /**
+         * 字符串变量名
+         */
+        STRING_SYMBOL("[a-zA-Z][_0-9a-zA-Z]*\\$"),
+        /**
          * 用户自定义的符号
          */
         SYMBOL("[a-zA-Z][_0-9a-zA-Z]*"),
@@ -135,15 +139,15 @@ public class NagisaLexDefinition extends LexDefinition {
         /**
          * 逻辑且
          */
-        OPERATOR_AND("(?i)AND"),
+        OPERATOR_AND("&&"),
         /**
          * 逻辑或
          */
-        OPERATOR_OR("(?i)OR"),
+        OPERATOR_OR("\\|\\|"),
         /**
          * 逻辑与
          */
-        OPERATOR_NOT("(?i)NOT"),
+        OPERATOR_NOT("!"),
         /**
          * 左小括号
          */

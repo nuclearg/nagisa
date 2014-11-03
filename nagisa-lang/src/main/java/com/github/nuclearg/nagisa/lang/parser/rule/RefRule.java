@@ -5,6 +5,7 @@ import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxDefinition;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
+import com.github.nuclearg.nagisa.lang.util.NagisaException;
 
 /**
  * 引用其它{@link SyntaxRuleDefinition}
@@ -28,7 +29,10 @@ public class RefRule implements SyntaxRule {
     }
 
     private SyntaxRule rule() {
-        return this.definition.rules.get(this.name);
+        SyntaxRule rule = this.definition.rules.get(this.name);
+        if (rule == null)
+            throw new NagisaException(this.name);
+        return rule;
     }
 
     @Override

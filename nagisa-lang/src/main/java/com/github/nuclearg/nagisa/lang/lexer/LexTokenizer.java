@@ -1,8 +1,8 @@
 package com.github.nuclearg.nagisa.lang.lexer;
 
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import com.github.nuclearg.nagisa.lang.util.NagisaException;
 import com.github.nuclearg.nagisa.lang.util.Range;
 
 /**
@@ -12,6 +12,24 @@ import com.github.nuclearg.nagisa.lang.util.Range;
  *
  */
 public class LexTokenizer {
+    public static final LexTokenType ERROR = new LexTokenType() {
+
+        @Override
+        public boolean transparent() {
+            return false;
+        }
+
+        @Override
+        public Pattern regex() {
+            return null;
+        }
+
+        @Override
+        public String name() {
+            return "ERROR_TOKEN";
+        }
+    };
+
     /**
      * 词法元素定义
      */
@@ -66,7 +84,7 @@ public class LexTokenizer {
     /**
      * 获取下一个词法元素
      * 
-     * @return 下一个词法元素，如果无法与任何词法规则匹配则抛异常，如果遇到EOF则返回一个type为null的token
+     * @return 下一个词法元素，如果无法与任何词法规则匹配则返回一个type为ERROR的token，如果遇到EOF则返回一个type为null的token
      */
     public LexToken next() {
         if (this.eof())
@@ -103,7 +121,7 @@ public class LexTokenizer {
 
         // 如果无法与任何词法规则匹配则抛异常
         if (token == null)
-            throw new NagisaException("词法分析失败。遇到无法解析的字符。row: " + this.row + ", column: " + this.column);
+            return new LexToken(ERROR, "" + text.charAt(this.pos), new Range(this.row, this.column, this.row, this.column));
 
         if (token.type.transparent())
             return this.next();

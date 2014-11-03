@@ -23,7 +23,7 @@ public class VariableSetStmt extends Stmt {
 
     VariableSetStmt(SyntaxTreeNode node) {
         this.symbol = node.tokens.get(1).text;
-        this.expr = Expr.resolveExpr(node.children.get(3));
+        this.expr = Expr.resolveExpr(node.children.get(1).children.get(2));
     }
 
     @Override
