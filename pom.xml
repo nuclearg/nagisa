@@ -11,10 +11,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <nagisa.version>1.0.0-SNAPSHOT</nagisa.version>
     </properties>
 
     <modules>
-        <module>nagisa-compiler</module>
+        <module>nagisa-lang</module>
+        <module>nagisa-interceptor</module>
     </modules>
 
     <dependencyManagement>
@@ -29,9 +31,16 @@
 
             <!-- apache-commons -->
             <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.6</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.3.2</version>
+            </dependency>
+
+            <!-- guava -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>18.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
