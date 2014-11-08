@@ -13,7 +13,7 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public class LexRule implements SyntaxRule {
+public final class LexRule implements SyntaxRule {
     /**
      * 词法元素类型
      */
@@ -28,16 +28,16 @@ public class LexRule implements SyntaxRule {
         LexToken token = lexer.next();
 
         // 正常情况，词法分析器给出的词与期望的类型一致
-        if (token.type == this.tokenType)
+        if (token.getType() == this.tokenType)
             return new SyntaxTreeNode(this, token);
 
         // 错误处理，遇到不匹配的词就直接忽略掉往后看
-        while (token.type != this.tokenType) {
+        while (token.getType() != this.tokenType) {
             errorReporter.error("遇到意外的符号 " + token + "，期望 " + this.tokenType, lexer.prevSnapshot());
 
-            if (token.type == null)// EOF
+            if (token.getType() == null)// EOF
                 return null;
-            if (token.type == NagisaLexDefinition.NagisaLexTokenType.EOL)// EOL
+            if (token.getType() == NagisaLexDefinition.NagisaLexTokenType.EOL)// EOL
                 return null;
 
             token = lexer.next();

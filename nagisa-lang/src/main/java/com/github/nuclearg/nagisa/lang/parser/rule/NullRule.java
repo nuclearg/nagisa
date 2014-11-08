@@ -13,13 +13,13 @@ import com.github.nuclearg.nagisa.lang.util.Range;
  * @author ng
  *
  */
-public class NullRule implements SyntaxRule {
+public final class NullRule implements SyntaxRule {
 
     @Override
     public SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         LexTokenizerSnapshot snapshot = lexer.snapshot();
 
-        Range range = new Range(snapshot.row, snapshot.column, snapshot.row, snapshot.column);
+        Range range = new Range(snapshot.getRow(), snapshot.getColumn(), snapshot.getRow(), snapshot.getColumn());
 
         return new SyntaxTreeNode(this, range);
     }

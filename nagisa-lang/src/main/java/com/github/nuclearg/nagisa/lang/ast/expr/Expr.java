@@ -1,9 +1,11 @@
 package com.github.nuclearg.nagisa.lang.ast.expr;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.github.nuclearg.nagisa.lang.ast.AstNode;
-import com.github.nuclearg.nagisa.lang.ast.expr.bool.BooleanExpr;
-import com.github.nuclearg.nagisa.lang.ast.expr.number.NumberExpr;
-import com.github.nuclearg.nagisa.lang.ast.expr.string.StringExpr;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
 /**
@@ -12,19 +14,58 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public abstract class Expr extends AstNode {
+public final class Expr extends AstNode {
+    /**
+     * 表达式类型
+     */
+    private final ExprType type;
+    /**
+     * 表达式的字面量
+     */
+    private final String text;
+    /**
+     * 该表达式的各个子表达式
+     */
+    private final List<Expr> children;
+
+    private Expr(ExprType type, String text) {
+        this.type = type;
+        this.text = text;
+        this.children = null;
+    }
+
+    private Expr(ExprType type, List<Expr> children) {
+        this.type = type;
+        this.text = null;
+        this.children = Collections.unmodifiableList(children);
+    }
+
+    /** 表达式类型 */
+    public ExprType getType() {
+        return this.type;
+    }
+
+    /** 表达式的字面量 */
+    public String getText() {
+        return this.text;
+    }
+
+    /** 该表达式的各个子表达式 */
+    public List<Expr> getChildren() {
+        return this.children;
+    }
+
+    @Override
+    public String toString() {
+        if (this.text != null)
+            return this.text;
+        if (this.children != null)
+            return StringUtils.join(this.children, " ");
+        return "";
+    }
 
     public static Expr resolveExpr(SyntaxTreeNode node) {
-        switch (node.ruleName) {
-            case "NumberExpr":
-                return NumberExpr.resolveExpr(node);
-            case "StringExpr":
-                return StringExpr.resolveExpr(node);
-            case "BooleanExpr":
-                return BooleanExpr.resolveExpr(node);
-            default:
-                throw new UnsupportedOperationException(node.ruleName);
-        }
+        return null;
     }
 
 }

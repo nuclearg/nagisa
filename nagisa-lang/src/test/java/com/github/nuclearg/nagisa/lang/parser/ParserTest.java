@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
+import com.github.nuclearg.nagisa.lang.lexer.LexTokenizerFactory;
 import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition;
 
 public class ParserTest {
@@ -38,12 +39,12 @@ public class ParserTest {
     }
 
     private void test(String ruleName, String code) {
-        LexTokenizer lexer = new LexTokenizer(new NagisaLexDefinition(), code);
+        LexTokenizer lexer = LexTokenizerFactory.buildLexTokenizer(new NagisaLexDefinition(), code);
 
         NagisaSyntaxDefinition definition = new NagisaSyntaxDefinition();
 
         System.out.println(ruleName + ": " + code);
-        SyntaxTreeNode node = definition.rules.get(ruleName).parse(lexer, new SyntaxErrorReporter());
+        SyntaxTreeNode node = definition.getRule(ruleName).parse(lexer, new SyntaxErrorReporter());
         System.out.println(" ==> " + node);
 
         Assert.assertTrue(lexer.eof());

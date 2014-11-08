@@ -8,7 +8,7 @@ import static com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition.NagisaLe
  * @author ng
  *
  */
-public class NagisaSyntaxDefinition extends SyntaxDefinition {
+public final class NagisaSyntaxDefinition extends SyntaxDefinition {
 
     public NagisaSyntaxDefinition() {
         // 数学运算表达式

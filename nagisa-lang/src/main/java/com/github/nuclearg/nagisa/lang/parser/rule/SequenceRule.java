@@ -18,7 +18,7 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public class SequenceRule implements SyntaxRule {
+public final class SequenceRule implements SyntaxRule {
     private final List<SyntaxRule> rules;
 
     public SequenceRule(List<SyntaxRule> elements) {

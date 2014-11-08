@@ -9,24 +9,39 @@ import com.github.nuclearg.nagisa.lang.util.Range;
  * @author enji.lj
  *
  */
-public class LexToken {
+public final class LexToken {
     /**
      * 词法元素类型
      */
-    public final LexTokenType type;
+    private final LexTokenType type;
     /**
      * 对应的实际文本
      */
-    public final String text;
+    private final String text;
     /**
      * 在源文件中的位置
      */
-    public final Range range;
+    private final Range range;
 
-    public LexToken(LexTokenType type, String text, Range range) {
+    LexToken(LexTokenType type, String text, Range range) {
         this.type = type;
         this.text = text;
         this.range = range;
+    }
+
+    /** 词法元素类型 */
+    public LexTokenType getType() {
+        return this.type;
+    }
+
+    /** 对应的实际文本 */
+    public String getText() {
+        return this.text;
+    }
+
+    /** 在源文件中的位置 */
+    public Range getRange() {
+        return this.range;
     }
 
     @Override
@@ -34,6 +49,6 @@ public class LexToken {
         if (this.type == NagisaLexTokenType.EOL)
             return "[EOL]";
         else
-            return this.text + " [" + this.type + "]";
+            return this.text + "[" + this.type + "]";
     }
 }

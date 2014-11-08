@@ -22,7 +22,7 @@ public abstract class Stmt extends AstNode {
     }
 
     private static Stmt resolveStmt(SyntaxTreeNode node) {
-        switch (node.ruleName) {
+        switch (node.getRuleName()) {
             case "EmptyStmt":
                 return new EmptyStmt();
             case "VariableSetStmt":

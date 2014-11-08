@@ -11,7 +11,7 @@ import com.github.nuclearg.nagisa.lang.util.Range;
  * @author ng
  *
  */
-public class LexTokenizer {
+public final class LexTokenizer {
     public static final LexTokenType ERROR = new LexTokenType() {
 
         @Override
@@ -57,7 +57,7 @@ public class LexTokenizer {
      */
     private int column;
 
-    public LexTokenizer(LexDefinition definition, String text) {
+    LexTokenizer(LexDefinition definition, String text) {
         this.definition = definition;
         this.text = text;
     }
@@ -94,7 +94,7 @@ public class LexTokenizer {
         this.prevSnapshot = new LexTokenizerSnapshot(this, this.pos, this.row, this.column);
 
         // 遍历所有词法规则进行匹配
-        for (LexTokenType type : this.definition.types) {
+        for (LexTokenType type : this.definition.getTypes()) {
             Matcher m = type.regex().matcher(this.text);
             if (m.find(this.pos) && m.start() == this.pos) {
                 // 正则匹配成功
@@ -123,7 +123,7 @@ public class LexTokenizer {
         if (token == null)
             return new LexToken(ERROR, "" + text.charAt(this.pos), new Range(this.row, this.column, this.row, this.column));
 
-        if (token.type.transparent())
+        if (token.getType().transparent())
             return this.next();
 
         return token;
@@ -152,9 +152,9 @@ public class LexTokenizer {
      *            要恢复的快照
      */
     private void restore(LexTokenizerSnapshot snapshot) {
-        this.pos = snapshot.pos;
-        this.row = snapshot.row;
-        this.column = snapshot.column;
+        this.pos = snapshot.getPos();
+        this.row = snapshot.getRow();
+        this.column = snapshot.getColumn();
     }
 
     @Override

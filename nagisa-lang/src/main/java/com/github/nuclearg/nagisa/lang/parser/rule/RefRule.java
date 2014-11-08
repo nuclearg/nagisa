@@ -13,7 +13,7 @@ import com.github.nuclearg.nagisa.lang.util.NagisaException;
  * @author ng
  *
  */
-public class RefRule implements SyntaxRule {
+public final class RefRule implements SyntaxRule {
     /**
      * 引用的语法定义
      */
@@ -29,7 +29,7 @@ public class RefRule implements SyntaxRule {
     }
 
     private SyntaxRule rule() {
-        SyntaxRule rule = this.definition.rules.get(this.name);
+        SyntaxRule rule = this.definition.getRule(this.name);
         if (rule == null)
             throw new NagisaException(this.name);
         return rule;
@@ -43,7 +43,7 @@ public class RefRule implements SyntaxRule {
     @Override
     public SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         SyntaxTreeNode node = this.rule().parse(lexer, errorReporter);
-        if (node.ruleName != null)
+        if (node.getRuleName() != null)
             return node;
         else
             return new SyntaxTreeNode(this.name, node);

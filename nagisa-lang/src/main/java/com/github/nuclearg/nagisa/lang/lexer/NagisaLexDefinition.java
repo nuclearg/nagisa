@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * @author ng
  *
  */
-public class NagisaLexDefinition extends LexDefinition {
+public final class NagisaLexDefinition extends LexDefinition {
 
     public NagisaLexDefinition() {
         super(Arrays.asList(NagisaLexTokenType.values()));

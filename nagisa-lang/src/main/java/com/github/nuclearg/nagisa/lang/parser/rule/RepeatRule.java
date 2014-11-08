@@ -15,7 +15,7 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public class RepeatRule implements SyntaxRule {
+public final class RepeatRule implements SyntaxRule {
     /**
      * 可选的规则
      */
@@ -34,7 +34,7 @@ public class RepeatRule implements SyntaxRule {
             LexToken token = lexer.peek();
 
             // 判断这个词是否可以被规则接收
-            if (this.rule.tryToken(token.type))
+            if (this.rule.tryToken(token.getType()))
                 children.add(this.rule.parse(lexer, errorReporter));
             else
                 break;

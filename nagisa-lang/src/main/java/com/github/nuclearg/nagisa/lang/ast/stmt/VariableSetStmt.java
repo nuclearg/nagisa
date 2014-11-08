@@ -11,19 +11,29 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public class VariableSetStmt extends Stmt {
+public final class VariableSetStmt extends Stmt {
     /**
      * 变量名
      */
-    public final String symbol;
+    private final String symbol;
     /**
      * 表达式
      */
-    public final Expr expr;
+    private final Expr expr;
 
     VariableSetStmt(SyntaxTreeNode node) {
-        this.symbol = node.tokens.get(1).text;
-        this.expr = Expr.resolveExpr(node.children.get(1).children.get(2));
+        this.symbol = node.getChildren().get(1).getChildren().get(0).getToken().getText();
+        this.expr = Expr.resolveExpr(node.getChildren().get(1).getChildren().get(2));
+    }
+
+    /** 变量名 */
+    public String getSymbol() {
+        return this.symbol;
+    }
+
+    /** 表达式 */
+    public Expr getExpr() {
+        return this.expr;
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
+import com.github.nuclearg.nagisa.lang.lexer.LexTokenizerFactory;
 import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition;
 import com.github.nuclearg.nagisa.lang.parser.NagisaSyntaxDefinition;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxErrorReporter;
@@ -46,11 +47,11 @@ public class AstTest {
 
         String code = InputStreamUtils.read(is, Charset.forName("utf-8"));
 
-        LexTokenizer lexer = new LexTokenizer(new NagisaLexDefinition(), code);
+        LexTokenizer lexer = LexTokenizerFactory.buildLexTokenizer(new NagisaLexDefinition(), code);
 
         NagisaSyntaxDefinition definition = new NagisaSyntaxDefinition();
 
-        CompilationUnit cu = new CompilationUnit(definition.rules.get("CompilationUnit").parse(lexer, new SyntaxErrorReporter()));
+        CompilationUnit cu = new CompilationUnit(definition.getRule("CompilationUnit").parse(lexer, new SyntaxErrorReporter()));
 
         System.out.println(cu);
 

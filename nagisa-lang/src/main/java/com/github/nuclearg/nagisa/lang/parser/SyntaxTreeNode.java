@@ -1,7 +1,5 @@
 package com.github.nuclearg.nagisa.lang.parser;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,50 +11,45 @@ import com.github.nuclearg.nagisa.lang.parser.rule.SyntaxRule;
 import com.github.nuclearg.nagisa.lang.util.Range;
 
 /**
- * 璇硶鏍戣妭鐐�
+ * 语法树节点
  * 
  * @author ng
  *
  */
 public class SyntaxTreeNode {
     /**
-     * 瀵瑰簲鐨勮娉曞厓绱�
+     * 对应的语法规则
      */
-    public final SyntaxRule rule;
+    private final SyntaxRule rule;
     /**
-     * 瀵瑰簲鐨勮娉曞厓绱犵殑鍚嶇О
+     * 对应的语法规则的名称
      */
-    public final String ruleName;
+    private final String ruleName;
     /**
-     * 瀵瑰簲鐨勮瘝娉曞厓绱�
+     * 对应的词法元素，可能为null
      */
-    public final List<LexToken> tokens;
+    private final LexToken token;
     /**
-     * 瀛愬厓绱狅紝鍙兘涓簄ull
+     * 子元素列表，可能为null
      */
-    public final List<SyntaxTreeNode> children;
+    private final List<SyntaxTreeNode> children;
     /**
-     * 鍦ㄦ簮鏂囦欢涓殑浣嶇疆
+     * 在源文件中的位置
      */
-    public final Range range;
+    private final Range range;
 
     public SyntaxTreeNode(SyntaxRule rule, LexToken token) {
         this.rule = rule;
         this.ruleName = null;
-        this.tokens = Arrays.asList(token);
+        this.token = token;
         this.children = null;
-        this.range = token.range;
+        this.range = token.getRange();
     }
 
     public SyntaxTreeNode(SyntaxRule rule, List<SyntaxTreeNode> children) {
         this.rule = rule;
         this.ruleName = null;
-        this.tokens = children.stream().map(e -> e.tokens).reduce(Collections.emptyList(), (a, b) -> {
-            List<LexToken> list = new ArrayList<>();
-            list.addAll(a);
-            list.addAll(b);
-            return list;
-        });
+        this.token = null;
         this.children = Collections.unmodifiableList(children);
 
         if (!this.children.isEmpty()) {
@@ -70,7 +63,7 @@ public class SyntaxTreeNode {
     public SyntaxTreeNode(NullRule rule, Range range) {
         this.rule = rule;
         this.ruleName = null;
-        this.tokens = Collections.emptyList();
+        this.token = null;
         this.children = null;
         this.range = range;
     }
@@ -78,13 +71,42 @@ public class SyntaxTreeNode {
     public SyntaxTreeNode(String name, SyntaxTreeNode node) {
         this.rule = node.rule;
         this.ruleName = name;
-        this.tokens = node.tokens;
+        this.token = node.token;
         this.children = node.children;
         this.range = node.range;
     }
 
+    /** 对应的语法规则 */
+    public SyntaxRule getRule() {
+        return this.rule;
+    }
+
+    /** 对应的语法规则的名称 */
+    public String getRuleName() {
+        return this.ruleName;
+    }
+
+    /** 对应的词法元素，可能为null */
+    public LexToken getToken() {
+        return this.token;
+    }
+
+    /** 子元素列表，可能为null */
+    public List<SyntaxTreeNode> getChildren() {
+        return this.children;
+    }
+
+    /** 在源文件中的位置 */
+    public Range getRange() {
+        return this.range;
+    }
+
     @Override
     public String toString() {
-        return StringUtils.join(this.tokens.stream().map(e -> e.text).toArray(), " ");
+        if (this.token != null)
+            return this.token.toString();
+        if (this.children != null)
+            return StringUtils.join(this.children, " ");
+        return "";
     }
 }

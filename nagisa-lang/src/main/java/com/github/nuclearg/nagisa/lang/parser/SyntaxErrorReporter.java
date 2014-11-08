@@ -2,7 +2,7 @@ package com.github.nuclearg.nagisa.lang.parser;
 
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizerSnapshot;
 
-public class SyntaxErrorReporter {
+public final class SyntaxErrorReporter {
     private int count;
 
     public void error(String message, LexTokenizerSnapshot lexerPos) {

@@ -7,17 +7,55 @@ import org.apache.commons.lang3.SystemUtils;
 import com.github.nuclearg.nagisa.lang.ast.expr.Expr;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
-public class ForStmt extends Stmt {
-    public final String symbol;
-    public final Expr initValue;
-    public final Expr targetValue;
-    public final List<Stmt> stmts;
+/**
+ * 简单循环语句
+ * 
+ * @author ng
+ *
+ */
+public final class ForStmt extends Stmt {
+    /**
+     * 循环变量名
+     */
+    private final String symbol;
+    /**
+     * 初始值
+     */
+    private final Expr initValue;
+    /**
+     * 目标值
+     */
+    private final Expr targetValue;
+    /**
+     * 循环体
+     */
+    private final List<Stmt> stmts;
 
     ForStmt(SyntaxTreeNode node) {
-        this.symbol = node.tokens.get(1).text;
-        this.initValue = Expr.resolveExpr(node.children.get(3));
-        this.targetValue = Expr.resolveExpr(node.children.get(5));
-        this.stmts = Stmt.resolveStmts(node.children.get(7).children);
+        this.symbol = node.getChildren().get(1).getToken().getText();
+        this.initValue = Expr.resolveExpr(node.getChildren().get(3));
+        this.targetValue = Expr.resolveExpr(node.getChildren().get(5));
+        this.stmts = Stmt.resolveStmts(node.getChildren().get(7).getChildren());
+    }
+
+    /** 循环变量名 */
+    public String getSymbol() {
+        return this.symbol;
+    }
+
+    /** 初始值 */
+    public Expr getInitValue() {
+        return this.initValue;
+    }
+
+    /** 目标值 */
+    public Expr getTargetValue() {
+        return this.targetValue;
+    }
+
+    /** 循环体 */
+    public List<Stmt> getStmts() {
+        return this.stmts;
     }
 
     @Override

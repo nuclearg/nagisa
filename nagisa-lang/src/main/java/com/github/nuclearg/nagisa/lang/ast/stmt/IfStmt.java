@@ -13,25 +13,40 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public class IfStmt extends Stmt {
+public final class IfStmt extends Stmt {
     /**
      * 条件表达式
      */
-    public final Expr condition;
+    private final Expr condition;
     /**
      * 判断成功的操作
      */
-    public final List<Stmt> thenStmts;
+    private final List<Stmt> thenStmts;
     /**
      * 判断失败的操作
      */
-    public final List<Stmt> elseStmts;
+    private final List<Stmt> elseStmts;
 
     IfStmt(SyntaxTreeNode node) {
-        this.condition = Expr.resolveExpr(node.children.get(1));
+        this.condition = Expr.resolveExpr(node.getChildren().get(1));
 
-        this.thenStmts = Stmt.resolveStmts(node.children.get(4).children);
+        this.thenStmts = Stmt.resolveStmts(node.getChildren().get(4).getChildren());
         this.elseStmts = null;
+    }
+
+    /** 条件表达式 */
+    public Expr getCondition() {
+        return this.condition;
+    }
+
+    /** 判断成功的操作 */
+    public List<Stmt> getThenStmts() {
+        return this.thenStmts;
+    }
+
+    /** 判断失败的操作 */
+    public List<Stmt> getElseStmts() {
+        return this.elseStmts;
     }
 
     @Override

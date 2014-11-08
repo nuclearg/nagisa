@@ -7,13 +7,35 @@ import org.apache.commons.lang3.SystemUtils;
 import com.github.nuclearg.nagisa.lang.ast.expr.Expr;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
-public class WhileStmt extends Stmt {
-    public final Expr condition;
-    public final List<Stmt> stmts;
+/**
+ * while循环语句
+ * 
+ * @author ng
+ *
+ */
+public final class WhileStmt extends Stmt {
+    /**
+     * 循环判断条件
+     */
+    private final Expr condition;
+    /**
+     * 循环体
+     */
+    private final List<Stmt> stmts;
 
     WhileStmt(SyntaxTreeNode node) {
-        this.condition = Expr.resolveExpr(node.children.get(1));
-        this.stmts = Stmt.resolveStmts(node.children.get(3).children);
+        this.condition = Expr.resolveExpr(node.getChildren().get(1));
+        this.stmts = Stmt.resolveStmts(node.getChildren().get(3).getChildren());
+    }
+
+    /** 循环判断条件 */
+    public Expr getCondition() {
+        return this.condition;
+    }
+
+    /** 循环体 */
+    public List<Stmt> getStmts() {
+        return this.stmts;
     }
 
     @Override

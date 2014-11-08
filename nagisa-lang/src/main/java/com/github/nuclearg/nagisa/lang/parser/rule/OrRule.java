@@ -17,7 +17,7 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public class OrRule implements SyntaxRule {
+public final class OrRule implements SyntaxRule {
     private final List<SyntaxRule> rules;
 
     public OrRule(List<SyntaxRule> rules) {
@@ -30,7 +30,7 @@ public class OrRule implements SyntaxRule {
         LexToken token = lexer.peek();
 
         for (SyntaxRule rule : this.rules)
-            if (rule.tryToken(token.type))
+            if (rule.tryToken(token.getType()))
                 return rule.parse(lexer, errorReporter);
 
         // 错误处理

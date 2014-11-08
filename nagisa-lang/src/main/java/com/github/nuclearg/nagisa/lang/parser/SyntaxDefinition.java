@@ -19,37 +19,42 @@ import com.github.nuclearg.nagisa.lang.parser.rule.SyntaxRule;
  * @author ng
  *
  */
-public class SyntaxDefinition {
+public abstract class SyntaxDefinition {
     /**
      * 语法规则列表
      */
-    public final Map<String, SyntaxRule> rules = new LinkedHashMap<>();
+    private final Map<String, SyntaxRule> rules = new LinkedHashMap<>();
 
-    protected void define(String name, SyntaxRule rule) {
+    /** 语法规则列表 */
+    public SyntaxRule getRule(String name) {
+        return this.rules.get(name);
+    }
+
+    protected final void define(String name, SyntaxRule rule) {
         this.rules.put(name, rule);
     }
 
-    protected SyntaxRule seq(SyntaxRule... elements) {
+    protected final SyntaxRule seq(SyntaxRule... elements) {
         return new SequenceRule(Arrays.asList(elements));
     }
 
-    protected SyntaxRule lex(LexTokenType tokenType) {
+    protected final SyntaxRule lex(LexTokenType tokenType) {
         return new LexRule(tokenType);
     }
 
-    protected SyntaxRule nul() {
+    protected final SyntaxRule nul() {
         return new NullRule();
     }
 
-    protected SyntaxRule ref(String name) {
+    protected final SyntaxRule ref(String name) {
         return new RefRule(this, name);
     }
 
-    protected SyntaxRule or(SyntaxRule... rules) {
+    protected final SyntaxRule or(SyntaxRule... rules) {
         return new OrRule(Arrays.asList(rules));
     }
 
-    protected SyntaxRule rep(SyntaxRule rule) {
+    protected final SyntaxRule rep(SyntaxRule rule) {
         return new RepeatRule(rule);
     }
 }

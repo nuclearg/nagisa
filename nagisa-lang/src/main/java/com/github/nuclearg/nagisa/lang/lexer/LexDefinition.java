@@ -9,14 +9,19 @@ import java.util.List;
  * @author ng
  *
  */
-public class LexDefinition {
+public abstract class LexDefinition {
     /**
      * 词法定义列表
      */
-    public final List<LexTokenType> types;
+    private final List<LexTokenType> types;
 
-    public LexDefinition(List<LexTokenType> types) {
+    protected LexDefinition(List<LexTokenType> types) {
         this.types = Collections.unmodifiableList(types);
+    }
+
+    /** 词法定义列表 */
+    public final List<LexTokenType> getTypes() {
+        return this.types;
     }
 
     @Override
