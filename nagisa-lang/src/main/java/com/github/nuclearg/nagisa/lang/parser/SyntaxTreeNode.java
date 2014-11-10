@@ -6,8 +6,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
-import com.github.nuclearg.nagisa.lang.parser.rule.NullRule;
-import com.github.nuclearg.nagisa.lang.parser.rule.SyntaxRule;
 import com.github.nuclearg.nagisa.lang.util.Range;
 
 /**
@@ -16,7 +14,7 @@ import com.github.nuclearg.nagisa.lang.util.Range;
  * @author ng
  *
  */
-public class SyntaxTreeNode {
+public final class SyntaxTreeNode {
     /**
      * 对应的语法规则
      */
@@ -30,7 +28,7 @@ public class SyntaxTreeNode {
      */
     private final LexToken token;
     /**
-     * 子元素列表，可能为null
+     * 子元素列表
      */
     private final List<SyntaxTreeNode> children;
     /**
@@ -38,15 +36,15 @@ public class SyntaxTreeNode {
      */
     private final Range range;
 
-    public SyntaxTreeNode(SyntaxRule rule, LexToken token) {
+    SyntaxTreeNode(SyntaxRule rule, LexToken token) {
         this.rule = rule;
         this.ruleName = null;
         this.token = token;
-        this.children = null;
+        this.children = Collections.emptyList();
         this.range = token.getRange();
     }
 
-    public SyntaxTreeNode(SyntaxRule rule, List<SyntaxTreeNode> children) {
+    SyntaxTreeNode(SyntaxRule rule, List<SyntaxTreeNode> children) {
         this.rule = rule;
         this.ruleName = null;
         this.token = null;
@@ -60,15 +58,15 @@ public class SyntaxTreeNode {
             this.range = new Range(0, 0, 0, 0);
     }
 
-    public SyntaxTreeNode(NullRule rule, Range range) {
+    SyntaxTreeNode(NullRule rule) {
         this.rule = rule;
         this.ruleName = null;
         this.token = null;
         this.children = null;
-        this.range = range;
+        this.range = null;
     }
 
-    public SyntaxTreeNode(String name, SyntaxTreeNode node) {
+    SyntaxTreeNode(String name, SyntaxTreeNode node) {
         this.rule = node.rule;
         this.ruleName = name;
         this.token = node.token;
@@ -106,7 +104,7 @@ public class SyntaxTreeNode {
         if (this.token != null)
             return this.token.toString();
         if (this.children != null)
-            return StringUtils.join(this.children, " ");
-        return "";
+            return "<" + StringUtils.join(this.children, " ") + ">";
+        return "<>";
     }
 }

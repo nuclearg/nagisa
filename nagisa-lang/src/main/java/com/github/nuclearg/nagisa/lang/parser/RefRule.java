@@ -1,10 +1,7 @@
-package com.github.nuclearg.nagisa.lang.parser.rule;
+package com.github.nuclearg.nagisa.lang.parser;
 
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxDefinition;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxErrorReporter;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 import com.github.nuclearg.nagisa.lang.util.NagisaException;
 
 /**
@@ -13,7 +10,7 @@ import com.github.nuclearg.nagisa.lang.util.NagisaException;
  * @author ng
  *
  */
-public final class RefRule implements SyntaxRule {
+final class RefRule extends SyntaxRule {
     /**
      * 引用的语法定义
      */
@@ -23,7 +20,7 @@ public final class RefRule implements SyntaxRule {
      */
     private final String name;
 
-    public RefRule(SyntaxDefinition definition, String name) {
+    RefRule(SyntaxDefinition definition, String name) {
         this.definition = definition;
         this.name = name;
     }
@@ -36,12 +33,12 @@ public final class RefRule implements SyntaxRule {
     }
 
     @Override
-    public boolean tryToken(LexTokenType tokenType) {
+    boolean tryToken(LexTokenType tokenType) {
         return this.rule().tryToken(tokenType);
     }
 
     @Override
-    public SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
+    SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         SyntaxTreeNode node = this.rule().parse(lexer, errorReporter);
         if (node.getRuleName() != null)
             return node;

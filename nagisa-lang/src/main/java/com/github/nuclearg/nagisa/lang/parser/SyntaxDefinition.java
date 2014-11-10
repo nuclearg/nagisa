@@ -5,13 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
-import com.github.nuclearg.nagisa.lang.parser.rule.LexRule;
-import com.github.nuclearg.nagisa.lang.parser.rule.NullRule;
-import com.github.nuclearg.nagisa.lang.parser.rule.OrRule;
-import com.github.nuclearg.nagisa.lang.parser.rule.RefRule;
-import com.github.nuclearg.nagisa.lang.parser.rule.RepeatRule;
-import com.github.nuclearg.nagisa.lang.parser.rule.SequenceRule;
-import com.github.nuclearg.nagisa.lang.parser.rule.SyntaxRule;
 
 /**
  * 语法定义

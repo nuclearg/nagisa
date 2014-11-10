@@ -1,4 +1,4 @@
-package com.github.nuclearg.nagisa.lang.parser.rule;
+package com.github.nuclearg.nagisa.lang.parser;
 
 import java.util.Collections;
 import java.util.List;
@@ -8,8 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxErrorReporter;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
 /**
  * 表示或的语法关系
@@ -17,15 +15,15 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class OrRule implements SyntaxRule {
+final class OrRule extends SyntaxRule {
     private final List<SyntaxRule> rules;
 
-    public OrRule(List<SyntaxRule> rules) {
+    OrRule(List<SyntaxRule> rules) {
         this.rules = Collections.unmodifiableList(rules);
     }
 
     @Override
-    public SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
+    SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         // 需要根据下一个词法元素类型来选择使用哪一条规则
         LexToken token = lexer.peek();
 
@@ -39,7 +37,7 @@ public final class OrRule implements SyntaxRule {
     }
 
     @Override
-    public boolean tryToken(LexTokenType tokenType) {
+    boolean tryToken(LexTokenType tokenType) {
         for (SyntaxRule rule : this.rules)
             if (rule.tryToken(tokenType))
                 return true;

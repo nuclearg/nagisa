@@ -2,6 +2,9 @@ package com.github.nuclearg.nagisa.lang.parser;
 
 import static com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition.NagisaLexTokenType.*;
 
+import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
+import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition;
+
 /**
  * nagisa的语法定义
  * 
@@ -9,14 +12,36 @@ import static com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition.NagisaLe
  *
  */
 public final class NagisaSyntaxDefinition extends SyntaxDefinition {
+    private static final NagisaSyntaxDefinition INSTANCE = new NagisaSyntaxDefinition();
+    private static final String ROOT_RULE = "CompilationUnit";
 
-    public NagisaSyntaxDefinition() {
+    /**
+     * 对文本行语法解析
+     * 
+     * @param text
+     *            待解析的文本
+     * @return 解析出的语法节点树
+     */
+    public static SyntaxTreeNode parse(String text) {
+        LexTokenizer lexer = NagisaLexDefinition.lexer(text);
+        SyntaxErrorReporter errorReporter = new SyntaxErrorReporter();
+
+        SyntaxTreeNode node = INSTANCE.getRule(ROOT_RULE).parse(lexer, errorReporter);
+
+        if (!lexer.eof())
+            errorReporter.fatal("有剩余字符无法被解析", lexer.snapshot());
+
+        return node;
+
+    }
+
+    private NagisaSyntaxDefinition() {
         // 数学运算表达式
         define("NumberExprElement",
                 or(
                         lex(INTEGER),
                         lex(SYMBOL),
-                        seq(lex(OPERATOR_PARENTHESE_LEFT), ref("Expr"), lex(OPERATOR_PARENTHESE_RIGHT))));
+                        seq(lex(OPERATOR_PARENTHESE_LEFT), ref("NumberExpr"), lex(OPERATOR_PARENTHESE_RIGHT))));
         define("NumberMulDivModExprTerm",
                 seq(
                         ref("NumberExprElement"),

@@ -1,4 +1,4 @@
-package com.github.nuclearg.nagisa.lang.parser.rule;
+package com.github.nuclearg.nagisa.lang.parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,8 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizerSnapshot;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxErrorReporter;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
 /**
  * 表示或的语法关系
@@ -18,20 +16,20 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class SequenceRule implements SyntaxRule {
+final class SequenceRule extends SyntaxRule {
     private final List<SyntaxRule> rules;
 
-    public SequenceRule(List<SyntaxRule> elements) {
+    SequenceRule(List<SyntaxRule> elements) {
         this.rules = Collections.unmodifiableList(elements);
     }
 
     @Override
-    public boolean tryToken(LexTokenType tokenType) {
+    boolean tryToken(LexTokenType tokenType) {
         return this.rules.get(0).tryToken(tokenType);
     }
 
     @Override
-    public SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
+    SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         List<SyntaxTreeNode> children = new ArrayList<>();
 
         for (SyntaxRule rule : this.rules) {
@@ -42,6 +40,9 @@ public final class SequenceRule implements SyntaxRule {
 
             // 正常情况，语法树节点成功构建
             if (node != null) {
+                if (node.getRange() == null) // 这表示是一个空节点
+                    continue;
+
                 children.add(node);
             } else {
                 // 错误处理，跳过当前的词向后看

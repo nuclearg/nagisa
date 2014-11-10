@@ -9,7 +9,7 @@ import java.util.List;
  * @author ng
  *
  */
-public abstract class LexDefinition {
+abstract class LexDefinition {
     /**
      * 词法定义列表
      */
@@ -20,7 +20,7 @@ public abstract class LexDefinition {
     }
 
     /** 词法定义列表 */
-    public final List<LexTokenType> getTypes() {
+    final List<LexTokenType> getTypes() {
         return this.types;
     }
 

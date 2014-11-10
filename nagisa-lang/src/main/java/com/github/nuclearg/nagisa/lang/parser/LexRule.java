@@ -1,11 +1,9 @@
-package com.github.nuclearg.nagisa.lang.parser.rule;
+package com.github.nuclearg.nagisa.lang.parser;
 
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
 import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxErrorReporter;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
 /**
  * 对应一个词法单元的语法规则
@@ -13,18 +11,18 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class LexRule implements SyntaxRule {
+final class LexRule extends SyntaxRule {
     /**
      * 词法元素类型
      */
     final LexTokenType tokenType;
 
-    public LexRule(LexTokenType tokenType) {
+    LexRule(LexTokenType tokenType) {
         this.tokenType = tokenType;
     }
 
     @Override
-    public SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
+    SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         LexToken token = lexer.next();
 
         // 正常情况，词法分析器给出的词与期望的类型一致
@@ -46,7 +44,7 @@ public final class LexRule implements SyntaxRule {
     }
 
     @Override
-    public boolean tryToken(LexTokenType tokenType) {
+    boolean tryToken(LexTokenType tokenType) {
         return this.tokenType == tokenType;
     }
 

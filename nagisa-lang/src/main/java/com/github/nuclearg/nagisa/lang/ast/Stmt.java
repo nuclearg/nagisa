@@ -1,9 +1,8 @@
-package com.github.nuclearg.nagisa.lang.ast.stmt;
+package com.github.nuclearg.nagisa.lang.ast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.nuclearg.nagisa.lang.ast.AstNode;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
 /**
@@ -12,8 +11,30 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public abstract class Stmt extends AstNode {
-    public static List<Stmt> resolveStmts(List<SyntaxTreeNode> nodes) {
+public abstract class Stmt {
+
+    @Override
+    public String toString() {
+        return this.toString("");
+    }
+
+    /**
+     * 需要实现类实现的带前缀（缩进）的toString
+     * 
+     * @param prefix
+     *            前缀
+     * @return 带前缀的字符串形式
+     */
+    protected abstract String toString(String prefix);
+
+    /**
+     * 将一系列语法节点解析为语句列表
+     * 
+     * @param nodes
+     *            语法节点列表
+     * @return 语句列表
+     */
+    static List<Stmt> resolveStmts(List<SyntaxTreeNode> nodes) {
         List<Stmt> stmts = new ArrayList<>();
 
         nodes.forEach(n -> stmts.add(resolveStmt(n)));
@@ -21,6 +42,13 @@ public abstract class Stmt extends AstNode {
         return stmts;
     }
 
+    /**
+     * 将一个语法节点解析为单条语句
+     * 
+     * @param node
+     *            语法节点
+     * @return 语句
+     */
     private static Stmt resolveStmt(SyntaxTreeNode node) {
         switch (node.getRuleName()) {
             case "EmptyStmt":
@@ -37,12 +65,4 @@ public abstract class Stmt extends AstNode {
                 throw new UnsupportedOperationException();
         }
     }
-
-    @Override
-    public String toString() {
-        return this.toString("");
-    }
-
-    protected abstract String toString(String prefix);
-
 }

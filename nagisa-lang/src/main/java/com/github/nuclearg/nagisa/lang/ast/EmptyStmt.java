@@ -1,4 +1,4 @@
-package com.github.nuclearg.nagisa.lang.ast.stmt;
+package com.github.nuclearg.nagisa.lang.ast;
 
 import org.apache.commons.lang3.SystemUtils;
 

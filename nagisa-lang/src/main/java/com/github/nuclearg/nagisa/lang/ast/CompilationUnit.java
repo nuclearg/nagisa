@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.github.nuclearg.nagisa.lang.ast.stmt.Stmt;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
 /**
@@ -13,7 +12,7 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public class CompilationUnit extends AstNode {
+public class CompilationUnit {
     /**
      * 程序中的各条语句
      */

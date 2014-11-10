@@ -10,9 +10,21 @@ import java.util.regex.Pattern;
  *
  */
 public final class NagisaLexDefinition extends LexDefinition {
+    private static final NagisaLexDefinition INSTANCE = new NagisaLexDefinition();
 
-    public NagisaLexDefinition() {
+    private NagisaLexDefinition() {
         super(Arrays.asList(NagisaLexTokenType.values()));
+    }
+
+    /**
+     * 构造一个词法解析器
+     * 
+     * @param text
+     *            被解析的文本
+     * @return 词法解析器
+     */
+    public static LexTokenizer lexer(String text) {
+        return new LexTokenizer(INSTANCE, text);
     }
 
     public static enum NagisaLexTokenType implements LexTokenType {
@@ -109,10 +121,6 @@ public final class NagisaLexDefinition extends LexDefinition {
          */
         OPERATOR_MOD("%"),
         /**
-         * 求乘方
-         */
-        OPERATOR_POWER("\\^"),
-        /**
          * 等于
          */
         OPERATOR_EQ("=="),
@@ -144,6 +152,10 @@ public final class NagisaLexDefinition extends LexDefinition {
          * 逻辑或
          */
         OPERATOR_OR("\\|\\|"),
+        /**
+         * 逻辑异或
+         */
+        OPERATOR_XOR("\\^"),
         /**
          * 逻辑与
          */

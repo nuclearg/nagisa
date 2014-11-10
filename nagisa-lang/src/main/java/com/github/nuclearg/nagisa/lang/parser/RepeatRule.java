@@ -1,4 +1,4 @@
-package com.github.nuclearg.nagisa.lang.parser.rule;
+package com.github.nuclearg.nagisa.lang.parser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,8 +6,6 @@ import java.util.List;
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxErrorReporter;
-import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
 /**
  * 可能存在零次或多次的语法规则
@@ -15,18 +13,18 @@ import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class RepeatRule implements SyntaxRule {
+final class RepeatRule extends SyntaxRule {
     /**
      * 可选的规则
      */
     private final SyntaxRule rule;
 
-    public RepeatRule(SyntaxRule rule) {
+    RepeatRule(SyntaxRule rule) {
         this.rule = rule;
     }
 
     @Override
-    public SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
+    SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         List<SyntaxTreeNode> children = new ArrayList<>();
 
         while (true) {
@@ -44,7 +42,7 @@ public final class RepeatRule implements SyntaxRule {
     }
 
     @Override
-    public boolean tryToken(LexTokenType tokenType) {
+    boolean tryToken(LexTokenType tokenType) {
         return true;
     }
 
