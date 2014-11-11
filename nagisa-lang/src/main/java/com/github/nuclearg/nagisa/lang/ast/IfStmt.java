@@ -39,12 +39,12 @@ public final class IfStmt extends Stmt {
     }
 
     /** 判断成功的操作 */
-    public List<Stmt> getThenStmts() {
+    public Iterable<Stmt> getThenStmts() {
         return this.thenStmts;
     }
 
     /** 判断失败的操作 */
-    public List<Stmt> getElseStmts() {
+    public Iterable<Stmt> getElseStmts() {
         return this.elseStmts;
     }
 

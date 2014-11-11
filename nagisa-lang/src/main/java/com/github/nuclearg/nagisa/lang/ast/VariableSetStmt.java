@@ -26,7 +26,7 @@ public final class VariableSetStmt extends Stmt {
     }
 
     /** 变量名 */
-    public String getSymbol() {
+    public String getVariableName() {
         return this.symbol;
     }
 

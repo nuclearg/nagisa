@@ -22,6 +22,13 @@ public class CompilationUnit {
         this.stmts = Stmt.resolveStmts(node.getChildren());
     }
 
+    /**
+     * 获取程序中的各条语句
+     */
+    public Iterable<Stmt> getStmts() {
+        return this.stmts;
+    }
+
     @Override
     public String toString() {
         return StringUtils.join(this.stmts, "");

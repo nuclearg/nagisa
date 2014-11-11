@@ -1,9 +1,9 @@
 package com.github.nuclearg.nagisa.lang.ast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
+import com.github.nuclearg.nagisa.lang.util.ListUtils;
 
 /**
  * 语句
@@ -35,11 +35,7 @@ public abstract class Stmt {
      * @return 语句列表
      */
     static List<Stmt> resolveStmts(List<SyntaxTreeNode> nodes) {
-        List<Stmt> stmts = new ArrayList<>();
-
-        nodes.forEach(n -> stmts.add(resolveStmt(n)));
-
-        return stmts;
+        return ListUtils.transform(nodes, n -> resolveStmt(n));
     }
 
     /**

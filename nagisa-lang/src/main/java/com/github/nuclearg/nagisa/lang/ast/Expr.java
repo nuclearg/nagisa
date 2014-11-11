@@ -91,8 +91,8 @@ public final class Expr {
         return this.text;
     }
 
-    /** 该表达式的各个子表达式，可能为null */
-    public List<Expr> getChildren() {
+    /** 该表达式的各个子表达式 */
+    public Iterable<Expr> getChildren() {
         return this.children;
     }
 
@@ -161,11 +161,11 @@ public final class Expr {
 
         switch ((NagisaLexTokenType) token.getType()) {
             case INTEGER:
-                return new Expr(ExprType.Integer, ExprOperator.LiteralInteger, text);
+                return new Expr(ExprType.Integer, ExprOperator.IntegerLiteral, text);
             case SYMBOL:
                 return new Expr(ExprType.Integer, ExprOperator.IntegerVariableRef, text);
             case STRING:
-                return new Expr(ExprType.String, ExprOperator.LiteralString, text);
+                return new Expr(ExprType.String, ExprOperator.StringLiteral, text);
             case STRING_SYMBOL:
                 return new Expr(ExprType.String, ExprOperator.StringVariableRef, text);
             default:
@@ -179,7 +179,7 @@ public final class Expr {
 
         switch ((NagisaLexTokenType) opToken.getType()) {
             case OPERATOR_SUB:
-                return new Expr(ExprType.Integer, ExprOperator.NumberNegative, opToken.getText(), param);
+                return new Expr(ExprType.Integer, ExprOperator.IntegerNegative, opToken.getText(), param);
             case OPERATOR_NOT:
                 return new Expr(ExprType.Boolean, ExprOperator.BooleanNot, opToken.getText(), param);
             default:
@@ -236,24 +236,30 @@ public final class Expr {
     }
 
     private static Expr resolveParentheseExpr(SyntaxTreeNode node) {
-        return new Expr(resolveExpr(node.getChildren().get(1)), true);
+        Expr expr = resolveExpr(node.getChildren().get(1));
+
+        // 如果expr是字面量则把括号去掉（因为毫无意义）
+        if (expr.children.isEmpty())
+            return expr;
+
+        return new Expr(expr, true);
     }
 
     static {
         Map<NagisaLexTokenType, ExprOperator[]> map = new HashMap<>();
 
-        map.put(NagisaLexTokenType.OPERATOR_ADD, new ExprOperator[] { ExprOperator.NumberAdd, ExprOperator.StringAdd, null });
-        map.put(NagisaLexTokenType.OPERATOR_SUB, new ExprOperator[] { ExprOperator.NumberSub, null, null });
-        map.put(NagisaLexTokenType.OPERATOR_MUL, new ExprOperator[] { ExprOperator.NumberMul, null, null });
-        map.put(NagisaLexTokenType.OPERATOR_DIV, new ExprOperator[] { ExprOperator.NumberDiv, null, null });
-        map.put(NagisaLexTokenType.OPERATOR_MOD, new ExprOperator[] { ExprOperator.NumberDiv, null, null });
+        map.put(NagisaLexTokenType.OPERATOR_ADD, new ExprOperator[] { ExprOperator.IntegerAdd, ExprOperator.StringAdd, null });
+        map.put(NagisaLexTokenType.OPERATOR_SUB, new ExprOperator[] { ExprOperator.IntegerSub, null, null });
+        map.put(NagisaLexTokenType.OPERATOR_MUL, new ExprOperator[] { ExprOperator.IntegerMul, null, null });
+        map.put(NagisaLexTokenType.OPERATOR_DIV, new ExprOperator[] { ExprOperator.IntegerDiv, null, null });
+        map.put(NagisaLexTokenType.OPERATOR_MOD, new ExprOperator[] { ExprOperator.IntegerDiv, null, null });
 
-        map.put(NagisaLexTokenType.OPERATOR_EQ, new ExprOperator[] { ExprOperator.NumberEq, ExprOperator.StringEq, null });
-        map.put(NagisaLexTokenType.OPERATOR_NEQ, new ExprOperator[] { ExprOperator.NumberNeq, ExprOperator.StringNeq, null });
-        map.put(NagisaLexTokenType.OPERATOR_GT, new ExprOperator[] { ExprOperator.NumberGt, ExprOperator.StringGt, null });
-        map.put(NagisaLexTokenType.OPERATOR_GTE, new ExprOperator[] { ExprOperator.NumberGte, ExprOperator.StringGte, null });
-        map.put(NagisaLexTokenType.OPERATOR_LT, new ExprOperator[] { ExprOperator.NumberLt, ExprOperator.StringLt, null });
-        map.put(NagisaLexTokenType.OPERATOR_LTE, new ExprOperator[] { ExprOperator.NumberLte, ExprOperator.StringLte, null });
+        map.put(NagisaLexTokenType.OPERATOR_EQ, new ExprOperator[] { ExprOperator.IntegerEq, ExprOperator.StringEq, null });
+        map.put(NagisaLexTokenType.OPERATOR_NEQ, new ExprOperator[] { ExprOperator.IntegerNeq, ExprOperator.StringNeq, null });
+        map.put(NagisaLexTokenType.OPERATOR_GT, new ExprOperator[] { ExprOperator.IntegerGt, ExprOperator.StringGt, null });
+        map.put(NagisaLexTokenType.OPERATOR_GTE, new ExprOperator[] { ExprOperator.IntegerGte, ExprOperator.StringGte, null });
+        map.put(NagisaLexTokenType.OPERATOR_LT, new ExprOperator[] { ExprOperator.IntegerLt, ExprOperator.StringLt, null });
+        map.put(NagisaLexTokenType.OPERATOR_LTE, new ExprOperator[] { ExprOperator.IntegerLte, ExprOperator.StringLte, null });
 
         map.put(NagisaLexTokenType.OPERATOR_AND, new ExprOperator[] { null, null, ExprOperator.BooleanAnd });
         map.put(NagisaLexTokenType.OPERATOR_OR, new ExprOperator[] { null, null, ExprOperator.BooleanOr });

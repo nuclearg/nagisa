@@ -7,7 +7,7 @@ import org.apache.commons.lang3.SystemUtils;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
 
 /**
- * 简单循环语句
+ * for循环语句
  * 
  * @author ng
  *
@@ -38,7 +38,7 @@ public final class ForStmt extends Stmt {
     }
 
     /** 循环变量名 */
-    public String getSymbol() {
+    public String getIteratorVariableName() {
         return this.symbol;
     }
 
@@ -53,7 +53,7 @@ public final class ForStmt extends Stmt {
     }
 
     /** 循环体 */
-    public List<Stmt> getStmts() {
+    public Iterable<Stmt> getStmts() {
         return this.stmts;
     }
 

@@ -33,7 +33,7 @@ public final class WhileStmt extends Stmt {
     }
 
     /** 循环体 */
-    public List<Stmt> getStmts() {
+    public Iterable<Stmt> getStmts() {
         return this.stmts;
     }
 

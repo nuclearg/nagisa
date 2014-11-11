@@ -8,40 +8,40 @@ package com.github.nuclearg.nagisa.lang.ast;
  */
 public enum ExprOperator {
     /** 整数字面量 */
-    LiteralInteger,
+    IntegerLiteral,
     /** 字符串字面量 */
-    LiteralString,
+    StringLiteral,
     /** 整数变量引用 */
     IntegerVariableRef,
     /** 字符串变量引用 */
     StringVariableRef,
 
     /** 整数取负 */
-    NumberNegative,
+    IntegerNegative,
 
     /** 整数加 */
-    NumberAdd,
+    IntegerAdd,
     /** 整数减 */
-    NumberSub,
+    IntegerSub,
     /** 整数乘 */
-    NumberMul,
+    IntegerMul,
     /** 整数除 */
-    NumberDiv,
+    IntegerDiv,
     /** 整数求余 */
-    NumberMod,
+    IntegerMod,
 
     /** 整数相等 */
-    NumberEq,
+    IntegerEq,
     /** 整数不相等 */
-    NumberNeq,
+    IntegerNeq,
     /** 整数大于 */
-    NumberGt,
+    IntegerGt,
     /** 整数大于等于 */
-    NumberGte,
+    IntegerGte,
     /** 整数小于 */
-    NumberLt,
+    IntegerLt,
     /** 整数小于等于 */
-    NumberLte,
+    IntegerLte,
 
     /** 字符串加 */
     StringAdd,
