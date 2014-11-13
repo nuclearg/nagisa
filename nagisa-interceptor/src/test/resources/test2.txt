@@ -1,0 +1,8 @@
+for i=0 to 100
+	for j=0 to 100
+		if i+j==35 && i*2+j*4==94 then
+			print i, j
+		end if
+	next
+next
+			

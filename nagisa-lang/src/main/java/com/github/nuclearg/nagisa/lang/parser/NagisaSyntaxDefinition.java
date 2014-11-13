@@ -37,84 +37,112 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
 
     private NagisaSyntaxDefinition() {
         // 数学运算表达式
-        define("NumberExprElement",
+        define("IntegerExprElement",
                 or(
-                        lex(INTEGER),
-                        lex(SYMBOL),
-                        seq(lex(OPERATOR_PARENTHESE_LEFT), ref("NumberExpr"), lex(OPERATOR_PARENTHESE_RIGHT))));
-        define("NumberMulDivModExprTerm",
+                        lex(LITERAL_INTEGER),
+                        lex(IDENTIFIER_INTEGER),
+                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("IntegerExpr"), lex(SYMBOL_PARENTHESE_RIGHT))));
+        define("IntegerMulDivModExprTerm",
                 seq(
-                        ref("NumberExprElement"),
+                        ref("IntegerExprElement"),
                         or(
                                 seq(
                                         or(
-                                                lex(OPERATOR_MUL),
-                                                lex(OPERATOR_DIV),
-                                                lex(OPERATOR_MOD)),
-                                        ref("NumberMulDivModExprTerm")),
+                                                lex(SYMBOL_MUL),
+                                                lex(SYMBOL_DIV),
+                                                lex(SYMBOL_MOD)),
+                                        ref("IntegerMulDivModExprTerm")),
                                 nul())));
-        define("NumberExpr",
+        define("IntegerExpr",
                 or(
-                        seq(lex(OPERATOR_SUB), ref("NumberExpr")),
+                        seq(lex(SYMBOL_SUB), ref("IntegerExpr")),
                         seq(
-                                ref("NumberMulDivModExprTerm"),
+                                ref("IntegerMulDivModExprTerm"),
                                 or(
                                         seq(
                                                 or(
-                                                        lex(OPERATOR_ADD),
-                                                        lex(OPERATOR_SUB)),
-                                                ref("NumberExpr")),
+                                                        lex(SYMBOL_ADD),
+                                                        lex(SYMBOL_SUB)),
+                                                ref("IntegerExpr")),
                                         nul()))));
 
         // 字符串运算表达式
         define("StringExprElement",
                 or(
-                        lex(STRING),
-                        lex(STRING_SYMBOL),
-                        seq(lex(OPERATOR_PARENTHESE_LEFT), ref("StringExpr"), lex(OPERATOR_PARENTHESE_RIGHT))));
+                        lex(LITERAL_STRING),
+                        lex(IDENTIFIER_STRING),
+                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("StringExpr"), lex(SYMBOL_PARENTHESE_RIGHT))));
         define("StringExpr",
                 seq(
                         ref("StringExprElement"),
                         or(
-                                seq(lex(OPERATOR_ADD), ref("StringExpr")),
+                                seq(lex(SYMBOL_ADD), ref("StringExpr")),
                                 nul())));
 
         // 逻辑运算表达式
         define("BooleanExprElement",
                 or(
                         seq(
-                                ref("NumberExpr"),
+                                ref("IntegerExpr"),
                                 or(
-                                        lex(OPERATOR_EQ),
-                                        lex(OPERATOR_NEQ),
-                                        lex(OPERATOR_GT),
-                                        lex(OPERATOR_GTE),
-                                        lex(OPERATOR_LT),
-                                        lex(OPERATOR_LTE)),
-                                ref("NumberExpr")),
+                                        lex(SYMBOL_EQ),
+                                        lex(SYMBOL_NEQ),
+                                        lex(SYMBOL_GT),
+                                        lex(SYMBOL_GTE),
+                                        lex(SYMBOL_LT),
+                                        lex(SYMBOL_LTE)),
+                                ref("IntegerExpr")),
                         seq(
                                 ref("StringExpr"),
                                 or(
-                                        lex(OPERATOR_EQ),
-                                        lex(OPERATOR_NEQ),
-                                        lex(OPERATOR_GT),
-                                        lex(OPERATOR_GTE),
-                                        lex(OPERATOR_LT),
-                                        lex(OPERATOR_LTE)),
+                                        lex(SYMBOL_EQ),
+                                        lex(SYMBOL_NEQ),
+                                        lex(SYMBOL_GT),
+                                        lex(SYMBOL_GTE),
+                                        lex(SYMBOL_LT),
+                                        lex(SYMBOL_LTE)),
                                 ref("StringExpr")),
-                        seq(lex(OPERATOR_PARENTHESE_LEFT), ref("BooleanExpr"), lex(OPERATOR_PARENTHESE_RIGHT))));
+                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("BooleanExpr"), lex(SYMBOL_PARENTHESE_RIGHT))));
         define("BooleanExpr",
                 or(
-                        seq(lex(OPERATOR_NOT), ref("BooleanExpr")),
+                        seq(lex(SYMBOL_NOT), ref("BooleanExpr")),
                         seq(
                                 ref("BooleanExprElement"),
                                 or(
                                         seq(
                                                 or(
-                                                        lex(OPERATOR_AND),
-                                                        lex(OPERATOR_OR)),
+                                                        lex(SYMBOL_AND),
+                                                        lex(SYMBOL_OR)),
                                                 ref("BooleanExpr")),
                                         nul()))));
+
+        // 形参列表
+        define("ParamList",
+                seq(
+                        or(
+                                lex(IDENTIFIER_INTEGER),
+                                lex(IDENTIFIER_STRING),
+                                nul()),
+                        rep(
+                        seq(
+                                lex(SYMBOL_COMMA),
+                                or(
+                                        lex(IDENTIFIER_INTEGER),
+                                        lex(IDENTIFIER_STRING))))));
+
+        // 实参列表
+        define("ArgumentList",
+                seq(
+                        or(
+                                ref("IntegerExpr"),
+                                ref("StringExpr"),
+                                nul()),
+                        rep(
+                        seq(
+                                lex(SYMBOL_COMMA),
+                                or(
+                                        ref("IntegerExpr"),
+                                        ref("StringExpr"))))));
 
         // 空语句
         define("EmptyStmt",
@@ -125,30 +153,90 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                 seq(
                         lex(KEYWORD_LET),
                         or(
-                                seq(lex(SYMBOL), lex(OPERATOR_LET), ref("NumberExpr"), lex(EOL)),
-                                seq(lex(STRING_SYMBOL), lex(OPERATOR_LET), ref("StringExpr"), lex(EOL)))));
+                                seq(lex(IDENTIFIER_INTEGER), lex(SYMBOL_LET), ref("IntegerExpr"), lex(EOL)),
+                                seq(lex(IDENTIFIER_STRING), lex(SYMBOL_LET), ref("StringExpr"), lex(EOL)))));
 
-        // if...else...endif
+        // if ... else ... end if
         define("IfStmt",
-                seq(lex(KEYWORD_IF), ref("BooleanExpr"), lex(KEYWORD_THEN), lex(EOL), rep(ref("Stmt")), or(seq(lex(KEYWORD_ELSE), lex(EOL), rep(ref("Stmt"))), nul()), lex(KEYWORD_ENDIF), lex(EOL)));
+                seq(lex(KEYWORD_IF), ref("BooleanExpr"), lex(KEYWORD_THEN), lex(EOL), rep(ref("Stmt")), or(seq(lex(KEYWORD_ELSE), lex(EOL), rep(ref("Stmt"))), nul()), lex(KEYWORD_END), lex(KEYWORD_IF), lex(EOL)));
 
-        // for...next
+        // for ... next
         define("ForStmt",
-                seq(lex(KEYWORD_FOR), lex(SYMBOL), lex(OPERATOR_LET), ref("NumberExpr"), lex(KEYWORD_TO), ref("NumberExpr"), lex(EOL), rep(ref("Stmt")), lex(KEYWORD_NEXT), lex(EOL)));
+                seq(
+                        lex(KEYWORD_FOR), lex(IDENTIFIER_INTEGER), lex(SYMBOL_LET), ref("IntegerExpr"), lex(KEYWORD_TO), ref("IntegerExpr"), lex(EOL),
+                        rep(
+                        or(
+                                ref("Stmt"),
+                                ref("BreakStmt"),
+                                ref("ContinueStmt"))),
+                        lex(KEYWORD_NEXT), lex(EOL)));
 
-        // while...wend
+        // while ... end while
         define("WhileStmt",
-                seq(lex(KEYWORD_WHILE), ref("BooleanExpr"), lex(EOL), rep(ref("Stmt")), lex(KEYWORD_WEND), lex(EOL)));
+                seq(lex(KEYWORD_WHILE), ref("BooleanExpr"), lex(EOL),
+                        rep(
+                        or(
+                                ref("Stmt"),
+                                ref("BreakStmt"),
+                                ref("ContinueStmt"))),
+                        lex(KEYWORD_END), lex(KEYWORD_WHILE), lex(EOL)));
 
-        // 一条语句
+        // break
+        define("BreakStmt",
+                seq(lex(KEYWORD_BREAK), lex(EOL)));
+
+        // continue
+        define("ContinueStmt",
+                seq(lex(KEYWORD_CONEINUE), lex(EOL)));
+
+        // 调用方法
+        define("CallSubStmt",
+                seq(
+                        lex(IDENTIFIER_INTEGER),
+                        ref("ArgumentList")));
+
+        // 定义函数
+        define("DefineFunctionStmt",
+                seq(lex(KEYWORD_FUNCTION), or(lex(IDENTIFIER_INTEGER), lex(IDENTIFIER_STRING)), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(EOL),
+                        rep(
+                        or(ref("Stmt"),
+                                ref("ReturnFromFunctionStmt"))),
+                        lex(KEYWORD_END), lex(KEYWORD_FUNCTION)
+                ));
+
+        // 从函数中返回（带参数）
+        define("ReturnFromFunctionStmt",
+                seq(lex(KEYWORD_RETURN), or(ref("IntegerExpr"), ref("StringExpr")), lex(EOL)));
+
+        // 定义方法
+        define("DefineSubStmt",
+                seq(lex(KEYWORD_SUB), lex(IDENTIFIER_INTEGER), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(EOL),
+                        rep(
+                        or(ref("Stmt"),
+                                ref("ReturnFromSubStmt"))),
+                        lex(KEYWORD_END), lex(KEYWORD_SUB)
+                ));
+
+        // 不带参数的return
+        define("ReturnFromSubStmt",
+                seq(lex(KEYWORD_RETURN), lex(EOL)));
+
+        // 普通语句
         define("Stmt",
                 or(
                         ref("EmptyStmt"),
                         ref("VariableSetStmt"),
                         ref("IfStmt"),
                         ref("ForStmt"),
-                        ref("WhileStmt")));
+                        ref("WhileStmt"),
+                        ref("CallSubStmt")));
 
-        define("CompilationUnit", rep(ref("Stmt")));
+        // 编译单元
+        define("CompilationUnit",
+                rep(
+                or(
+                        ref("Stmt"),
+                        ref("DefineFunctionStmt"),
+                        ref("DefineSubStmt"))));
     }
 }

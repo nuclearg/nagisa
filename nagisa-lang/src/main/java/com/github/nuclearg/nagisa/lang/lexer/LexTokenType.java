@@ -15,7 +15,12 @@ public interface LexTokenType {
     public String name();
 
     /**
-     * 词法元素的正则表达式
+     * 词法元素的字符串字面值，如果必须用正则才能表示则此值为null
+     */
+    public String literal();
+
+    /**
+     * 词法元素的正则表达式，如果用字面值就能表示则此值为null
      */
     public Pattern regex();
 

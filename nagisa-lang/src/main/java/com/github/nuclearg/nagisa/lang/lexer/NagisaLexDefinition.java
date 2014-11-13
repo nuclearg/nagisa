@@ -31,167 +31,207 @@ public final class NagisaLexDefinition extends LexDefinition {
         /**
          * 空白
          */
-        SPACE("( |\\t)+", true),
+        SPACE(Pattern.compile("( |\\t)+"), true),
         /**
          * 换行
          */
-        EOL("[\\r\\n]+"),
+        EOL(Pattern.compile("[\\r\\n]+")),
         /**
          * 注释
          */
-        REMARK("//.*$", true),
+        REMARK(Pattern.compile("//.*$"), true),
 
         /**
          * LET
          */
-        KEYWORD_LET("(?i)LET"),
+        KEYWORD_LET("LET"),
         /**
          * IF
          */
-        KEYWORD_IF("(?i)IF"),
+        KEYWORD_IF("IF"),
         /**
          * THEN
          */
-        KEYWORD_THEN("(?i)THEN"),
+        KEYWORD_THEN("THEN"),
         /**
          * ELSE
          */
-        KEYWORD_ELSE("(?i)ELSE"),
-        /**
-         * ENDIF
-         */
-        KEYWORD_ENDIF("(?i)ENDIF"),
+        KEYWORD_ELSE("ELSE"),
 
         /**
          * FOR
          */
-        KEYWORD_FOR("(?i)FOR"),
+        KEYWORD_FOR("FOR"),
         /**
          * TO
          */
-        KEYWORD_TO("(?i)TO"),
+        KEYWORD_TO("TO"),
         /**
          * NEXT
          */
-        KEYWORD_NEXT("(?i)NEXT"),
+        KEYWORD_NEXT("NEXT"),
         /**
          * WHILE
          */
-        KEYWORD_WHILE("(?i)WHILE"),
+        KEYWORD_WHILE("WHILE"),
         /**
-         * WEND
+         * BREAK
          */
-        KEYWORD_WEND("(?i)WEND"),
+        KEYWORD_BREAK("BREAK"),
+        /**
+         * CONTINUE
+         */
+        KEYWORD_CONEINUE("CONTINUE"),
+        /**
+         * END
+         */
+        KEYWORD_END("END"),
+        /**
+         * FUNCTION
+         */
+        KEYWORD_FUNCTION("FUNCTION"),
+        /**
+         * SUB
+         */
+        KEYWORD_SUB("SUB"),
+        /**
+         * RETURN
+         */
+        KEYWORD_RETURN("RETURN"),
+        /**
+         * GOTO
+         */
+        KEYWORD_GOTO("GOTO"),
 
         /**
          * 字符串变量名
          */
-        STRING_SYMBOL("[a-zA-Z][_0-9a-zA-Z]*\\$"),
+        IDENTIFIER_STRING(Pattern.compile("[a-zA-Z][_0-9a-zA-Z]*\\$")),
         /**
          * 用户自定义的符号
          */
-        SYMBOL("[a-zA-Z][_0-9a-zA-Z]*"),
+        IDENTIFIER_INTEGER(Pattern.compile("[a-zA-Z][_0-9a-zA-Z]*")),
         /**
          * 整数
          */
-        INTEGER("[0-9]+"),
+        LITERAL_INTEGER(Pattern.compile("[0-9]+")),
         /**
          * 字符串
          */
-        STRING("\"([^\"]|\\\\\")+\""),
+        LITERAL_STRING(Pattern.compile("\"([^\"]|\\\\\")+\"")),
 
         /**
          * 加号
          */
-        OPERATOR_ADD("\\+"),
+        SYMBOL_ADD("+"),
         /**
          * 减号
          */
-        OPERATOR_SUB("-"),
+        SYMBOL_SUB("-"),
         /**
          * 乘号
          */
-        OPERATOR_MUL("\\*"),
+        SYMBOL_MUL("*"),
         /**
          * 除号
          */
-        OPERATOR_DIV("/"),
+        SYMBOL_DIV("/"),
         /**
          * 求余
          */
-        OPERATOR_MOD("%"),
+        SYMBOL_MOD("%"),
         /**
          * 等于
          */
-        OPERATOR_EQ("=="),
+        SYMBOL_EQ("=="),
         /**
          * 不等于
          */
-        OPERATOR_NEQ("!="),
+        SYMBOL_NEQ("!="),
         /**
          * 大于
          */
-        OPERATOR_GT(">"),
+        SYMBOL_GT(">"),
         /**
          * 大于等于
          */
-        OPERATOR_GTE(">="),
+        SYMBOL_GTE(">="),
         /**
          * 小于
          */
-        OPERATOR_LT("<"),
+        SYMBOL_LT("<"),
         /**
          * 小于等于
          */
-        OPERATOR_LTE("<="),
+        SYMBOL_LTE("<="),
         /**
          * 逻辑且
          */
-        OPERATOR_AND("&&"),
+        SYMBOL_AND("&&"),
         /**
          * 逻辑或
          */
-        OPERATOR_OR("\\|\\|"),
+        SYMBOL_OR("||"),
         /**
          * 逻辑异或
          */
-        OPERATOR_XOR("\\^"),
+        SYMBOL_XOR("^"),
         /**
          * 逻辑与
          */
-        OPERATOR_NOT("!"),
+        SYMBOL_NOT("!"),
+        /**
+         * 赋值运算符
+         */
+        SYMBOL_LET("="),
+
         /**
          * 左小括号
          */
-        OPERATOR_PARENTHESE_LEFT("\\("),
+        SYMBOL_PARENTHESE_LEFT("("),
         /**
          * 右小括号
          */
-        OPERATOR_PARENTHESE_RIGHT("\\)"),
+        SYMBOL_PARENTHESE_RIGHT(")"),
         /**
          * 左中括号
          */
-        OPERATOR_BRACKET_LEFT("\\["),
+        SYMBOL_BRACKET_LEFT("["),
         /**
          * 右中括号
          */
-        OPERATOR_BRACKET_RIGHT("\\]"),
+        SYMBOL_BRACKET_RIGHT("]"),
 
         /**
-         * 赋值
+         * 逗号
          */
-        OPERATOR_LET("="), ;
+        SYMBOL_COMMA(","),
 
+        ;
+
+        private final String literal;
         private final Pattern regex;
         private final boolean transparent;
 
-        private NagisaLexTokenType(String regex) {
+        private NagisaLexTokenType(String literal) {
+            this.literal = literal;
+            this.regex = null;
+            this.transparent = false;
+        }
+
+        private NagisaLexTokenType(Pattern regex) {
             this(regex, false);
         }
 
-        private NagisaLexTokenType(String regex, boolean transparent) {
-            this.regex = Pattern.compile(regex);
+        private NagisaLexTokenType(Pattern regex, boolean transparent) {
+            this.literal = null;
+            this.regex = regex;
             this.transparent = transparent;
+        }
+
+        @Override
+        public String literal() {
+            return this.literal;
         }
 
         @Override

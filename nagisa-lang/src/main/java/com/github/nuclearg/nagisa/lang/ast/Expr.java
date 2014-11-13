@@ -140,13 +140,13 @@ public final class Expr {
                 return resolveExpr(node.getChildren().get(0));
             case 2:
                 // 判断是单目运算符还是双目运算符，数字运算的双目运算符只有两个child
-                if (firstToken != null && (firstToken.getType() == NagisaLexTokenType.OPERATOR_SUB || firstToken.getType() == NagisaLexTokenType.OPERATOR_NOT))
+                if (firstToken != null && (firstToken.getType() == NagisaLexTokenType.SYMBOL_SUB || firstToken.getType() == NagisaLexTokenType.SYMBOL_NOT))
                     return resolveSingleParamExpr(node);
                 else
                     return resolveDoubleParamExpr(node);
             case 3:
                 // 判断是双目运算符还是括号表达式
-                if (firstToken != null && firstToken.getType() == NagisaLexTokenType.OPERATOR_PARENTHESE_LEFT)
+                if (firstToken != null && firstToken.getType() == NagisaLexTokenType.SYMBOL_PARENTHESE_LEFT)
                     return resolveParentheseExpr(node);
                 else
                     return resolveDoubleParamExpr(node);
@@ -160,13 +160,13 @@ public final class Expr {
         String text = token.getText();
 
         switch ((NagisaLexTokenType) token.getType()) {
-            case INTEGER:
+            case LITERAL_INTEGER:
                 return new Expr(ExprType.Integer, ExprOperator.IntegerLiteral, text);
-            case SYMBOL:
+            case IDENTIFIER_INTEGER:
                 return new Expr(ExprType.Integer, ExprOperator.IntegerVariableRef, text);
-            case STRING:
+            case LITERAL_STRING:
                 return new Expr(ExprType.String, ExprOperator.StringLiteral, text);
-            case STRING_SYMBOL:
+            case IDENTIFIER_STRING:
                 return new Expr(ExprType.String, ExprOperator.StringVariableRef, text);
             default:
                 throw new UnsupportedOperationException(token.toString());
@@ -178,9 +178,9 @@ public final class Expr {
         Expr param = resolveExpr(node.getChildren().get(1));
 
         switch ((NagisaLexTokenType) opToken.getType()) {
-            case OPERATOR_SUB:
+            case SYMBOL_SUB:
                 return new Expr(ExprType.Integer, ExprOperator.IntegerNegative, opToken.getText(), param);
-            case OPERATOR_NOT:
+            case SYMBOL_NOT:
                 return new Expr(ExprType.Boolean, ExprOperator.BooleanNot, opToken.getText(), param);
             default:
                 throw new UnsupportedOperationException("token: " + opToken + ", node: " + node);
@@ -248,22 +248,22 @@ public final class Expr {
     static {
         Map<NagisaLexTokenType, ExprOperator[]> map = new HashMap<>();
 
-        map.put(NagisaLexTokenType.OPERATOR_ADD, new ExprOperator[] { ExprOperator.IntegerAdd, ExprOperator.StringAdd, null });
-        map.put(NagisaLexTokenType.OPERATOR_SUB, new ExprOperator[] { ExprOperator.IntegerSub, null, null });
-        map.put(NagisaLexTokenType.OPERATOR_MUL, new ExprOperator[] { ExprOperator.IntegerMul, null, null });
-        map.put(NagisaLexTokenType.OPERATOR_DIV, new ExprOperator[] { ExprOperator.IntegerDiv, null, null });
-        map.put(NagisaLexTokenType.OPERATOR_MOD, new ExprOperator[] { ExprOperator.IntegerDiv, null, null });
+        map.put(NagisaLexTokenType.SYMBOL_ADD, new ExprOperator[] { ExprOperator.IntegerAdd, ExprOperator.StringAdd, null });
+        map.put(NagisaLexTokenType.SYMBOL_SUB, new ExprOperator[] { ExprOperator.IntegerSub, null, null });
+        map.put(NagisaLexTokenType.SYMBOL_MUL, new ExprOperator[] { ExprOperator.IntegerMul, null, null });
+        map.put(NagisaLexTokenType.SYMBOL_DIV, new ExprOperator[] { ExprOperator.IntegerDiv, null, null });
+        map.put(NagisaLexTokenType.SYMBOL_MOD, new ExprOperator[] { ExprOperator.IntegerDiv, null, null });
 
-        map.put(NagisaLexTokenType.OPERATOR_EQ, new ExprOperator[] { ExprOperator.IntegerEq, ExprOperator.StringEq, null });
-        map.put(NagisaLexTokenType.OPERATOR_NEQ, new ExprOperator[] { ExprOperator.IntegerNeq, ExprOperator.StringNeq, null });
-        map.put(NagisaLexTokenType.OPERATOR_GT, new ExprOperator[] { ExprOperator.IntegerGt, ExprOperator.StringGt, null });
-        map.put(NagisaLexTokenType.OPERATOR_GTE, new ExprOperator[] { ExprOperator.IntegerGte, ExprOperator.StringGte, null });
-        map.put(NagisaLexTokenType.OPERATOR_LT, new ExprOperator[] { ExprOperator.IntegerLt, ExprOperator.StringLt, null });
-        map.put(NagisaLexTokenType.OPERATOR_LTE, new ExprOperator[] { ExprOperator.IntegerLte, ExprOperator.StringLte, null });
+        map.put(NagisaLexTokenType.SYMBOL_EQ, new ExprOperator[] { ExprOperator.IntegerEq, ExprOperator.StringEq, null });
+        map.put(NagisaLexTokenType.SYMBOL_NEQ, new ExprOperator[] { ExprOperator.IntegerNeq, ExprOperator.StringNeq, null });
+        map.put(NagisaLexTokenType.SYMBOL_GT, new ExprOperator[] { ExprOperator.IntegerGt, ExprOperator.StringGt, null });
+        map.put(NagisaLexTokenType.SYMBOL_GTE, new ExprOperator[] { ExprOperator.IntegerGte, ExprOperator.StringGte, null });
+        map.put(NagisaLexTokenType.SYMBOL_LT, new ExprOperator[] { ExprOperator.IntegerLt, ExprOperator.StringLt, null });
+        map.put(NagisaLexTokenType.SYMBOL_LTE, new ExprOperator[] { ExprOperator.IntegerLte, ExprOperator.StringLte, null });
 
-        map.put(NagisaLexTokenType.OPERATOR_AND, new ExprOperator[] { null, null, ExprOperator.BooleanAnd });
-        map.put(NagisaLexTokenType.OPERATOR_OR, new ExprOperator[] { null, null, ExprOperator.BooleanOr });
-        map.put(NagisaLexTokenType.OPERATOR_XOR, new ExprOperator[] { null, null, ExprOperator.BooleanXor });
+        map.put(NagisaLexTokenType.SYMBOL_AND, new ExprOperator[] { null, null, ExprOperator.BooleanAnd });
+        map.put(NagisaLexTokenType.SYMBOL_OR, new ExprOperator[] { null, null, ExprOperator.BooleanOr });
+        map.put(NagisaLexTokenType.SYMBOL_XOR, new ExprOperator[] { null, null, ExprOperator.BooleanXor });
 
         OPERATOR_MAP = Collections.unmodifiableMap(map);
     }

@@ -57,6 +57,10 @@ public abstract class Stmt {
                 return new ForStmt(node);
             case "WhileStmt":
                 return new WhileStmt(node);
+            case "BreakStmt":
+                return new BreakStmt();
+            case "ContinueStmt":
+                return new ContinueStmt();
             default:
                 throw new UnsupportedOperationException();
         }

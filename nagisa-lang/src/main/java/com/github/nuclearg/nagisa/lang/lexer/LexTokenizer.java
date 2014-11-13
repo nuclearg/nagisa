@@ -20,12 +20,22 @@ public final class LexTokenizer {
         }
 
         @Override
+        public String literal() {
+            return null;
+        }
+
+        @Override
         public Pattern regex() {
             return null;
         }
 
         @Override
         public String name() {
+            return "ERROR_TOKEN";
+        }
+
+        @Override
+        public String toString() {
             return "ERROR_TOKEN";
         }
     };
@@ -95,11 +105,21 @@ public final class LexTokenizer {
 
         // 遍历所有词法规则进行匹配
         for (LexTokenType type : this.definition.getTypes()) {
-            Matcher m = type.regex().matcher(this.text);
-            if (m.find(this.pos) && m.start() == this.pos) {
-                // 正则匹配成功
-                String str = this.text.substring(m.start(), m.end());
-                this.pos += m.end() - m.start();
+            String str = null;
+
+            if (type.literal() != null) {
+                // 使用字面量进行匹配
+                if (this.text.toUpperCase().indexOf(type.literal().toUpperCase(), this.pos) == this.pos)
+                    str = type.literal();
+            } else {
+                // 使用正则进行匹配
+                Matcher m = type.regex().matcher(this.text);
+                if (m.find(this.pos) && m.start() == this.pos)
+                    str = this.text.substring(m.start(), m.end());
+            }
+
+            if (str != null) {
+                this.pos += str.length();
 
                 // 处理行号和列号
                 String copy = str.replaceAll("\\r\\n|\\r", "\n");

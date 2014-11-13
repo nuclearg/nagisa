@@ -10,6 +10,6 @@ while i<100
 		let odd = odd + i
 	endif
 	let i=i+1
-wend
+end while
 
 let sum = even + odd
