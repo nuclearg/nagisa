@@ -53,7 +53,7 @@ public final class SyntaxTreeNode {
         if (!this.children.isEmpty()) {
             SyntaxTreeNode first = children.get(0);
             SyntaxTreeNode last = children.get(children.size() - 1);
-            this.range = new Range(first.range.startRow, first.range.startColumn, last.range.endRow, last.range.endColumn);
+            this.range = new Range(first.range.getStartRow(), first.range.getStartColumn(), last.range.getEndRow(), last.range.getEndColumn());
         } else
             this.range = new Range(0, 0, 0, 0);
     }

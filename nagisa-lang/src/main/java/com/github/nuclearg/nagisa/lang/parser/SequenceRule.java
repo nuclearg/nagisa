@@ -43,7 +43,15 @@ final class SequenceRule extends SyntaxRule {
                 if (node.getRange() == null) // 这表示是一个空节点
                     continue;
 
-                children.add(node);
+                /*
+                 * 把子节点挂到children里
+                 */
+                if (node.getToken() != null || node.getRuleName() != null)
+                    // 如果rule是ref或lex，则把节点挂到本节点的children里
+                    children.add(node);
+                else
+                    // 其它情况则忽略掉这一层节点，把里面的children直接提升成本节点的children
+                    children.addAll(node.getChildren());
             } else {
                 // 错误处理，跳过当前的词向后看
                 errorReporter.error("语法子树构建失败。当前符号：" + lexer.peek() + ". 期望 " + rule, snapshot);

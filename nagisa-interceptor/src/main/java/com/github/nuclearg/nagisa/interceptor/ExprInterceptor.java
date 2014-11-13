@@ -1,12 +1,14 @@
 package com.github.nuclearg.nagisa.interceptor;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.github.nuclearg.nagisa.lang.ast.Expr;
 import com.github.nuclearg.nagisa.lang.ast.ExprOperator;
-import com.github.nuclearg.nagisa.lang.util.ListUtils;
 
 /**
  * 表达式的解释器
@@ -31,11 +33,13 @@ class ExprInterceptor {
     private ExprInterceptor(Expr expr) {
         this.operator = expr.getOperator();
         this.text = expr.getText();
-        this.children = ListUtils.transform(expr.getChildren(), e -> new ExprInterceptor(e));
+        this.children = Collections.unmodifiableList(StreamSupport.stream(expr.getChildren().spliterator(), false)
+                .map(e -> new ExprInterceptor(e))
+                .collect(Collectors.toList()));
     }
 
     Value eval(Context ctx) {
-        List<Value> values = ListUtils.transform(this.children, e -> e.eval(ctx));
+        List<Value> values = this.children.stream().map(e -> e.eval(ctx)).collect(Collectors.toList());
         long int0 = values.size() > 0 ? values.get(0).getIntegerValue() : 0;
         long int1 = values.size() > 1 ? values.get(1).getIntegerValue() : 0;
         String str0 = values.size() > 0 ? values.get(0).getStringValue() : null;
@@ -104,6 +108,9 @@ class ExprInterceptor {
                 return new Value(bool0 || bool1);
             case BooleanXor:
                 return new Value(bool0 != bool1);
+                
+            case FunctionInvocation:
+                return null;
 
             default:
                 throw new UnsupportedOperationException("operation: " + this.operator);

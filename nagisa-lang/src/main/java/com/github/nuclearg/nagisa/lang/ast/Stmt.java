@@ -1,9 +1,9 @@
 package com.github.nuclearg.nagisa.lang.ast;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
-import com.github.nuclearg.nagisa.lang.util.ListUtils;
 
 /**
  * 语句
@@ -35,7 +35,7 @@ public abstract class Stmt {
      * @return 语句列表
      */
     static List<Stmt> resolveStmts(List<SyntaxTreeNode> nodes) {
-        return ListUtils.transform(nodes, n -> resolveStmt(n));
+        return nodes.stream().map(n -> resolveStmt(n)).collect(Collectors.toList());
     }
 
     /**

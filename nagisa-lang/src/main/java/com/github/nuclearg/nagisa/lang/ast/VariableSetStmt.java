@@ -21,8 +21,8 @@ public final class VariableSetStmt extends Stmt {
     private final Expr expr;
 
     VariableSetStmt(SyntaxTreeNode node) {
-        this.symbol = node.getChildren().get(1).getChildren().get(0).getToken().getText();
-        this.expr = Expr.resolveExpr(node.getChildren().get(1).getChildren().get(2));
+        this.symbol = node.getChildren().get(1).getToken().getText();
+        this.expr = Expr.resolveExpr(node.getChildren().get(3));
     }
 
     /** 变量名 */

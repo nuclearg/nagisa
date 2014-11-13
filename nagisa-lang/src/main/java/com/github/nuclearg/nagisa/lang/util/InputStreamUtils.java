@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-public class InputStreamUtils {
+public final class InputStreamUtils {
+    private InputStreamUtils() {
+    }
+
     public static byte[] read(InputStream is) throws IOException {
         try {
             ByteArrayOutputStream os = new ByteArrayOutputStream();

@@ -40,7 +40,11 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
         define("IntegerExprElement",
                 or(
                         lex(LITERAL_INTEGER),
-                        lex(IDENTIFIER_INTEGER),
+                        seq(
+                                lex(IDENTIFIER_INTEGER),
+                                or(
+                                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("ArgumentList"), lex(SYMBOL_PARENTHESE_RIGHT)),
+                                        nul())),
                         seq(lex(SYMBOL_PARENTHESE_LEFT), ref("IntegerExpr"), lex(SYMBOL_PARENTHESE_RIGHT))));
         define("IntegerMulDivModExprTerm",
                 seq(
@@ -70,7 +74,11 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
         define("StringExprElement",
                 or(
                         lex(LITERAL_STRING),
-                        lex(IDENTIFIER_STRING),
+                        seq(
+                                lex(IDENTIFIER_STRING),
+                                or(
+                                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("ArgumentList"), lex(SYMBOL_PARENTHESE_RIGHT)),
+                                        nul())),
                         seq(lex(SYMBOL_PARENTHESE_LEFT), ref("StringExpr"), lex(SYMBOL_PARENTHESE_RIGHT))));
         define("StringExpr",
                 seq(
@@ -123,12 +131,13 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                                 lex(IDENTIFIER_INTEGER),
                                 lex(IDENTIFIER_STRING),
                                 nul()),
-                        rep(
-                        seq(
-                                lex(SYMBOL_COMMA),
-                                or(
-                                        lex(IDENTIFIER_INTEGER),
-                                        lex(IDENTIFIER_STRING))))));
+                        rep(ref("RestParam"))));
+        define("RestParam",
+                seq(
+                        lex(SYMBOL_COMMA),
+                        or(
+                                lex(IDENTIFIER_INTEGER),
+                                lex(IDENTIFIER_STRING))));
 
         // 实参列表
         define("ArgumentList",
@@ -137,12 +146,13 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                                 ref("IntegerExpr"),
                                 ref("StringExpr"),
                                 nul()),
-                        rep(
-                        seq(
-                                lex(SYMBOL_COMMA),
-                                or(
-                                        ref("IntegerExpr"),
-                                        ref("StringExpr"))))));
+                        rep(ref("RestArgument"))));
+        define("RestArgument",
+                seq(
+                        lex(SYMBOL_COMMA),
+                        or(
+                                ref("IntegerExpr"),
+                                ref("StringExpr"))));
 
         // 空语句
         define("EmptyStmt",
@@ -158,27 +168,27 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
 
         // if ... else ... end if
         define("IfStmt",
-                seq(lex(KEYWORD_IF), ref("BooleanExpr"), lex(KEYWORD_THEN), lex(EOL), rep(ref("Stmt")), or(seq(lex(KEYWORD_ELSE), lex(EOL), rep(ref("Stmt"))), nul()), lex(KEYWORD_END), lex(KEYWORD_IF), lex(EOL)));
+                seq(lex(KEYWORD_IF), ref("BooleanExpr"), lex(KEYWORD_THEN), lex(EOL), ref("IfBodyStmtList"), or(seq(lex(KEYWORD_ELSE), lex(EOL), ref("IfBodyStmtList")), nul()), lex(KEYWORD_END), lex(KEYWORD_IF), lex(EOL)));
+        define("IfBodyStmtList",
+                rep(ref("Stmt")));
 
         // for ... next
         define("ForStmt",
                 seq(
                         lex(KEYWORD_FOR), lex(IDENTIFIER_INTEGER), lex(SYMBOL_LET), ref("IntegerExpr"), lex(KEYWORD_TO), ref("IntegerExpr"), lex(EOL),
-                        rep(
-                        or(
-                                ref("Stmt"),
-                                ref("BreakStmt"),
-                                ref("ContinueStmt"))),
+                        ref("ForBodyStmtList"),
                         lex(KEYWORD_NEXT), lex(EOL)));
+        define("ForBodyStmtList",
+                rep(
+                or(
+                        ref("Stmt"),
+                        ref("BreakStmt"),
+                        ref("ContinueStmt"))));
 
         // while ... end while
         define("WhileStmt",
                 seq(lex(KEYWORD_WHILE), ref("BooleanExpr"), lex(EOL),
-                        rep(
-                        or(
-                                ref("Stmt"),
-                                ref("BreakStmt"),
-                                ref("ContinueStmt"))),
+                        ref("ForBodyStmtList"),
                         lex(KEYWORD_END), lex(KEYWORD_WHILE), lex(EOL)));
 
         // break
@@ -233,10 +243,11 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
 
         // 编译单元
         define("CompilationUnit",
-                rep(
-                or(
-                        ref("Stmt"),
-                        ref("DefineFunctionStmt"),
-                        ref("DefineSubStmt"))));
+                seq(
+                        rep(ref("Stmt")),
+                        rep(
+                        or(
+                                ref("DefineFunctionStmt"),
+                                ref("DefineSubStmt")))));
     }
 }

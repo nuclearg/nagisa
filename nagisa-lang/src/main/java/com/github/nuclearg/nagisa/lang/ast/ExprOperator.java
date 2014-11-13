@@ -67,4 +67,7 @@ public enum ExprOperator {
     BooleanOr,
     /** 逻辑异或 */
     BooleanXor,
+
+    /** 函数调用 */
+    FunctionInvocation,
 }

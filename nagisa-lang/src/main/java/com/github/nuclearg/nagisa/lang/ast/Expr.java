@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
 import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition.NagisaLexTokenType;
@@ -68,6 +71,14 @@ public final class Expr {
         this.priorityRedefined = false;
     }
 
+    public Expr(ExprType exprType, ExprOperator operator, String text, List<Expr> children) {
+        this.type = exprType;
+        this.operator = operator;
+        this.text = text;
+        this.children = Collections.unmodifiableList(children);
+        this.priorityRedefined = false;
+    }
+
     private Expr(Expr expr, boolean priorityRedefined) {
         this.type = expr.type;
         this.operator = expr.operator;
@@ -110,7 +121,8 @@ public final class Expr {
                 text = this.children.get(0) + " " + this.text + " " + this.children.get(1);
                 break;
             default:
-                throw new UnsupportedOperationException("children: " + this.children);
+                text = this.text + "(" + StringUtils.join(this.children, ", ") + ")";
+                break;
         }
 
         if (this.priorityRedefined)
@@ -134,24 +146,21 @@ public final class Expr {
         // 判断表达式有几个组成部分
         switch (node.getChildren().size()) {
             case 0:
-                // 判断是否带括号
                 return resolveNoneParamExpr(node);
             case 1:
                 return resolveExpr(node.getChildren().get(0));
             case 2:
-                // 判断是单目运算符还是双目运算符，数字运算的双目运算符只有两个child
-                if (firstToken != null && (firstToken.getType() == NagisaLexTokenType.SYMBOL_SUB || firstToken.getType() == NagisaLexTokenType.SYMBOL_NOT))
-                    return resolveSingleParamExpr(node);
-                else
-                    return resolveDoubleParamExpr(node);
+                return resolveSingleParamExpr(node);
             case 3:
                 // 判断是双目运算符还是括号表达式
                 if (firstToken != null && firstToken.getType() == NagisaLexTokenType.SYMBOL_PARENTHESE_LEFT)
                     return resolveParentheseExpr(node);
                 else
                     return resolveDoubleParamExpr(node);
+            case 4:
+                return resolveFunctionCallExpr(node);
             default:
-                throw new UnsupportedOperationException("expr size: " + node.getChildren().size() + ", node: " + node);
+                throw new UnsupportedOperationException("node: " + node);
         }
     }
 
@@ -243,6 +252,29 @@ public final class Expr {
             return expr;
 
         return new Expr(expr, true);
+    }
+
+    private static Expr resolveFunctionCallExpr(SyntaxTreeNode node) {
+        LexToken funcNameToken = node.getChildren().get(0).getToken();
+
+        ExprType exprType;
+        if (funcNameToken.getType() == NagisaLexTokenType.IDENTIFIER_INTEGER)
+            exprType = ExprType.Integer;
+        else if (funcNameToken.getType() == NagisaLexTokenType.IDENTIFIER_STRING)
+            exprType = ExprType.String;
+        else
+            throw new UnsupportedOperationException("expr type: " + funcNameToken.getType() + ", node: " + node);
+
+        // 函数名
+        String name = node.getChildren().get(0).getToken().getText();
+        // 参数列表
+        List<SyntaxTreeNode> argNodes = node.getChildren().get(2).getChildren();
+        List<Expr> args = argNodes.stream()
+                .map(n -> "RestArgument".equals(n.getRuleName()) ? n.getChildren().get(1) : n)
+                .map(n -> resolveExpr(n))
+                .collect(Collectors.toList());
+
+        return new Expr(exprType, ExprOperator.FunctionInvocation, name, args);
     }
 
     static {

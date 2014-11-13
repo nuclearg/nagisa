@@ -6,29 +6,49 @@ package com.github.nuclearg.nagisa.lang.util;
  * @author ng
  *
  */
-public class Range {
+public final class Range {
     /**
      * 起始行号
      */
-    public final int startRow;
+    private final int startRow;
     /**
      * 起始列号
      */
-    public final int startColumn;
+    private final int startColumn;
     /**
      * 结束行号
      */
-    public final int endRow;
+    private final int endRow;
     /**
      * 结束列号
      */
-    public final int endColumn;
+    private final int endColumn;
 
     public Range(int startRow, int startColumn, int endRow, int endColumn) {
         this.startRow = startRow;
         this.startColumn = startColumn;
         this.endRow = endRow;
         this.endColumn = endColumn;
+    }
+
+    /** 起始行号 */
+    public int getStartRow() {
+        return this.startRow;
+    }
+
+    /** 起始列号 */
+    public int getStartColumn() {
+        return this.startColumn;
+    }
+
+    /** 结束行号 */
+    public int getEndRow() {
+        return this.endRow;
+    }
+
+    /** 结束列号 */
+    public int getEndColumn() {
+        return this.endColumn;
     }
 
     @Override
