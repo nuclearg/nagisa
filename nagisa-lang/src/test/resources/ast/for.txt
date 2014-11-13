@@ -1,0 +1,12 @@
+for i=0 to 10
+	let sum = sum + i
+next
+
+for i=0 to 10
+	for j=0 to i
+		let sum = sum + i * j
+	next
+	
+	for k=0 to i*j
+	next
+next

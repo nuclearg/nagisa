@@ -1,0 +1,28 @@
+if a>b then
+	let c = a+b
+endif
+
+if a<b then
+
+	if a==1 then
+
+		if b==1 then
+
+		endif
+
+	endif
+
+else
+	if b>c then
+		if c>d then
+			let x=x+1
+		else
+		endif
+	endif
+endif
+
+if a>b then
+	let c=a+b
+else
+	let c=a+b
+endif

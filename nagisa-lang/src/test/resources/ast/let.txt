@@ -1,0 +1,13 @@
+let a=0
+let b=-1
+let b2=(1)
+let c=a+b
+let c=(a+b)
+let c=(a)+(b)
+let c=((((a))+((b))))
+let d=a+b*c-d
+let e=(a+b)*(c-d)%f
+
+let a$="asdf"
+let b$="ddd" +( "asdf")
+let c$=a$+b$
