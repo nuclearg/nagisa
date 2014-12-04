@@ -2,6 +2,8 @@ package com.github.nuclearg.nagisa.lang.parser;
 
 import static com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition.NagisaLexTokenType.*;
 
+import com.github.nuclearg.nagisa.lang.error.Fatals;
+import com.github.nuclearg.nagisa.lang.error.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
 import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition;
 
@@ -29,69 +31,50 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
         SyntaxTreeNode node = INSTANCE.getRule(ROOT_RULE).parse(lexer, errorReporter);
 
         if (!lexer.eof())
-            errorReporter.fatal("有剩余字符无法被解析", lexer.snapshot());
+            errorReporter.report(Fatals.F1001, lexer.position());
 
         return node;
 
     }
 
     private NagisaSyntaxDefinition() {
-        // 数学运算表达式
-        define("IntegerExprElement",
-                or(
-                        lex(LITERAL_INTEGER),
-                        seq(
-                                lex(IDENTIFIER_INTEGER),
-                                or(
-                                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("ArgumentList"), lex(SYMBOL_PARENTHESE_RIGHT)),
-                                        nul())),
-                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("IntegerExpr"), lex(SYMBOL_PARENTHESE_RIGHT))));
-        define("IntegerMulDivModExprTerm",
-                seq(
-                        ref("IntegerExprElement"),
-                        or(
-                                seq(
-                                        or(
-                                                lex(SYMBOL_MUL),
-                                                lex(SYMBOL_DIV),
-                                                lex(SYMBOL_MOD)),
-                                        ref("IntegerMulDivModExprTerm")),
-                                nul())));
-        define("IntegerExpr",
-                or(
-                        seq(lex(SYMBOL_SUB), ref("IntegerExpr")),
-                        seq(
-                                ref("IntegerMulDivModExprTerm"),
-                                or(
-                                        seq(
-                                                or(
-                                                        lex(SYMBOL_ADD),
-                                                        lex(SYMBOL_SUB)),
-                                                ref("IntegerExpr")),
-                                        nul()))));
+        /*
+         * 运算符优先级规则：
+         * 
+         * 括号 > 取负，取反 > 乘、除、求余 > 加、减 > 等于、不等于、大于、小于、大于等于、小于等于 > 与、或
+         */
 
-        // 字符串运算表达式
-        define("StringExprElement",
+        define("AtomExprElement",
                 or(
-                        lex(LITERAL_STRING),
+                        lex(LITERAL_INTEGER), // 整数字面量
+                        lex(LITERAL_STRING), // 字符串字面量
+                        seq(lex(SYMBOL_SUB), ref("AtomExprElement")), // 取负
+                        seq(lex(SYMBOL_NOT), ref("AtomExprElement")), // 取反
+                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("Expr"), lex(SYMBOL_PARENTHESE_RIGHT)), // 括号运算
                         seq(
-                                lex(IDENTIFIER_STRING),
-                                or(
-                                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("ArgumentList"), lex(SYMBOL_PARENTHESE_RIGHT)),
-                                        nul())),
-                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("StringExpr"), lex(SYMBOL_PARENTHESE_RIGHT))));
-        define("StringExpr",
+                                lex(IDENTIFIER), // 普通标识符
+                                opt(seq(lex(SYMBOL_PARENTHESE_LEFT), ref("ArgumentList"), lex(SYMBOL_PARENTHESE_RIGHT))))));// 函数调用
+        define("MulDivModExprTerm",
                 seq(
-                        ref("StringExprElement"),
-                        or(
-                                seq(lex(SYMBOL_ADD), ref("StringExpr")),
-                                nul())));
-
-        // 逻辑运算表达式
-        define("BooleanExprElement",
-                or(
-                        seq(
-                                ref("IntegerExpr"),
+                        ref("AtomExprElement"),
+                        opt(seq(
+                                or(
+                                        lex(SYMBOL_MUL),
+                                        lex(SYMBOL_DIV),
+                                        lex(SYMBOL_MOD)),
+                                ref("MulDivModExprTerm")))));
+        define("AddSubExprTerm",
+                seq(
+                        ref("MulDivModExprTerm"),
+                        opt(seq(
+                                or(
+                                        lex(SYMBOL_ADD),
+                                        lex(SYMBOL_SUB)),
+                                ref("AddSubExprTerm")))));
+        define("CompareExprTerm",
+                seq(
+                        ref("AddSubExprTerm"),
+                        opt(seq(
                                 or(
                                         lex(SYMBOL_EQ),
                                         lex(SYMBOL_NEQ),
@@ -99,60 +82,32 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                                         lex(SYMBOL_GTE),
                                         lex(SYMBOL_LT),
                                         lex(SYMBOL_LTE)),
-                                ref("IntegerExpr")),
-                        seq(
-                                ref("StringExpr"),
+                                ref("CompareExprTerm")))));
+        define("Expr",
+                seq(
+                        ref("CompareExprTerm"),
+                        opt(seq(
                                 or(
-                                        lex(SYMBOL_EQ),
-                                        lex(SYMBOL_NEQ),
-                                        lex(SYMBOL_GT),
-                                        lex(SYMBOL_GTE),
-                                        lex(SYMBOL_LT),
-                                        lex(SYMBOL_LTE)),
-                                ref("StringExpr")),
-                        seq(lex(SYMBOL_PARENTHESE_LEFT), ref("BooleanExpr"), lex(SYMBOL_PARENTHESE_RIGHT))));
-        define("BooleanExpr",
-                or(
-                        seq(lex(SYMBOL_NOT), ref("BooleanExpr")),
-                        seq(
-                                ref("BooleanExprElement"),
-                                or(
-                                        seq(
-                                                or(
-                                                        lex(SYMBOL_AND),
-                                                        lex(SYMBOL_OR)),
-                                                ref("BooleanExpr")),
-                                        nul()))));
+                                        lex(SYMBOL_AND),
+                                        lex(SYMBOL_OR),
+                                        lex(SYMBOL_XOR)),
+                                ref("CompareExprTerm")))));
 
         // 形参列表
         define("ParamList",
                 seq(
-                        or(
-                                lex(IDENTIFIER_INTEGER),
-                                lex(IDENTIFIER_STRING),
-                                nul()),
-                        rep(ref("RestParam"))));
+                        opt(lex(IDENTIFIER)), rep(ref("RestParam"))));
         define("RestParam",
                 seq(
-                        lex(SYMBOL_COMMA),
-                        or(
-                                lex(IDENTIFIER_INTEGER),
-                                lex(IDENTIFIER_STRING))));
+                        lex(SYMBOL_COMMA), lex(IDENTIFIER)));
 
         // 实参列表
         define("ArgumentList",
                 seq(
-                        or(
-                                ref("IntegerExpr"),
-                                ref("StringExpr"),
-                                nul()),
-                        rep(ref("RestArgument"))));
+                        opt(ref("Expr")), rep(ref("RestArgument"))));
         define("RestArgument",
                 seq(
-                        lex(SYMBOL_COMMA),
-                        or(
-                                ref("IntegerExpr"),
-                                ref("StringExpr"))));
+                        lex(SYMBOL_COMMA), ref("Expr")));
 
         // 空语句
         define("EmptyStmt",
@@ -161,34 +116,28 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
         // 赋值语句
         define("VariableSetStmt",
                 seq(
-                        lex(KEYWORD_LET),
-                        or(
-                                seq(lex(IDENTIFIER_INTEGER), lex(SYMBOL_LET), ref("IntegerExpr"), lex(EOL)),
-                                seq(lex(IDENTIFIER_STRING), lex(SYMBOL_LET), ref("StringExpr"), lex(EOL)))));
+                        lex(KEYWORD_LET), lex(IDENTIFIER), lex(SYMBOL_LET), ref("Expr"), lex(EOL)));
 
         // if ... else ... end if
         define("IfStmt",
-                seq(lex(KEYWORD_IF), ref("BooleanExpr"), lex(KEYWORD_THEN), lex(EOL), ref("IfBodyStmtList"), or(seq(lex(KEYWORD_ELSE), lex(EOL), ref("IfBodyStmtList")), nul()), lex(KEYWORD_END), lex(KEYWORD_IF), lex(EOL)));
-        define("IfBodyStmtList",
-                rep(ref("Stmt")));
+                seq(lex(KEYWORD_IF), ref("Expr"), lex(KEYWORD_THEN), lex(EOL),
+                        ref("StmtList"),
+                        or(
+                                seq(lex(KEYWORD_ELSE), lex(EOL), ref("StmtList")),
+                                nul()),
+                        lex(KEYWORD_END), lex(KEYWORD_IF), lex(EOL)));
 
         // for ... next
         define("ForStmt",
                 seq(
-                        lex(KEYWORD_FOR), lex(IDENTIFIER_INTEGER), lex(SYMBOL_LET), ref("IntegerExpr"), lex(KEYWORD_TO), ref("IntegerExpr"), lex(EOL),
-                        ref("ForBodyStmtList"),
+                        lex(KEYWORD_FOR), lex(IDENTIFIER), lex(SYMBOL_LET), ref("Expr"), lex(KEYWORD_TO), ref("Expr"), lex(EOL),
+                        ref("StmtList"),
                         lex(KEYWORD_NEXT), lex(EOL)));
-        define("ForBodyStmtList",
-                rep(
-                or(
-                        ref("Stmt"),
-                        ref("BreakStmt"),
-                        ref("ContinueStmt"))));
 
         // while ... end while
         define("WhileStmt",
-                seq(lex(KEYWORD_WHILE), ref("BooleanExpr"), lex(EOL),
-                        ref("ForBodyStmtList"),
+                seq(lex(KEYWORD_WHILE), ref("Expr"), lex(EOL),
+                        ref("StmtList"),
                         lex(KEYWORD_END), lex(KEYWORD_WHILE), lex(EOL)));
 
         // break
@@ -202,34 +151,32 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
         // 调用方法
         define("CallSubStmt",
                 seq(
-                        lex(IDENTIFIER_INTEGER),
-                        ref("ArgumentList")));
+                        lex(IDENTIFIER), ref("ArgumentList")));
 
         // 定义函数
         define("DefineFunctionStmt",
-                seq(lex(KEYWORD_FUNCTION), or(lex(IDENTIFIER_INTEGER), lex(IDENTIFIER_STRING)), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(EOL),
-                        rep(
-                        or(ref("Stmt"),
-                                ref("ReturnFromFunctionStmt"))),
-                        lex(KEYWORD_END), lex(KEYWORD_FUNCTION)
-                ));
-
-        // 从函数中返回（带参数）
-        define("ReturnFromFunctionStmt",
-                seq(lex(KEYWORD_RETURN), or(ref("IntegerExpr"), ref("StringExpr")), lex(EOL)));
-
+                seq(lex(KEYWORD_FUNCTION), lex(IDENTIFIER), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(KEYWORD_AS), lex(IDENTIFIER), lex(EOL),
+                        ref("StmtList"),
+                        lex(KEYWORD_END), lex(KEYWORD_FUNCTION)));
         // 定义方法
         define("DefineSubStmt",
-                seq(lex(KEYWORD_SUB), lex(IDENTIFIER_INTEGER), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(EOL),
-                        rep(
-                        or(ref("Stmt"),
-                                ref("ReturnFromSubStmt"))),
-                        lex(KEYWORD_END), lex(KEYWORD_SUB)
-                ));
+                seq(lex(KEYWORD_SUB), lex(IDENTIFIER), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(EOL),
+                        ref("StmtList"),
+                        lex(KEYWORD_END), lex(KEYWORD_SUB)));
+        // 返回语句
+        define("ReturnStmt",
+                seq(lex(KEYWORD_RETURN), opt(ref("Expr")), lex(EOL)));
 
-        // 不带参数的return
-        define("ReturnFromSubStmt",
-                seq(lex(KEYWORD_RETURN), lex(EOL)));
+        // 定义函数
+        define("DefineNativeFunctionStmt",
+                seq(lex(KEYWORD_FUNCTION), lex(IDENTIFIER), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(KEYWORD_AS), lex(IDENTIFIER), lex(EOL),
+                        ref("StmtList"),
+                        lex(KEYWORD_END), lex(KEYWORD_FUNCTION)));
+        // 定义方法
+        define("DefineNativeSubStmt",
+                seq(lex(KEYWORD_SUB), lex(IDENTIFIER), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(EOL),
+                        ref("StmtList"),
+                        lex(KEYWORD_END), lex(KEYWORD_SUB)));
 
         // 普通语句
         define("Stmt",
@@ -239,15 +186,20 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                         ref("IfStmt"),
                         ref("ForStmt"),
                         ref("WhileStmt"),
-                        ref("CallSubStmt")));
+                        ref("BreakStmt"),
+                        ref("ContinueStmt"),
+                        ref("CallSubStmt"),
+                        ref("ReturnStmt")));
+        define("StmtList",
+                rep(ref("Stmt")));
 
         // 编译单元
         define("CompilationUnit",
                 seq(
                         rep(ref("Stmt")),
-                        rep(
-                        or(
+                        rep(or(
                                 ref("DefineFunctionStmt"),
-                                ref("DefineSubStmt")))));
+                                ref("DefineSubStmt"),
+                                ref("EmptyStmt")))));
     }
 }

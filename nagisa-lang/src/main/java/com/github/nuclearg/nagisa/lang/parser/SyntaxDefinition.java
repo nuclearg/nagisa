@@ -47,6 +47,10 @@ public abstract class SyntaxDefinition {
         return new OrRule(Arrays.asList(rules));
     }
 
+    protected final SyntaxRule opt(SyntaxRule rule) {
+        return or(rule, nul());
+    }
+
     protected final SyntaxRule rep(SyntaxRule rule) {
         return new RepeatRule(rule);
     }

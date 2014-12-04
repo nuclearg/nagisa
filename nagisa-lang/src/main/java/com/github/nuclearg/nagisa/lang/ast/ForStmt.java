@@ -30,11 +30,11 @@ public final class ForStmt extends Stmt {
      */
     private final List<Stmt> stmts;
 
-    ForStmt(SyntaxTreeNode node) {
+    ForStmt(SyntaxTreeNode node, Context ctx) {
         this.symbol = node.getChildren().get(1).getToken().getText();
-        this.initValue = Expr.resolveExpr(node.getChildren().get(3));
-        this.targetValue = Expr.resolveExpr(node.getChildren().get(5));
-        this.stmts = Stmt.resolveStmts(node.getChildren().get(7).getChildren());
+        this.initValue = Expr.resolveExpr(node.getChildren().get(3), ctx);
+        this.targetValue = Expr.resolveExpr(node.getChildren().get(5), ctx);
+        this.stmts = Stmt.resolveStmts(node.getChildren().get(7).getChildren(), ctx);
     }
 
     /** 循环变量名 */
@@ -61,8 +61,7 @@ public final class ForStmt extends Stmt {
     public String toString(String prefix) {
         StringBuilder builder = new StringBuilder();
         builder.append(prefix).append("FOR ").append(this.symbol).append(" = ").append(this.initValue).append(" TO ").append(this.targetValue).append(SystemUtils.LINE_SEPARATOR);
-        for (Stmt stmt : this.stmts)
-            builder.append(stmt.toString(prefix + "    "));
+        this.stmts.stream().forEach(s -> builder.append(s.toString(prefix + "    ")));
         builder.append(prefix).append("NEXT").append(SystemUtils.LINE_SEPARATOR);
         return builder.toString();
     }

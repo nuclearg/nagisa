@@ -3,6 +3,8 @@ package com.github.nuclearg.nagisa.lang.lexer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.github.nuclearg.nagisa.lang.util.Range;
 
 /**
@@ -52,7 +54,7 @@ public final class LexTokenizer {
     /**
      * 读取完前一个词之后的快照
      */
-    private LexTokenizerSnapshot prevSnapshot;
+    private Position prevPosition;
 
     /**
      * 当前字符位置
@@ -85,7 +87,7 @@ public final class LexTokenizer {
      * @return 同{@link #next()}
      */
     public LexToken peek() {
-        LexTokenizerSnapshot snapshot = this.snapshot();
+        Position snapshot = this.position();
         LexToken token = this.next();
         this.restore(snapshot);
         return token;
@@ -98,10 +100,10 @@ public final class LexTokenizer {
      */
     public LexToken next() {
         if (this.eof())
-            return new LexToken(null, null, new Range(this.row, this.column, this.row, this.column));
+            return new LexToken(null, null, new Range(this.position(), this.position()));
 
         LexToken token = null;
-        this.prevSnapshot = new LexTokenizerSnapshot(this, this.pos, this.row, this.column);
+        this.prevPosition = new Position(this.pos, this.row, this.column);
 
         // 遍历所有词法规则进行匹配
         for (LexTokenType type : this.definition.getTypes()) {
@@ -109,8 +111,26 @@ public final class LexTokenizer {
 
             if (type.literal() != null) {
                 // 使用字面量进行匹配
-                if (this.text.toUpperCase().indexOf(type.literal().toUpperCase(), this.pos) == this.pos)
+                if (this.text.toUpperCase().indexOf(type.literal().toUpperCase(), this.pos) == this.pos) {
                     str = type.literal();
+
+                    // 检查之后的字符不是[a-zA-Z0-9]，避免将“LET asdf = 0”中标识符“asdf”中的as解析为KEYWORD_AS
+
+                    // 只有当前token的最后一个字符是[a-zA-Z0-9]时才需要进行这种检查，否则“let a=0”中的等于号会校验不过去
+                    String lastChar = str.charAt(type.literal().length() - 1) + "";
+                    if (StringUtils.isAlphanumeric(lastChar)) {
+                        int posAfterToken = this.pos + str.length();
+
+                        // 没到EOF
+                        if (this.text.length() != posAfterToken) {
+                            // 取下一个字符
+                            String nextChar = this.text.charAt(posAfterToken) + "";
+
+                            if (StringUtils.isAlphanumeric(nextChar))
+                                str = null;
+                        }
+                    }
+                }
             } else {
                 // 使用正则进行匹配
                 Matcher m = type.regex().matcher(this.text);
@@ -124,7 +144,6 @@ public final class LexTokenizer {
                 // 处理行号和列号
                 String copy = str.replaceAll("\\r\\n|\\r", "\n");
                 int oldRow = this.row;
-                int oldColumn = this.column;
 
                 this.row += copy.chars().filter(ch -> ch == '\n').count();
                 if (this.row != oldRow)
@@ -133,16 +152,23 @@ public final class LexTokenizer {
                     this.column += str.length();
 
                 // 构造词法元素
-                Range range = new Range(oldRow, oldColumn, this.row, this.column);
+                Range range = new Range(this.prevPosition, this.position());
                 token = new LexToken(type, str, range);
                 break;
             }
         }
 
-        // 如果无法与任何词法规则匹配则抛异常
-        if (token == null)
-            return new LexToken(ERROR, "" + text.charAt(this.pos), new Range(this.row, this.column, this.row, this.column));
+        // 如果无法与任何词法规则匹配则跳过一个字符，并返回ERROR
+        if (token == null) {
+            char ch = text.charAt(this.pos);
+            this.pos++;
+            this.column++;
 
+            Range range = new Range(this.prevPosition, this.position());
+            return new LexToken(ERROR, "" + ch, range);
+        }
+
+        // 如果这个词是透明的，则向调用者返回下一个词
         if (token.getType().transparent())
             return this.next();
 
@@ -154,27 +180,27 @@ public final class LexTokenizer {
      * 
      * @return 当前的快照
      */
-    public LexTokenizerSnapshot snapshot() {
-        return new LexTokenizerSnapshot(this, this.pos, this.row, this.column);
+    public Position position() {
+        return new Position(this.pos, this.row, this.column);
     }
 
     /**
      * 获取读取当前词之前的快照
      */
-    public LexTokenizerSnapshot prevSnapshot() {
-        return this.prevSnapshot;
+    public Position prevPosition() {
+        return this.prevPosition;
     }
 
     /**
      * 恢复指定的快照状态
      * 
-     * @param snapshot
+     * @param position
      *            要恢复的快照
      */
-    private void restore(LexTokenizerSnapshot snapshot) {
-        this.pos = snapshot.getPos();
-        this.row = snapshot.getRow();
-        this.column = snapshot.getColumn();
+    public void restore(Position position) {
+        this.pos = position.getPos();
+        this.row = position.getRow();
+        this.column = position.getColumn();
     }
 
     @Override

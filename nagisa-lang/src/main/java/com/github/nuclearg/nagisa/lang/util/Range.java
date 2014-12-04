@@ -1,5 +1,7 @@
 package com.github.nuclearg.nagisa.lang.util;
 
+import com.github.nuclearg.nagisa.lang.lexer.Position;
+
 /**
  * 表示范围
  * 
@@ -7,6 +9,15 @@ package com.github.nuclearg.nagisa.lang.util;
  *
  */
 public final class Range {
+    /**
+     * 起始位置
+     */
+    private final Position startPosition;
+    /**
+     * 结束位置
+     */
+    private final Position endPosition;
+
     /**
      * 起始行号
      */
@@ -24,11 +35,23 @@ public final class Range {
      */
     private final int endColumn;
 
-    public Range(int startRow, int startColumn, int endRow, int endColumn) {
-        this.startRow = startRow;
-        this.startColumn = startColumn;
-        this.endRow = endRow;
-        this.endColumn = endColumn;
+    public Range(Position startPosition, Position endPosition) {
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+        this.startRow = startPosition.getRow();
+        this.startColumn = startPosition.getColumn();
+        this.endRow = endPosition.getRow();
+        this.endColumn = endPosition.getColumn();
+    }
+
+    /** 起始位置 */
+    public Position getStartPosition() {
+        return this.startPosition;
+    }
+
+    /** 结束位置 */
+    public Position getEndPosition() {
+        return this.endPosition;
     }
 
     /** 起始行号 */

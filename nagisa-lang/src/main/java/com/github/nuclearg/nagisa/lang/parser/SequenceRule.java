@@ -6,9 +6,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.github.nuclearg.nagisa.lang.error.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
-import com.github.nuclearg.nagisa.lang.lexer.LexTokenizerSnapshot;
+import com.github.nuclearg.nagisa.lang.lexer.Position;
 
 /**
  * 表示或的语法关系
@@ -32,30 +33,30 @@ final class SequenceRule extends SyntaxRule {
     SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         List<SyntaxTreeNode> children = new ArrayList<>();
 
+        Position position = lexer.position();
         for (SyntaxRule rule : this.rules) {
-            LexTokenizerSnapshot snapshot = lexer.snapshot();
-
             // 尝试解析下一个元素
-            SyntaxTreeNode node = rule.parse(lexer, errorReporter);
+            SyntaxTreeNode node = this.tryParse(lexer, rule, errorReporter);
+
+            // 如果解析失败则报错返回
+            if (node == null) {
+                lexer.restore(position);
+                return null;
+            }
 
             // 正常情况，语法树节点成功构建
-            if (node != null) {
-                if (node.getRange() == null) // 这表示是一个空节点
-                    continue;
+            if (node.getRange() == null) // 这表示是一个空节点，忽略
+                continue;
 
-                /*
-                 * 把子节点挂到children里
-                 */
-                if (node.getToken() != null || node.getRuleName() != null)
-                    // 如果rule是ref或lex，则把节点挂到本节点的children里
-                    children.add(node);
-                else
-                    // 其它情况则忽略掉这一层节点，把里面的children直接提升成本节点的children
-                    children.addAll(node.getChildren());
-            } else {
-                // 错误处理，跳过当前的词向后看
-                errorReporter.error("语法子树构建失败。当前符号：" + lexer.peek() + ". 期望 " + rule, snapshot);
-            }
+            /*
+             * 把子节点挂到children里
+             */
+            if (node.getToken() != null || node.getRuleName() != null)
+                // 如果rule是ref或lex，则把节点挂到本节点的children里
+                children.add(node);
+            else
+                // 其它情况则忽略掉这一层节点，把里面的children直接提升成本节点的children
+                children.addAll(node.getChildren());
         }
 
         return new SyntaxTreeNode(this, children);

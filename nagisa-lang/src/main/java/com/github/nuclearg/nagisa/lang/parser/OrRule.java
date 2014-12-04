@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.github.nuclearg.nagisa.lang.error.Errors;
+import com.github.nuclearg.nagisa.lang.error.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
@@ -26,13 +28,12 @@ final class OrRule extends SyntaxRule {
     SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         // 需要根据下一个词法元素类型来选择使用哪一条规则
         LexToken token = lexer.peek();
-
         for (SyntaxRule rule : this.rules)
             if (rule.tryToken(token.getType()))
-                return rule.parse(lexer, errorReporter);
+                return tryParse(lexer, rule, errorReporter);
 
-        // 错误处理
-        errorReporter.error("找不到合适的语法规则，遇到意外的符号 " + token, lexer.snapshot());
+        // 没有规则支持当前的符号，报错返回
+        errorReporter.report(Errors.E0002, lexer.position(), token);
         return null;
     }
 

@@ -1,5 +1,6 @@
 package com.github.nuclearg.nagisa.lang.ast;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -26,11 +27,14 @@ public final class IfStmt extends Stmt {
      */
     private final List<Stmt> elseStmts;
 
-    IfStmt(SyntaxTreeNode node) {
-        this.condition = Expr.resolveExpr(node.getChildren().get(1));
+    IfStmt(SyntaxTreeNode node, Context ctx) {
+        this.condition = Expr.resolveExpr(node.getChildren().get(1), ctx);
 
-        this.thenStmts = Stmt.resolveStmts(node.getChildren().get(4).getChildren());
-        this.elseStmts = null;
+        this.thenStmts = Stmt.resolveStmts(node.getChildren().get(4).getChildren(), ctx);
+        if (!node.getChildren().get(6).getChildren().isEmpty())
+            this.elseStmts = Stmt.resolveStmts(node.getChildren().get(6).getChildren(), ctx);
+        else
+            this.elseStmts = Collections.emptyList();
     }
 
     /** 条件表达式 */
@@ -51,16 +55,14 @@ public final class IfStmt extends Stmt {
     @Override
     public String toString(String prefix) {
         StringBuilder builder = new StringBuilder();
-        builder.append(prefix).append("IF ").append(this.condition).append(" THEN");
-
-        if (this.thenStmts.size() == 1)
-            builder.append(" ").append(this.thenStmts.get(0));
-        else {
-            builder.append(SystemUtils.LINE_SEPARATOR);
-            for (Stmt stmt : this.thenStmts)
-                builder.append(stmt.toString(prefix + "    "));
-            builder.append(prefix).append("ENDIF").append(SystemUtils.LINE_SEPARATOR);
+        builder.append(prefix).append("IF ").append(this.condition).append(" THEN").append(SystemUtils.LINE_SEPARATOR);
+        this.thenStmts.stream().forEach(s -> builder.append(s.toString(prefix + "    ")));
+        if (!this.elseStmts.isEmpty()) {
+            builder.append(prefix).append("ELSE").append(SystemUtils.LINE_SEPARATOR);
+            this.elseStmts.stream().forEach(s -> builder.append(s.toString(prefix + "    ")));
         }
+
+        builder.append(prefix).append("ENDIF").append(SystemUtils.LINE_SEPARATOR);
 
         return builder.toString();
     }

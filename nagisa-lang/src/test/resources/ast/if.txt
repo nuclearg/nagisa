@@ -1,6 +1,6 @@
 if a>b then
 	let c = a+b
-endif
+end if
 
 if a<b then
 
@@ -8,21 +8,21 @@ if a<b then
 
 		if b==1 then
 
-		endif
+		end if
 
-	endif
+	end if
 
 else
 	if b>c then
 		if c>d then
 			let x=x+1
 		else
-		endif
-	endif
-endif
+		end if
+	end if
+end if
 
 if a>b then
 	let c=a+b
 else
 	let c=a+b
-endif
+end if

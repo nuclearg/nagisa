@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
+import com.github.nuclearg.nagisa.lang.lexer.Position;
 import com.github.nuclearg.nagisa.lang.util.Range;
 
 /**
@@ -50,12 +51,13 @@ public final class SyntaxTreeNode {
         this.token = null;
         this.children = Collections.unmodifiableList(children);
 
-        if (!this.children.isEmpty()) {
+        if (children.isEmpty())
+            this.range = new Range(Position.EMPTY, Position.EMPTY);
+        else {
             SyntaxTreeNode first = children.get(0);
             SyntaxTreeNode last = children.get(children.size() - 1);
-            this.range = new Range(first.range.getStartRow(), first.range.getStartColumn(), last.range.getEndRow(), last.range.getEndColumn());
-        } else
-            this.range = new Range(0, 0, 0, 0);
+            this.range = new Range(first.range.getStartPosition(), last.range.getEndPosition());
+        }
     }
 
     SyntaxTreeNode(NullRule rule) {

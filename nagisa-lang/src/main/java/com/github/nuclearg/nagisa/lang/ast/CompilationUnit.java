@@ -18,8 +18,8 @@ public class CompilationUnit {
      */
     private final List<Stmt> stmts;
 
-    CompilationUnit(SyntaxTreeNode node) {
-        this.stmts = Stmt.resolveStmts(node.getChildren());
+    CompilationUnit(SyntaxTreeNode node, Context ctx) {
+        this.stmts = Stmt.resolveStmts(node.getChildren(), ctx);
     }
 
     /**

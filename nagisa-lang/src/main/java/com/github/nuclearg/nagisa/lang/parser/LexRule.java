@@ -1,9 +1,12 @@
 package com.github.nuclearg.nagisa.lang.parser;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.github.nuclearg.nagisa.lang.error.Errors;
+import com.github.nuclearg.nagisa.lang.error.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
-import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition;
 
 /**
  * 对应一个词法单元的语法规则
@@ -23,23 +26,23 @@ final class LexRule extends SyntaxRule {
 
     @Override
     SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
-        LexToken token = lexer.next();
+        LexToken token = lexer.peek();
 
-        // 正常情况，词法分析器给出的词与期望的类型一致
-        if (token.getType() == this.tokenType)
-            return new SyntaxTreeNode(this, token);
+        // 如果词法分析器给出的词与期望的类型不一致则报错返回
+        if (token.getType() != this.tokenType) {
+            // 清理一下待输出的内容
+            String current = token.getText();
+            current = StringUtils.replace(current, "\r", "<CR>");
+            current = StringUtils.replace(current, "\n", "<LF>");
 
-        // 错误处理，遇到不匹配的词就直接忽略掉往后看
-        while (token.getType() != this.tokenType) {
-            errorReporter.error("遇到意外的符号 " + token + "，期望 " + this.tokenType, lexer.prevSnapshot());
+            String exptected = this.tokenType.literal() != null ? this.tokenType.literal() : this.tokenType.toString();
 
-            if (token.getType() == null)// EOF
-                return null;
-            if (token.getType() == NagisaLexDefinition.NagisaLexTokenType.EOL)// EOL
-                return null;
-
-            token = lexer.next();
+            errorReporter.report(Errors.E0001, lexer.prevPosition(), current, exptected);
+            return null;
         }
+
+        // 解析成功，返回语法树节点
+        lexer.next();
         return new SyntaxTreeNode(this, token);
     }
 

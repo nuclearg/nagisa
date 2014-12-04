@@ -15,6 +15,8 @@ import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
+import com.github.nuclearg.nagisa.lang.error.SyntaxErrorReporter;
+import com.github.nuclearg.nagisa.lang.identifier.IdentifierRegistry;
 import com.github.nuclearg.nagisa.lang.parser.NagisaSyntaxDefinition;
 import com.github.nuclearg.nagisa.lang.util.InputStreamUtils;
 
@@ -45,11 +47,18 @@ public class AstTest extends ParentRunner<File> {
 
             @Override
             public void evaluate() throws Throwable {
+                SyntaxErrorReporter errorReporter = new SyntaxErrorReporter();
+                IdentifierRegistry registry = new IdentifierRegistry(errorReporter);
+                Context ctx = new Context(registry, errorReporter);
+
                 InputStream is = new FileInputStream(child);
 
                 String code = InputStreamUtils.read(is, Charset.forName("utf-8"));
 
-                CompilationUnit cu = new CompilationUnit(NagisaSyntaxDefinition.parse(code));
+                System.out.println("===== " + child.getName() + " =====");
+                System.out.println(code);
+
+                CompilationUnit cu = new CompilationUnit(NagisaSyntaxDefinition.parse(code), ctx);
 
                 System.out.println(cu);
             }

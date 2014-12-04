@@ -1,5 +1,6 @@
 package com.github.nuclearg.nagisa.lang.parser;
 
+import com.github.nuclearg.nagisa.lang.error.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
 import com.github.nuclearg.nagisa.lang.util.NagisaException;
@@ -40,6 +41,10 @@ final class RefRule extends SyntaxRule {
     @Override
     SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         SyntaxTreeNode node = this.rule().parse(lexer, errorReporter);
+
+        if (node == null)
+            return null;
+
         if (node.getRuleName() != null)
             return node;
         else

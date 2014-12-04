@@ -22,9 +22,9 @@ public final class WhileStmt extends Stmt {
      */
     private final List<Stmt> stmts;
 
-    WhileStmt(SyntaxTreeNode node) {
-        this.condition = Expr.resolveExpr(node.getChildren().get(1));
-        this.stmts = Stmt.resolveStmts(node.getChildren().get(3).getChildren());
+    WhileStmt(SyntaxTreeNode node, Context ctx) {
+        this.condition = Expr.resolveExpr(node.getChildren().get(1), ctx);
+        this.stmts = Stmt.resolveStmts(node.getChildren().get(3).getChildren(), ctx);
     }
 
     /** 循环判断条件 */
@@ -41,8 +41,7 @@ public final class WhileStmt extends Stmt {
     public String toString(String prefix) {
         StringBuilder builder = new StringBuilder();
         builder.append(prefix).append("WHILE ").append(this.condition).append(SystemUtils.LINE_SEPARATOR);
-        for (Stmt stmt : this.stmts)
-            builder.append(stmt.toString(prefix + "    "));
+        this.stmts.stream().forEach(s -> builder.append(s.toString(prefix + "    ")));
         builder.append(prefix).append("WEND").append(SystemUtils.LINE_SEPARATOR);
         return builder.toString();
     }

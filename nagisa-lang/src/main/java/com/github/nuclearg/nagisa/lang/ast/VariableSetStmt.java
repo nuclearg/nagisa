@@ -20,9 +20,13 @@ public final class VariableSetStmt extends Stmt {
      */
     private final Expr expr;
 
-    VariableSetStmt(SyntaxTreeNode node) {
+    VariableSetStmt(SyntaxTreeNode node, Context ctx) {
         this.symbol = node.getChildren().get(1).getToken().getText();
-        this.expr = Expr.resolveExpr(node.getChildren().get(3));
+        this.expr = Expr.resolveExpr(node.getChildren().get(3), ctx);
+
+        // 注册变量名
+        if (this.expr != null)
+            ctx.registry.registerVariableInfo(this.symbol, this.expr.getType(), node.getRange().getStartPosition());
     }
 
     /** 变量名 */

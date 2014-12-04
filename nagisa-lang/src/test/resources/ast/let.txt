@@ -8,16 +8,16 @@ let c=((((a))+((b))))
 let d=a+b*c-d
 let e=(a+b)*(c-d)%f
 
-let a$="asdf"
-let b$="ddd" +( "asdf")
-let c$=a$+b$
+let a="asdf"
+let b="ddd" +( "asdf")
+let c=a+b
 
 let a=rnd()
-let a$=test$()
+let a=test()
 let a=(rnd())
-let a$=left$(a$)
+let a=left(a)
 let a=(foo(a,b,c))
-let a$=foo$(a$,b,c$)
+let a=foo(a,b, c)
 
 
 

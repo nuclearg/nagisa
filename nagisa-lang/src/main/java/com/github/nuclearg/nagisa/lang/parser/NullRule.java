@@ -1,5 +1,6 @@
 package com.github.nuclearg.nagisa.lang.parser;
 
+import com.github.nuclearg.nagisa.lang.error.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
 

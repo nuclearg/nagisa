@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.github.nuclearg.nagisa.lang.error.Errors;
+import com.github.nuclearg.nagisa.lang.identifier.FunctionIdentifierInfo;
+import com.github.nuclearg.nagisa.lang.identifier.IdentifierType;
+import com.github.nuclearg.nagisa.lang.identifier.VariableIdentifierInfo;
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
 import com.github.nuclearg.nagisa.lang.lexer.NagisaLexDefinition.NagisaLexTokenType;
 import com.github.nuclearg.nagisa.lang.parser.SyntaxTreeNode;
@@ -28,7 +32,7 @@ public final class Expr {
     /**
      * 表达式类型
      */
-    private final ExprType type;
+    private final IdentifierType type;
     /**
      * 表达式运算符
      */
@@ -47,7 +51,7 @@ public final class Expr {
      */
     private final boolean priorityRedefined;
 
-    private Expr(ExprType type, ExprOperator operator, String text) {
+    private Expr(IdentifierType type, ExprOperator operator, String text) {
         this.type = type;
         this.operator = operator;
         this.text = text;
@@ -55,7 +59,7 @@ public final class Expr {
         this.priorityRedefined = false;
     }
 
-    private Expr(ExprType type, ExprOperator operator, String text, Expr child) {
+    private Expr(IdentifierType type, ExprOperator operator, String text, Expr child) {
         this.type = type;
         this.operator = operator;
         this.text = text;
@@ -63,7 +67,7 @@ public final class Expr {
         this.priorityRedefined = false;
     }
 
-    private Expr(ExprType type, ExprOperator operator, String text, Expr left, Expr right) {
+    private Expr(IdentifierType type, ExprOperator operator, String text, Expr left, Expr right) {
         this.type = type;
         this.operator = operator;
         this.text = text;
@@ -71,7 +75,7 @@ public final class Expr {
         this.priorityRedefined = false;
     }
 
-    public Expr(ExprType exprType, ExprOperator operator, String text, List<Expr> children) {
+    public Expr(IdentifierType exprType, ExprOperator operator, String text, List<Expr> children) {
         this.type = exprType;
         this.operator = operator;
         this.text = text;
@@ -84,11 +88,11 @@ public final class Expr {
         this.operator = expr.operator;
         this.text = expr.text;
         this.children = expr.children;
-        this.priorityRedefined = true;
+        this.priorityRedefined = priorityRedefined;
     }
 
     /** 表达式类型 */
-    public ExprType getType() {
+    public IdentifierType getType() {
         return this.type;
     }
 
@@ -136,9 +140,11 @@ public final class Expr {
      * 
      * @param node
      *            表示表达式的语法节点
+     * @param ctx
+     *            上下文
      * @return 表达式语法树
      */
-    static Expr resolveExpr(SyntaxTreeNode node) {
+    static Expr resolveExpr(SyntaxTreeNode node, Context ctx) {
         LexToken firstToken = null;
         if (node.getChildren().size() > 1)
             firstToken = node.getChildren().get(0).getToken();
@@ -146,75 +152,77 @@ public final class Expr {
         // 判断表达式有几个组成部分
         switch (node.getChildren().size()) {
             case 0:
-                return resolveNoneParamExpr(node);
+                return resolveNoneParamExpr(node, ctx);
             case 1:
-                return resolveExpr(node.getChildren().get(0));
+                return resolveExpr(node.getChildren().get(0), ctx);
             case 2:
-                return resolveSingleParamExpr(node);
+                return resolveSingleParamExpr(node, ctx);
             case 3:
                 // 判断是双目运算符还是括号表达式
                 if (firstToken != null && firstToken.getType() == NagisaLexTokenType.SYMBOL_PARENTHESE_LEFT)
-                    return resolveParentheseExpr(node);
+                    return resolveParentheseExpr(node, ctx);
                 else
-                    return resolveDoubleParamExpr(node);
+                    return resolveDoubleParamExpr(node, ctx);
             case 4:
-                return resolveFunctionCallExpr(node);
+                return resolveFunctionCallExpr(node, ctx);
             default:
                 throw new UnsupportedOperationException("node: " + node);
         }
     }
 
-    private static Expr resolveNoneParamExpr(SyntaxTreeNode node) {
+    private static Expr resolveNoneParamExpr(SyntaxTreeNode node, Context ctx) {
         LexToken token = node.getToken();
         String text = token.getText();
 
         switch ((NagisaLexTokenType) token.getType()) {
             case LITERAL_INTEGER:
-                return new Expr(ExprType.Integer, ExprOperator.IntegerLiteral, text);
-            case IDENTIFIER_INTEGER:
-                return new Expr(ExprType.Integer, ExprOperator.IntegerVariableRef, text);
+                return new Expr(IdentifierType.INTEGER, ExprOperator.IntegerLiteral, text);
             case LITERAL_STRING:
-                return new Expr(ExprType.String, ExprOperator.StringLiteral, text);
-            case IDENTIFIER_STRING:
-                return new Expr(ExprType.String, ExprOperator.StringVariableRef, text);
+                return new Expr(IdentifierType.STRING, ExprOperator.StringLiteral, text);
+            case IDENTIFIER:
+                VariableIdentifierInfo info = ctx.registry.queryVariableInfo(text, node.getRange().getStartPosition());
+                if (info == null)
+                    return null;
+                return new Expr(info.getType(), ExprOperator.VariableRef, text);
             default:
                 throw new UnsupportedOperationException(token.toString());
         }
     }
 
-    private static Expr resolveSingleParamExpr(SyntaxTreeNode node) {
+    private static Expr resolveSingleParamExpr(SyntaxTreeNode node, Context ctx) {
         LexToken opToken = node.getChildren().get(0).getToken();
-        Expr param = resolveExpr(node.getChildren().get(1));
+        Expr param = resolveExpr(node.getChildren().get(1), ctx);
+
+        if (param == null)
+            return null;
 
         switch ((NagisaLexTokenType) opToken.getType()) {
             case SYMBOL_SUB:
-                return new Expr(ExprType.Integer, ExprOperator.IntegerNegative, opToken.getText(), param);
+                if (param.type != IdentifierType.INTEGER)
+                    ctx.errorReporter.report(Errors.E1004, node.getRange().getStartPosition(), IdentifierType.INTEGER, param.type);
+                return new Expr(IdentifierType.INTEGER, ExprOperator.IntegerNegative, opToken.getText(), param);
             case SYMBOL_NOT:
-                return new Expr(ExprType.Boolean, ExprOperator.BooleanNot, opToken.getText(), param);
+                if (param.type != IdentifierType.STRING)
+                    ctx.errorReporter.report(Errors.E1004, node.getRange().getStartPosition(), IdentifierType.BOOLEAN, param.type);
+                return new Expr(IdentifierType.BOOLEAN, ExprOperator.BooleanNot, opToken.getText(), param);
             default:
                 throw new UnsupportedOperationException("token: " + opToken + ", node: " + node);
         }
     }
 
-    private static Expr resolveDoubleParamExpr(SyntaxTreeNode node) {
-        Expr left;
-        LexToken opToken;
-        Expr right;
+    private static Expr resolveDoubleParamExpr(SyntaxTreeNode node, Context ctx) {
+        Expr left = resolveExpr(node.getChildren().get(0), ctx);
+        LexToken opToken = node.getChildren().get(1).getToken();
+        Expr right = resolveExpr(node.getChildren().get(2), ctx);
 
-        if (node.getChildren().size() == 3) {
-            // 用三个节点承载一个双目运算符
-            left = resolveExpr(node.getChildren().get(0));
-            opToken = node.getChildren().get(1).getToken();
-            right = resolveExpr(node.getChildren().get(2));
-        } else {
-            // 用两个节点承载一个双目运算符，运算符位于第二个节点的第一个位置
-            SyntaxTreeNode node2 = node.getChildren().get(1);
-            if (node2.getChildren().size() != 2)
-                throw new UnsupportedOperationException("node: " + node);
+        if (left == null || right == null)
+            return null;
 
-            left = resolveExpr(node.getChildren().get(0));
-            opToken = node2.getChildren().get(0).getToken();
-            right = resolveExpr(node2.getChildren().get(1));
+        // 判断两个表达式的类型是否一致
+        // TODO 隐式类型转换
+        if (left.type != right.type) {
+            ctx.errorReporter.report(Errors.E1005, node.getRange().getStartPosition(), left.type, right.type);
+            return null;
         }
 
         // 根据表达式类型从表中获取对应的表达式运算符
@@ -222,30 +230,26 @@ public final class Expr {
         if (array == null)
             throw new UnsupportedOperationException("token: " + opToken + ", node: " + node);
 
-        ExprType type = left.type;
-        ExprOperator op;
-        switch (type) {
-            case Integer:
-                op = array[0];
-                break;
-            case String:
-                op = array[1];
-                break;
-            case Boolean:
-                op = array[2];
-                break;
-            default:
-                throw new UnsupportedOperationException(type.toString());
-        }
+        IdentifierType type = left.type;
+        ExprOperator op = null;
+
+        if (type == IdentifierType.INTEGER)
+            op = array[0];
+        if (type == IdentifierType.STRING)
+            op = array[1];
+        if (type == IdentifierType.BOOLEAN)
+            op = array[2];
 
         if (op == null)
-            throw new UnsupportedOperationException("token: " + opToken + ", type: " + type + ", node: " + node);
+            ctx.errorReporter.report(Errors.E1006, node.getRange().getStartPosition(), type, opToken.getText());
 
         return new Expr(type, op, opToken.getText(), left, right);
     }
 
-    private static Expr resolveParentheseExpr(SyntaxTreeNode node) {
-        Expr expr = resolveExpr(node.getChildren().get(1));
+    private static Expr resolveParentheseExpr(SyntaxTreeNode node, Context ctx) {
+        Expr expr = resolveExpr(node.getChildren().get(1), ctx);
+        if (expr == null)
+            return null;
 
         // 如果expr是字面量则把括号去掉（因为毫无意义）
         if (expr.children.isEmpty())
@@ -254,27 +258,40 @@ public final class Expr {
         return new Expr(expr, true);
     }
 
-    private static Expr resolveFunctionCallExpr(SyntaxTreeNode node) {
-        LexToken funcNameToken = node.getChildren().get(0).getToken();
-
-        ExprType exprType;
-        if (funcNameToken.getType() == NagisaLexTokenType.IDENTIFIER_INTEGER)
-            exprType = ExprType.Integer;
-        else if (funcNameToken.getType() == NagisaLexTokenType.IDENTIFIER_STRING)
-            exprType = ExprType.String;
-        else
-            throw new UnsupportedOperationException("expr type: " + funcNameToken.getType() + ", node: " + node);
-
+    private static Expr resolveFunctionCallExpr(SyntaxTreeNode node, Context ctx) {
         // 函数名
         String name = node.getChildren().get(0).getToken().getText();
         // 参数列表
         List<SyntaxTreeNode> argNodes = node.getChildren().get(2).getChildren();
         List<Expr> args = argNodes.stream()
                 .map(n -> "RestArgument".equals(n.getRuleName()) ? n.getChildren().get(1) : n)
-                .map(n -> resolveExpr(n))
+                .map(n -> resolveExpr(n, ctx))
                 .collect(Collectors.toList());
 
-        return new Expr(exprType, ExprOperator.FunctionInvocation, name, args);
+        FunctionIdentifierInfo info = ctx.registry.queryFunctionInfo(name, node.getRange().getStartPosition());
+        if (info == null)
+            return null;
+
+        // 不能以表达式的方式调用方法
+        if (info.getType() == IdentifierType.VOID) {
+            ctx.errorReporter.report(Errors.E2003, node.getRange().getStartPosition(), info.getName());
+            return null;
+        }
+
+        // 检查形参和实参的数量是否匹配
+        if (args.size() != info.getParameters().size()) {
+            ctx.errorReporter.report(Errors.E2004, node.getRange().getStartPosition(), info.getName());
+            return null;
+        }
+
+        // 检查形参和实参的类型是否匹配
+        for (int i = 0; i < args.size(); i++)
+            if (args.get(i).type != info.getParameters().get(i).getType()) {
+                ctx.errorReporter.report(Errors.E2005, node.getRange().getStartPosition(), info.getName(), i, info.getParameters().get(i), args.get(i).type);
+                return null;
+            }
+
+        return new Expr(info.getType(), ExprOperator.FunctionInvocation, info.getName(), args);
     }
 
     static {

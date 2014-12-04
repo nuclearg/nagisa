@@ -11,10 +11,8 @@ public enum ExprOperator {
     IntegerLiteral,
     /** 字符串字面量 */
     StringLiteral,
-    /** 整数变量引用 */
-    IntegerVariableRef,
-    /** 字符串变量引用 */
-    StringVariableRef,
+    /** 变量引用 */
+    VariableRef,
 
     /** 整数取负 */
     IntegerNegative,

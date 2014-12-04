@@ -1,0 +1,11 @@
+let a = asdf()
+print asdf()
+
+
+function asdf() as integer
+	return r
+end function
+
+sub print()
+	print asdf
+end sub

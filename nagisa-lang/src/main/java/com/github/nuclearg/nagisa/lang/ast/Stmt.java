@@ -32,10 +32,12 @@ public abstract class Stmt {
      * 
      * @param nodes
      *            语法节点列表
+     * @param ctx
+     *            上下文
      * @return 语句列表
      */
-    static List<Stmt> resolveStmts(List<SyntaxTreeNode> nodes) {
-        return nodes.stream().map(n -> resolveStmt(n)).collect(Collectors.toList());
+    static List<Stmt> resolveStmts(List<SyntaxTreeNode> nodes, Context ctx) {
+        return nodes.stream().map(n -> resolveStmt(n, ctx)).collect(Collectors.toList());
     }
 
     /**
@@ -43,26 +45,40 @@ public abstract class Stmt {
      * 
      * @param node
      *            语法节点
+     * @param ctx
+     *            上下文
      * @return 语句
      */
-    private static Stmt resolveStmt(SyntaxTreeNode node) {
+    private static Stmt resolveStmt(SyntaxTreeNode node, Context ctx) {
         switch (node.getRuleName()) {
             case "EmptyStmt":
                 return new EmptyStmt();
             case "VariableSetStmt":
-                return new VariableSetStmt(node);
+                return new VariableSetStmt(node, ctx);
             case "IfStmt":
-                return new IfStmt(node);
+                return new IfStmt(node, ctx);
             case "ForStmt":
-                return new ForStmt(node);
+                return new ForStmt(node, ctx);
             case "WhileStmt":
-                return new WhileStmt(node);
+                return new WhileStmt(node, ctx);
             case "BreakStmt":
                 return new BreakStmt();
             case "ContinueStmt":
                 return new ContinueStmt();
+            case "CallSubStmt":
+                return new CallSubStmt(node, ctx);
+            case "DefineVariableStmt":
+                return new DefineVariableStmt(node, ctx);
+            case "DefineFunctionStmt":
+            case "DefineSubStmt":
+                return new DefineFunctionStmt(node, ctx);
+            case "DefineNativeFunctionStmt":
+            case "DefineNativeSubStmt":
+                return new DefineNativeFunctionStmt(node, ctx);
+            case "ReturnStmt":
+                return new ReturnStmt(node, ctx);
             default:
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException(node.getRuleName() + ", node: " + node);
         }
     }
 }

@@ -3,6 +3,7 @@ package com.github.nuclearg.nagisa.lang.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.nuclearg.nagisa.lang.error.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.lang.lexer.LexToken;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.lang.lexer.LexTokenizer;
@@ -33,7 +34,7 @@ final class RepeatRule extends SyntaxRule {
 
             // 判断这个词是否可以被规则接收
             if (this.rule.tryToken(token.getType()))
-                children.add(this.rule.parse(lexer, errorReporter));
+                children.add(this.tryParse(lexer, rule, errorReporter));
             else
                 break;
         }

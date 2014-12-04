@@ -6,11 +6,9 @@ package com.github.nuclearg.nagisa.lang.lexer;
  * @author ng
  *
  */
-public final class LexTokenizerSnapshot {
-    /**
-     * 词法解析器实例
-     */
-    private final LexTokenizer host;
+public final class Position {
+    public static final Position EMPTY = new Position(0, 0, 0);
+
     /**
      * 当前位置
      */
@@ -24,16 +22,10 @@ public final class LexTokenizerSnapshot {
      */
     private final int column;
 
-    LexTokenizerSnapshot(LexTokenizer host, int pos, int row, int column) {
-        this.host = host;
+    Position(int pos, int row, int column) {
         this.pos = pos;
         this.row = row;
         this.column = column;
-    }
-
-    /** 词法解析器实例 */
-    public LexTokenizer getHost() {
-        return this.host;
     }
 
     /** 当前位置 */
