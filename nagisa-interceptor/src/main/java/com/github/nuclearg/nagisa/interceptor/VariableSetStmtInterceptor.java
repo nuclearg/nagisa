@@ -26,7 +26,7 @@ class VariableSetStmtInterceptor extends StmtInterceptor {
     @Override
     public void eval(Context ctx) {
         Value value = expr.eval(ctx);
-        ctx.setValue(this.variableName, value);
+        ctx.setVariableValue(this.variableName, value);
     }
 
 }

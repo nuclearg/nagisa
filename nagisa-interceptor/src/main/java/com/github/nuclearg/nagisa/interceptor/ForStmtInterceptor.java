@@ -38,9 +38,9 @@ class ForStmtInterceptor extends StmtInterceptor {
     @Override
     public void eval(Context ctx) {
         long value = this.initValue.eval(ctx).getIntegerValue();
-        ctx.setIntegerValue(this.iteratorVariableName, value);
+        ctx.setVariableValue(this.iteratorVariableName, new Value(value));
 
-        while (ctx.getIntegerValue(this.iteratorVariableName) < this.targetValue.eval(ctx).getIntegerValue())
+        while (ctx.getIntegerVariableValue(this.iteratorVariableName) < this.targetValue.eval(ctx).getIntegerValue())
             StmtInterceptor.eval(this.stmts, ctx);
     }
 

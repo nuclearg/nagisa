@@ -50,12 +50,10 @@ class ExprInterceptor {
         switch (this.operator) {
             case IntegerLiteral:
                 return new Value(NumberUtils.toLong(this.text));
-            case IntegerVariableRef:
-                return new Value(ctx.getIntegerValue(this.text));
             case StringLiteral:
                 return new Value(this.text);
-            case StringVariableRef:
-                return new Value(ctx.getStringValue(this.text));
+            case VariableRef:
+                return new Value(ctx.getIntegerVariableValue(this.text));
 
             case IntegerNegative:
                 return new Value(0 - int0);
@@ -108,7 +106,7 @@ class ExprInterceptor {
                 return new Value(bool0 || bool1);
             case BooleanXor:
                 return new Value(bool0 != bool1);
-                
+
             case FunctionInvocation:
                 return null;
 

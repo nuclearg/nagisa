@@ -16,6 +16,8 @@ public final class Interceptor {
      *            待执行的程序
      */
     public void eval(CompilationUnit cu) {
-        new CompilationUnitInterceptor(cu).eval(new Context());
+        RuntimeErrorReporter errorReporter = new RuntimeErrorReporter();
+
+        new CompilationUnitInterceptor(cu).eval(new Context(errorReporter));
     }
 }

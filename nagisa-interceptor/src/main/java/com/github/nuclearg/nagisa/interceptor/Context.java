@@ -10,41 +10,47 @@ import java.util.Map;
  *
  */
 class Context {
-    private final Map<String, Long> integerMap = new HashMap<>();
-    private final Map<String, String> stringMap = new HashMap<>();
+    /**
+     * 运行时错误报告器
+     */
+    private final RuntimeErrorReporter errorReporter;
+    /**
+     * 变量表
+     */
+    private final Map<String, Value> variableMap = new HashMap<>();
 
-    long getIntegerValue(String name) {
-        if (this.integerMap.get(name) == null)
-            this.integerMap.put(name, 0L);
-
-        return this.integerMap.get(name);
+    Context(RuntimeErrorReporter errorReporter) {
+        this.errorReporter = errorReporter;
     }
 
-    void setIntegerValue(String name, long value) {
-        this.integerMap.put(name, value);
-    }
-
-    String getStringValue(String name) {
-        if (this.stringMap.get(name) == null)
-            this.stringMap.put(name, "");
-
-        return this.stringMap.get(name);
-    }
-
-    void setStringValue(String name, String value) {
-        this.stringMap.put(name, value);
-    }
-
-    void setValue(String name, Value value) {
-        switch (value.getType()) {
-            case Integer:
-                setIntegerValue(name, value.getIntegerValue());
-                break;
-            case String:
-                setStringValue(name, value.getStringValue());
-                break;
-            default:
-                throw new UnsupportedOperationException("value: " + value);
+    long getIntegerVariableValue(String name) {
+        if (!this.variableMap.containsKey(name)) {
+            errorReporter.report("变量不存在");
+            return 0;
         }
+
+        return this.variableMap.get(name).getIntegerValue();
+    }
+
+    String getStringVariableValue(String name) {
+        if (!this.variableMap.containsKey(name)) {
+            errorReporter.report("变量不存在");
+            return "";
+        }
+
+        return this.variableMap.get(name).getStringValue();
+    }
+
+    boolean getBooleanVariableValue(String name) {
+        if (!this.variableMap.containsKey(name)) {
+            errorReporter.report("变量不存在");
+            return false;
+        }
+
+        return this.variableMap.get(name).getBooleanValue();
+    }
+
+    void setVariableValue(String name, Value value) {
+        this.variableMap.put(name, value);
     }
 }
