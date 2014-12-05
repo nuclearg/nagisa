@@ -15,8 +15,9 @@
     </properties>
 
     <modules>
-        <module>nagisa-lang</module>
+        <module>nagisa-frontend</module>
         <module>nagisa-interceptor</module>
+        <module>nagisa-rtlib</module>
     </modules>
 
     <dependencyManagement>
