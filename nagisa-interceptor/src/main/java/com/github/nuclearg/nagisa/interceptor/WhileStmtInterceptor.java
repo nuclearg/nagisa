@@ -2,7 +2,7 @@ package com.github.nuclearg.nagisa.interceptor;
 
 import java.util.List;
 
-import com.github.nuclearg.nagisa.lang.ast.WhileStmt;
+import com.github.nuclearg.nagisa.frontend.ast.WhileStmt;
 
 /**
  * while循环语句的解释器

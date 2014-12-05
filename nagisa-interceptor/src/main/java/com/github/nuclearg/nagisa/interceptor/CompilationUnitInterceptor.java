@@ -2,7 +2,7 @@ package com.github.nuclearg.nagisa.interceptor;
 
 import java.util.List;
 
-import com.github.nuclearg.nagisa.lang.ast.CompilationUnit;
+import com.github.nuclearg.nagisa.frontend.ast.CompilationUnit;
 
 /**
  * 整篇程序的解释器

@@ -1,6 +1,6 @@
 package com.github.nuclearg.nagisa.interceptor;
 
-import com.github.nuclearg.nagisa.lang.identifier.IdentifierType;
+import com.github.nuclearg.nagisa.frontend.identifier.IdentifierType;
 
 /**
  * 解释器中各个表达式运算出的值

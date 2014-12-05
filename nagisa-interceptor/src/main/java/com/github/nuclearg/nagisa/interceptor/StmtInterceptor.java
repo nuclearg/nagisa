@@ -3,7 +3,7 @@ package com.github.nuclearg.nagisa.interceptor;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.nuclearg.nagisa.lang.ast.Stmt;
+import com.github.nuclearg.nagisa.frontend.ast.Stmt;
 
 /**
  * 语句的解释器

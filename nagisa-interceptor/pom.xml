@@ -12,7 +12,7 @@
 	<version>${nagisa.version}</version>
 
 	<packaging>jar</packaging>
-	<name>nagisa-lang</name>
+	<name>nagisa-interceptor</name>
 
 	<dependencies>
 		<!-- nagisa -->

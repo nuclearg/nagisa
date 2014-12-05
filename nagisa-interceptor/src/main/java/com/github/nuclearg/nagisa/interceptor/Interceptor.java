@@ -1,6 +1,6 @@
 package com.github.nuclearg.nagisa.interceptor;
 
-import com.github.nuclearg.nagisa.lang.ast.CompilationUnit;
+import com.github.nuclearg.nagisa.frontend.ast.CompilationUnit;
 
 /**
  * 解释器

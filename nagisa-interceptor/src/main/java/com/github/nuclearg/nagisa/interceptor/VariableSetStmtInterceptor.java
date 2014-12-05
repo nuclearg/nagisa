@@ -1,6 +1,6 @@
 package com.github.nuclearg.nagisa.interceptor;
 
-import com.github.nuclearg.nagisa.lang.ast.VariableSetStmt;
+import com.github.nuclearg.nagisa.frontend.ast.VariableSetStmt;
 
 /**
  * 赋值循环语句的解释器

@@ -7,8 +7,8 @@ import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import com.github.nuclearg.nagisa.lang.ast.Expr;
-import com.github.nuclearg.nagisa.lang.ast.ExprOperator;
+import com.github.nuclearg.nagisa.frontend.ast.Expr;
+import com.github.nuclearg.nagisa.frontend.ast.ExprOperator;
 
 /**
  * 表达式的解释器
