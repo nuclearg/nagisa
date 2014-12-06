@@ -91,7 +91,7 @@ public class IdentifierRegistry {
      */
     public void registerFunctionInfo(String name, IdentifierType type, List<VariableIdentifierInfo> parameters, SyntaxTreeNode node) {
         if (this.functionMap.containsKey(name.toUpperCase()))
-            errorReporter.report(node, Errors.E1003, name);
+            errorReporter.report(node, Errors.E1004, name);
         else
             this.functionMap.put(name.toUpperCase(), new FunctionIdentifierInfo(name, type, parameters));
     }

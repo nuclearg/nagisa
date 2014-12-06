@@ -254,26 +254,27 @@ public final class Expr {
                 .collect(Collectors.toList());
 
         FunctionIdentifierInfo info = ctx.registry.queryFunctionInfo(name);
-        if (info == null)
+        if (info == null) {
             ctx.errorReporter.report(node, Errors.E1003, name);
-        else {
-            /*
-             * 进行一些检查
-             */
-
-            // 不能以表达式的方式调用方法
-            if (info.getType() == IdentifierType.VOID)
-                ctx.errorReporter.report(node, Errors.E2003, info.getName());
-
-            // 检查形参和实参的数量是否匹配
-            if (args.size() != info.getParameters().size())
-                ctx.errorReporter.report(node, Errors.E2004, info.getName(), info.getParameters().size(), args.size());
-            else
-                // 检查形参和实参的类型是否匹配
-                for (int i = 0; i < args.size(); i++)
-                    if (args.get(i).type != info.getParameters().get(i).getType())
-                        ctx.errorReporter.report(node, Errors.E2005, info.getName(), i, info.getParameters().get(i).getName(), info.getParameters().get(i).getType(), args.get(i).type);
+            return null;
         }
+
+        /*
+         * 进行一些检查
+         */
+
+        // 不能以表达式的方式调用方法
+        if (info.getType() == IdentifierType.VOID)
+            ctx.errorReporter.report(node, Errors.E2003, info.getName());
+
+        // 检查形参和实参的数量是否匹配
+        if (args.size() != info.getParameters().size())
+            ctx.errorReporter.report(node, Errors.E2004, info.getName(), info.getParameters().size(), args.size());
+        else
+            // 检查形参和实参的类型是否匹配
+            for (int i = 0; i < args.size(); i++)
+                if (args.get(i).type != info.getParameters().get(i).getType())
+                    ctx.errorReporter.report(node, Errors.E2005, info.getName(), i, info.getParameters().get(i).getName(), info.getParameters().get(i).getType(), args.get(i).type);
 
         return new Expr(info.getType(), ExprOperator.FunctionInvocation, info.getName(), args);
     }

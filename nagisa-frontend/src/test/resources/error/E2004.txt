@@ -1,0 +1,4 @@
+asdf
+
+sub asdf(a as integer)
+end sub

@@ -1,0 +1,4 @@
+let a = asdf()
+
+function asdf(a as integer) as integer
+end function
