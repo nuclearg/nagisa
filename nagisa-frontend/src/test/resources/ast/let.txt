@@ -17,12 +17,16 @@ let f=1==0
 let aaa=t&&f
 let aaa=t||f
 
-let a=rnd()
-let a=test()
-let a=(rnd())
-let a=left(a)
-let a=(foo(a,b,c))
-let a=foo(a,b, c)
+let a=func1()
+let a=(func1())
+let a=func2(a)
+let a = func1() * func2(a) + func2(func2(func2(1)))
+let a = ((((func1()*func2(func1())))))
 
 
+function func1() as integer
+end function
+
+function func2(a as integer) as integer
+end function
 

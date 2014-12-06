@@ -1,12 +1,8 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
-import com.github.nuclearg.nagisa.frontend.identifier.IdentifierType;
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
 /**
@@ -15,19 +11,7 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public class DefineNativeFunctionStmt extends Stmt {
-    /**
-     * 函数名
-     */
-    private final String name;
-    /**
-     * 返回类型
-     */
-    private final IdentifierType type;
-    /**
-     * 形参列表
-     */
-    private final List<String> parameters;
+public final class DefineNativeFunctionStmt extends DefineFunctionStmtBase {
     /**
      * 对应的java类名
      */
@@ -38,9 +22,8 @@ public class DefineNativeFunctionStmt extends Stmt {
     private final String javaMethodName;
 
     DefineNativeFunctionStmt(SyntaxTreeNode node, Context ctx) {
-        this.name = node.getChildren().get(1).getToken().getText();
-        this.type = null;
-        this.parameters = Collections.emptyList();
+        super(node, ctx);
+
         this.javaClassName = "aaa";
         this.javaMethodName = "asdfasdf";
     }
@@ -48,8 +31,8 @@ public class DefineNativeFunctionStmt extends Stmt {
     @Override
     protected String toString(String prefix) {
         return prefix + "NATIVEFUNCTION " + this.name + " (" + StringUtils.join(this.parameters, ", ") + ") AS " + this.type + SystemUtils.LINE_SEPARATOR
-                + prefix + "    " + this.javaClassName + SystemUtils.LINE_SEPARATOR
-                + prefix + "    " + this.javaMethodName + SystemUtils.LINE_SEPARATOR
+                + prefix + "    \"" + this.javaClassName + "\"" + SystemUtils.LINE_SEPARATOR
+                + prefix + "    \"" + this.javaMethodName + "\"" + SystemUtils.LINE_SEPARATOR
                 + prefix + "END FUNCTION" + SystemUtils.LINE_SEPARATOR;
     }
 }

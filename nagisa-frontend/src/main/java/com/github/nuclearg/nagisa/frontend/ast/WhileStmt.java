@@ -1,7 +1,5 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
-import java.util.List;
-
 import org.apache.commons.lang3.SystemUtils;
 
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
@@ -12,7 +10,7 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class WhileStmt extends Stmt {
+public final class WhileStmt extends Stmt implements StmtBlockSupported {
     /**
      * 循环判断条件
      */
@@ -20,11 +18,11 @@ public final class WhileStmt extends Stmt {
     /**
      * 循环体
      */
-    private final List<Stmt> stmts;
+    private final StmtBlock stmts;
 
     WhileStmt(SyntaxTreeNode node, Context ctx) {
         this.condition = Expr.resolveExpr(node.getChildren().get(1), ctx);
-        this.stmts = Stmt.resolveStmts(node.getChildren().get(3).getChildren(), ctx);
+        this.stmts = new StmtBlock(node.getChildren().get(3).getChildren(), ctx);
     }
 
     /** 循环判断条件 */
@@ -38,9 +36,14 @@ public final class WhileStmt extends Stmt {
     }
 
     @Override
+    public void initStmtBlock() {
+        this.stmts.init();
+    }
+
+    @Override
     public String toString(String prefix) {
         return prefix + "WHILE " + this.condition + SystemUtils.LINE_SEPARATOR
-                + Stmt.toString(this.stmts, prefix + "    ")
+                + this.stmts.toString(prefix + "    ")
                 + prefix + "END WHILE" + SystemUtils.LINE_SEPARATOR;
     }
 }

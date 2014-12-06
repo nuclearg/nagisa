@@ -1,7 +1,6 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.commons.lang3.SystemUtils;
 
@@ -13,7 +12,7 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class IfStmt extends Stmt {
+public final class IfStmt extends Stmt implements StmtBlockSupported {
     /**
      * 条件表达式
      */
@@ -21,21 +20,21 @@ public final class IfStmt extends Stmt {
     /**
      * 判断成功的操作
      */
-    private final List<Stmt> thenStmts;
+    private final StmtBlock thenStmts;
     /**
      * 判断失败的操作
      */
-    private final List<Stmt> elseStmts;
+    private final StmtBlock elseStmts;
 
     IfStmt(SyntaxTreeNode node, Context ctx) {
         this.condition = Expr.resolveExpr(node.getChildren().get(1), ctx);
 
-        this.thenStmts = Stmt.resolveStmts(node.getChildren().get(4).getChildren(), ctx);
+        this.thenStmts = new StmtBlock(node.getChildren().get(4).getChildren(), ctx);
 
         if (!node.getChildren().get(7).getChildren().isEmpty())
-            this.elseStmts = Stmt.resolveStmts(node.getChildren().get(7).getChildren(), ctx);
+            this.elseStmts = new StmtBlock(node.getChildren().get(7).getChildren(), ctx);
         else
-            this.elseStmts = Collections.emptyList();
+            this.elseStmts = new StmtBlock(Collections.emptyList(), ctx);
     }
 
     /** 条件表达式 */
@@ -54,16 +53,17 @@ public final class IfStmt extends Stmt {
     }
 
     @Override
+    public void initStmtBlock() {
+        this.thenStmts.init();
+        this.elseStmts.init();
+    }
+
+    @Override
     public String toString(String prefix) {
-        if (this.elseStmts.isEmpty())
-            return prefix + "IF " + this.condition + " THEN" + SystemUtils.LINE_SEPARATOR
-                    + Stmt.toString(this.thenStmts, prefix + "    ")
-                    + prefix + "END IF" + SystemUtils.LINE_SEPARATOR;
-        else
-            return prefix + "IF " + this.condition + " THEN" + SystemUtils.LINE_SEPARATOR
-                    + Stmt.toString(this.thenStmts, prefix + "    ")
-                    + prefix + "ELSE" + SystemUtils.LINE_SEPARATOR
-                    + Stmt.toString(this.elseStmts, prefix + "    ")
-                    + prefix + "END IF" + SystemUtils.LINE_SEPARATOR;
+        return prefix + "IF " + this.condition + " THEN" + SystemUtils.LINE_SEPARATOR
+                + this.thenStmts.toString(prefix + "    ")
+                + prefix + "ELSE" + SystemUtils.LINE_SEPARATOR
+                + this.elseStmts.toString(prefix + "    ")
+                + prefix + "END IF" + SystemUtils.LINE_SEPARATOR;
     }
 }

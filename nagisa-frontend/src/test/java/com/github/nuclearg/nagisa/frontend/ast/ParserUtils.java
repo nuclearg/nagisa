@@ -11,6 +11,7 @@ import org.apache.commons.lang3.SystemUtils;
 import com.github.nuclearg.nagisa.frontend.error.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.frontend.identifier.IdentifierRegistry;
 import com.github.nuclearg.nagisa.frontend.parser.NagisaSyntaxDefinition;
+import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
 class ParserUtils {
     static ParseResult parse(String code) {
@@ -18,7 +19,11 @@ class ParserUtils {
         IdentifierRegistry registry = new IdentifierRegistry(errorReporter);
         Context ctx = new Context(registry, errorReporter);
 
-        CompilationUnit cu = new CompilationUnit(NagisaSyntaxDefinition.parse(code, errorReporter), ctx);
+        SyntaxTreeNode node = NagisaSyntaxDefinition.parse(code, errorReporter);
+        if (node == null)
+            return new ParseResult(code, null, errorReporter.getErrors());
+
+        CompilationUnit cu = new CompilationUnit(node, ctx);
 
         return new ParseResult(code, cu, errorReporter.getErrors());
     }

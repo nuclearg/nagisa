@@ -1,3 +1,10 @@
+nativesub1 1, "asdf", 1==2
+nativesub2
+nativefunc1 1, "asdf", 1==2
+nativefunc2
+let a = nativefunc1(1, "asdf", 1==2)
+let b = nativefunc2()
+
 nativesub nativesub1(i as integer, foo as string, bar as boolean)
 	"hello"
 	"world"

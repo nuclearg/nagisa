@@ -11,10 +11,12 @@ import com.github.nuclearg.nagisa.frontend.ast.CompilationUnit;
  *
  */
 class CompilationUnitInterceptor {
-    private final List<StmtInterceptor> stmts;
+    private final List<StmtInterceptor> bodyStmts;
+    private final List<StmtInterceptor> functionStmts;
 
     CompilationUnitInterceptor(CompilationUnit cu) {
-        this.stmts = StmtInterceptor.buildInterceptors(cu.getStmts());
+        this.bodyStmts = StmtInterceptor.buildInterceptors(cu.getBodyStmts());
+        this.functionStmts = StmtInterceptor.buildInterceptors(cu.getBodyStmts());
     }
 
     /**
@@ -24,7 +26,8 @@ class CompilationUnitInterceptor {
      *            上下文
      */
     void eval(Context ctx) {
-        StmtInterceptor.eval(this.stmts, ctx);
+        StmtInterceptor.eval(this.functionStmts, ctx);
+        StmtInterceptor.eval(this.bodyStmts, ctx);
     }
 
 }

@@ -100,22 +100,6 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                                         lex(SYMBOL_OR)),
                                 ref("CompareExprTerm")))));
 
-        // 形参列表
-        define("ParamList",
-                seq(
-                        opt(seq(lex(IDENTIFIER), lex(KEYWORD_AS), lex(IDENTIFIER))), rep(ref("RestParam"))));
-        define("RestParam",
-                seq(
-                        lex(SYMBOL_COMMA), lex(IDENTIFIER), lex(KEYWORD_AS), lex(IDENTIFIER)));
-
-        // 实参列表
-        define("ArgumentList",
-                seq(
-                        opt(ref("Expr")), rep(ref("RestArgument"))));
-        define("RestArgument",
-                seq(
-                        lex(SYMBOL_COMMA), ref("Expr")));
-
         // 空语句
         define("EmptyStmt",
                 lex(EOL));
@@ -184,6 +168,25 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                         lex(LITERAL_STRING), lex(EOL),
                         lex(KEYWORD_END), lex(KEYWORD_SUB)));
 
+        // 形参列表
+        define("ParamList",
+                seq(
+                        opt(ref("Param")), rep(ref("RestParam"))));
+        define("Param",
+                seq(
+                        lex(IDENTIFIER), lex(KEYWORD_AS), lex(IDENTIFIER)));
+        define("RestParam",
+                seq(
+                        lex(SYMBOL_COMMA), ref("Param")));
+
+        // 实参列表
+        define("ArgumentList",
+                seq(
+                        opt(ref("Expr")), rep(ref("RestArgument"))));
+        define("RestArgument",
+                seq(
+                        lex(SYMBOL_COMMA), ref("Expr")));
+
         // 普通语句
         define("Stmt",
                 or(
@@ -201,12 +204,18 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
         // 编译单元
         define("CompilationUnit",
                 seq(
-                        rep(ref("Stmt")),
-                        rep(or(
-                                ref("DefineFunctionStmt"),
-                                ref("DefineSubStmt"),
-                                ref("DefineNativeFunctionStmt"),
-                                ref("DefineNativeSubStmt"),
-                                ref("EmptyStmt")))));
+                        ref("CompilaationUnitBodyStmts"),
+                        ref("CompilationUnitDeclareStmts")));
+        // 编译单元中的语句体部分
+        define("CompilaationUnitBodyStmts",
+                ref("StmtList"));
+        // 编译单元中的定义部分
+        define("CompilationUnitDeclareStmts",
+                rep(or(
+                        ref("DefineFunctionStmt"),
+                        ref("DefineSubStmt"),
+                        ref("DefineNativeFunctionStmt"),
+                        ref("DefineNativeSubStmt"),
+                        ref("EmptyStmt"))));
     }
 }

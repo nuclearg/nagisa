@@ -93,7 +93,7 @@ public class IdentifierRegistry {
         if (this.functionMap.containsKey(name.toUpperCase()))
             errorReporter.report(node, Errors.E1003, name);
         else
-            this.functionMap.put(name, new FunctionIdentifierInfo(name, type, parameters));
+            this.functionMap.put(name.toUpperCase(), new FunctionIdentifierInfo(name, type, parameters));
     }
 
     /**
@@ -104,8 +104,6 @@ public class IdentifierRegistry {
      * @return 类型，可能为null
      */
     public IdentifierType queryTypeInfo(String name) {
-        IdentifierType type = this.typeMap.get(name.toUpperCase());
-
-        return type;
+        return this.typeMap.get(name.toUpperCase());
     }
 }

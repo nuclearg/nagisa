@@ -31,4 +31,8 @@ public class VariableIdentifierInfo {
         return this.type;
     }
 
+    @Override
+    public String toString() {
+        return this.name + " AS " + this.type;
+    }
 }

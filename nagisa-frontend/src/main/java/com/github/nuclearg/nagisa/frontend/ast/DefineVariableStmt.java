@@ -7,12 +7,12 @@ import com.github.nuclearg.nagisa.frontend.identifier.IdentifierType;
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
 /**
- * 调用方法的语句
+ * 变量定义语句
  * 
  * @author ng
  *
  */
-public class DefineVariableStmt extends Stmt {
+public final class DefineVariableStmt extends Stmt {
     /**
      * 变量名
      */

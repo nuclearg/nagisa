@@ -109,20 +109,23 @@ public final class Expr {
     @Override
     public String toString() {
         String text;
-        switch (this.children.size()) {
-            case 0:
-                text = this.text;
-                break;
-            case 1:
-                text = this.text + this.children.get(0);
-                break;
-            case 2:
-                text = this.children.get(0) + " " + this.text + " " + this.children.get(1);
-                break;
-            default:
-                text = this.text + "(" + StringUtils.join(this.children, ", ") + ")";
-                break;
-        }
+
+        if (this.operator == ExprOperator.FunctionInvocation)
+            text = this.text + "(" + StringUtils.join(this.children, ", ") + ")";
+        else
+            switch (this.children.size()) {
+                case 0:
+                    text = this.text;
+                    break;
+                case 1:
+                    text = this.text + this.children.get(0);
+                    break;
+                case 2:
+                    text = this.children.get(0) + " " + this.text + " " + this.children.get(1);
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
 
         if (this.priorityRedefined)
             return "(" + text + ")";
@@ -161,7 +164,7 @@ public final class Expr {
             case 4:
                 return resolveFunctionCallExpr(node, ctx);
             default:
-                ctx.errorReporter.report(node, Fatals.F0001, "unsupported expr syntax. node: " + node);
+                ctx.errorReporter.report(node, Fatals.F0001, "unsupported expr children size. size: " + node.getChildren().size() + ", node: " + node);
                 return null;
         }
     }
@@ -183,7 +186,8 @@ public final class Expr {
                 }
                 return new Expr(info.getType(), ExprOperator.VariableRef, text);
             default:
-                throw new UnsupportedOperationException(token.toString());
+                ctx.errorReporter.report(node, Fatals.F0001, "unsupported param0 expr. token: " + token);
+                return null;
         }
     }
 
@@ -204,7 +208,8 @@ public final class Expr {
                     ctx.errorReporter.report(node, Errors.E1101, IdentifierType.BOOLEAN, param.type);
                 return new Expr(IdentifierType.BOOLEAN, ExprOperator.BooleanNot, opToken.getText(), param);
             default:
-                throw new UnsupportedOperationException("token: " + opToken + ", node: " + node);
+                ctx.errorReporter.report(node, Fatals.F0001, "unsupported param1 expr. token: " + opToken);
+                return null;
         }
     }
 
@@ -250,26 +255,25 @@ public final class Expr {
 
         FunctionIdentifierInfo info = ctx.registry.queryFunctionInfo(name);
         if (info == null)
-            return null;
+            ctx.errorReporter.report(node, Errors.E1003, name);
+        else {
+            /*
+             * 进行一些检查
+             */
 
-        // 不能以表达式的方式调用方法
-        if (info.getType() == IdentifierType.VOID) {
-            ctx.errorReporter.report(node, Errors.E2003, info.getName());
-            return null;
+            // 不能以表达式的方式调用方法
+            if (info.getType() == IdentifierType.VOID)
+                ctx.errorReporter.report(node, Errors.E2003, info.getName());
+
+            // 检查形参和实参的数量是否匹配
+            if (args.size() != info.getParameters().size())
+                ctx.errorReporter.report(node, Errors.E2004, info.getName(), info.getParameters().size(), args.size());
+            else
+                // 检查形参和实参的类型是否匹配
+                for (int i = 0; i < args.size(); i++)
+                    if (args.get(i).type != info.getParameters().get(i).getType())
+                        ctx.errorReporter.report(node, Errors.E2005, info.getName(), i, info.getParameters().get(i).getName(), info.getParameters().get(i).getType(), args.get(i).type);
         }
-
-        // 检查形参和实参的数量是否匹配
-        if (args.size() != info.getParameters().size()) {
-            ctx.errorReporter.report(node, Errors.E2004, info.getName());
-            return null;
-        }
-
-        // 检查形参和实参的类型是否匹配
-        for (int i = 0; i < args.size(); i++)
-            if (args.get(i).type != info.getParameters().get(i).getType()) {
-                ctx.errorReporter.report(node, Errors.E2005, info.getName(), i, info.getParameters().get(i), args.get(i).type);
-                return null;
-            }
 
         return new Expr(info.getType(), ExprOperator.FunctionInvocation, info.getName(), args);
     }

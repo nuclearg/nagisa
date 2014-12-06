@@ -1,19 +1,18 @@
+let a = func1(1,"asdf",1==1)
+let b = func2()
+func1 1,"asdf",1==2
+func2
+sub1 1,"asdf",0==0
+sub2
+
 sub sub1(i as integer, foo as string, bar as boolean)
-	"hello"
-	"world"
 end sub
 
 sub sub2()
-	"hello"
-	"world"
 end sub
 
 function func1(i as integer, foo as string, bar as boolean) as integer
-	"hello"
-	"world"
 end function
 
 function func2() as string
-	"hello"
-	"world"
 end function

@@ -1,8 +1,5 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
@@ -14,30 +11,27 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public class DefineSubStmt extends Stmt {
-    /**
-     * 方法名
-     */
-    private final String name;
-    /**
-     * 形参列表
-     */
-    private final List<String> parameters;
+public final class DefineSubStmt extends DefineFunctionStmtBase implements StmtBlockSupported {
     /**
      * 函数体
      */
-    private final List<Stmt> stmts;
+    private final StmtBlock stmts;
 
     DefineSubStmt(SyntaxTreeNode node, Context ctx) {
-        this.name = node.getChildren().get(1).getToken().getText();
-        this.parameters = Collections.emptyList();
-        this.stmts = Stmt.resolveStmts(node.getChildren().get(6).getChildren(), ctx);
+        super(node, ctx);
+
+        this.stmts = new StmtBlock(node.getChildren().get(6).getChildren(), ctx);
+    }
+
+    @Override
+    public void initStmtBlock() {
+        this.stmts.init();
     }
 
     @Override
     protected String toString(String prefix) {
         return prefix + "SUB " + this.name + " (" + StringUtils.join(this.parameters, ", ") + ")" + SystemUtils.LINE_SEPARATOR
-                + Stmt.toString(this.stmts, prefix + "    ")
+                + this.stmts.toString(prefix + "    ")
                 + prefix + "END SUB" + SystemUtils.LINE_SEPARATOR;
     }
 }
