@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.nuclearg.nagisa.frontend.error.Errors;
-import com.github.nuclearg.nagisa.frontend.identifier.IdentifierType;
+import com.github.nuclearg.nagisa.frontend.identifier.TypeIdentifierInfo;
 import com.github.nuclearg.nagisa.frontend.identifier.VariableIdentifierInfo;
 import com.github.nuclearg.nagisa.frontend.lexer.NagisaLexDefinition.NagisaLexTokenType;
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
@@ -24,7 +24,7 @@ abstract class DefineFunctionStmtBase extends Stmt {
     /**
      * 返回类型
      */
-    protected final IdentifierType type;
+    protected final TypeIdentifierInfo type;
     /**
      * 形参列表
      */
@@ -36,7 +36,7 @@ abstract class DefineFunctionStmtBase extends Stmt {
 
         // 类型
         if (node.getChildren().get(5).getToken().getType() == NagisaLexTokenType.EOL) // 没有类型声明
-            this.type = IdentifierType.VOID;
+            this.type = TypeIdentifierInfo.VOID;
         else {
             SyntaxTreeNode typeNode = node.getChildren().get(6);
             String typeName = typeNode.getToken().getText();
@@ -44,7 +44,7 @@ abstract class DefineFunctionStmtBase extends Stmt {
             this.type = ctx.registry.queryTypeInfo(typeName);
             if (this.type == null)
                 ctx.errorReporter.report(typeNode, Errors.E1005, typeName);
-            if (this.type == IdentifierType.VOID)
+            if (this.type == TypeIdentifierInfo.VOID)
                 ctx.errorReporter.report(typeNode, Errors.E1104);
         }
 
@@ -57,10 +57,10 @@ abstract class DefineFunctionStmtBase extends Stmt {
                     SyntaxTreeNode typeNode = n.getChildren().get(2);
                     String typeName = typeNode.getToken().getText();
 
-                    IdentifierType type = ctx.registry.queryTypeInfo(typeName);
+                    TypeIdentifierInfo type = ctx.registry.queryTypeInfo(typeName);
                     if (type == null)
                         ctx.errorReporter.report(typeNode, Errors.E1005, typeName);
-                    if (type == IdentifierType.VOID)
+                    if (type == TypeIdentifierInfo.VOID)
                         ctx.errorReporter.report(typeNode, Errors.E1104);
 
                     return new VariableIdentifierInfo(name, type);

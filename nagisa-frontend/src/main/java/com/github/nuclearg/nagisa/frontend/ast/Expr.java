@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.nuclearg.nagisa.frontend.error.Errors;
 import com.github.nuclearg.nagisa.frontend.error.Fatals;
 import com.github.nuclearg.nagisa.frontend.identifier.FunctionIdentifierInfo;
-import com.github.nuclearg.nagisa.frontend.identifier.IdentifierType;
+import com.github.nuclearg.nagisa.frontend.identifier.TypeIdentifierInfo;
 import com.github.nuclearg.nagisa.frontend.identifier.VariableIdentifierInfo;
 import com.github.nuclearg.nagisa.frontend.lexer.LexToken;
 import com.github.nuclearg.nagisa.frontend.lexer.LexTokenType;
@@ -27,7 +27,7 @@ public final class Expr {
     /**
      * 表达式类型
      */
-    private final IdentifierType type;
+    private final TypeIdentifierInfo type;
     /**
      * 表达式运算符
      */
@@ -46,7 +46,7 @@ public final class Expr {
      */
     private final boolean priorityRedefined;
 
-    private Expr(IdentifierType type, ExprOperator operator, String text) {
+    private Expr(TypeIdentifierInfo type, ExprOperator operator, String text) {
         this.type = type;
         this.operator = operator;
         this.text = text;
@@ -54,7 +54,7 @@ public final class Expr {
         this.priorityRedefined = false;
     }
 
-    private Expr(IdentifierType type, ExprOperator operator, String text, Expr child) {
+    private Expr(TypeIdentifierInfo type, ExprOperator operator, String text, Expr child) {
         this.type = type;
         this.operator = operator;
         this.text = text;
@@ -62,7 +62,7 @@ public final class Expr {
         this.priorityRedefined = false;
     }
 
-    private Expr(IdentifierType type, ExprOperator operator, String text, Expr left, Expr right) {
+    private Expr(TypeIdentifierInfo type, ExprOperator operator, String text, Expr left, Expr right) {
         this.type = type;
         this.operator = operator;
         this.text = text;
@@ -70,7 +70,7 @@ public final class Expr {
         this.priorityRedefined = false;
     }
 
-    public Expr(IdentifierType exprType, ExprOperator operator, String text, List<Expr> children) {
+    public Expr(TypeIdentifierInfo exprType, ExprOperator operator, String text, List<Expr> children) {
         this.type = exprType;
         this.operator = operator;
         this.text = text;
@@ -87,7 +87,7 @@ public final class Expr {
     }
 
     /** 表达式类型 */
-    public IdentifierType getType() {
+    public TypeIdentifierInfo getType() {
         return this.type;
     }
 
@@ -175,9 +175,9 @@ public final class Expr {
 
         switch ((NagisaLexTokenType) token.getType()) {
             case LITERAL_INTEGER:
-                return new Expr(IdentifierType.INTEGER, ExprOperator.IntegerLiteral, text);
+                return new Expr(TypeIdentifierInfo.INTEGER, ExprOperator.IntegerLiteral, text);
             case LITERAL_STRING:
-                return new Expr(IdentifierType.STRING, ExprOperator.StringLiteral, text);
+                return new Expr(TypeIdentifierInfo.STRING, ExprOperator.StringLiteral, text);
             case IDENTIFIER:
                 VariableIdentifierInfo info = ctx.registry.queryVariableInfo(text);
                 if (info == null) {
@@ -200,13 +200,13 @@ public final class Expr {
 
         switch ((NagisaLexTokenType) opToken.getType()) {
             case SYMBOL_SUB:
-                if (param.type != IdentifierType.INTEGER)
-                    ctx.errorReporter.report(node, Errors.E1101, IdentifierType.INTEGER, param.type);
-                return new Expr(IdentifierType.INTEGER, ExprOperator.IntegerNegative, opToken.getText(), param);
+                if (param.type != TypeIdentifierInfo.INTEGER)
+                    ctx.errorReporter.report(node, Errors.E1101, TypeIdentifierInfo.INTEGER, param.type);
+                return new Expr(TypeIdentifierInfo.INTEGER, ExprOperator.IntegerNegative, opToken.getText(), param);
             case SYMBOL_NOT:
-                if (param.type != IdentifierType.STRING)
-                    ctx.errorReporter.report(node, Errors.E1101, IdentifierType.BOOLEAN, param.type);
-                return new Expr(IdentifierType.BOOLEAN, ExprOperator.BooleanNot, opToken.getText(), param);
+                if (param.type != TypeIdentifierInfo.STRING)
+                    ctx.errorReporter.report(node, Errors.E1101, TypeIdentifierInfo.BOOLEAN, param.type);
+                return new Expr(TypeIdentifierInfo.BOOLEAN, ExprOperator.BooleanNot, opToken.getText(), param);
             default:
                 ctx.errorReporter.report(node, Fatals.F0001, "unsupported param1 expr. token: " + opToken);
                 return null;
@@ -264,7 +264,7 @@ public final class Expr {
          */
 
         // 不能以表达式的方式调用方法
-        if (info.getType() == IdentifierType.VOID)
+        if (info.getType() == TypeIdentifierInfo.VOID)
             ctx.errorReporter.report(node, Errors.E2003, info.getName());
 
         // 检查形参和实参的数量是否匹配
@@ -281,13 +281,13 @@ public final class Expr {
 
     private static class OperatorInfo {
         private final LexTokenType opTokenType;
-        private final IdentifierType leftType;
-        private final IdentifierType rightType;
+        private final TypeIdentifierInfo leftType;
+        private final TypeIdentifierInfo rightType;
 
         private final ExprOperator operator;
-        private final IdentifierType resultType;
+        private final TypeIdentifierInfo resultType;
 
-        OperatorInfo(LexTokenType opTokenType, IdentifierType leftType, IdentifierType rightType, ExprOperator operator, IdentifierType resultType) {
+        OperatorInfo(LexTokenType opTokenType, TypeIdentifierInfo leftType, TypeIdentifierInfo rightType, ExprOperator operator, TypeIdentifierInfo resultType) {
             this.opTokenType = opTokenType;
             this.leftType = leftType;
             this.rightType = rightType;
@@ -298,32 +298,32 @@ public final class Expr {
     }
 
     private static final List<OperatorInfo> OPERATORS = Arrays.asList(
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_ADD, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerAdd, IdentifierType.INTEGER),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_SUB, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerSub, IdentifierType.INTEGER),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_MUL, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerMul, IdentifierType.INTEGER),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_DIV, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerDiv, IdentifierType.INTEGER),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_MOD, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerMod, IdentifierType.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_ADD, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerAdd, TypeIdentifierInfo.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_SUB, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerSub, TypeIdentifierInfo.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_MUL, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerMul, TypeIdentifierInfo.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_DIV, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerDiv, TypeIdentifierInfo.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_MOD, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerMod, TypeIdentifierInfo.INTEGER),
 
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_ADD, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.StringAdd, IdentifierType.STRING),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_ADD, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.StringAdd, TypeIdentifierInfo.STRING),
 
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerEq, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerNeq, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_GT, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_GTE, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_LT, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_LTE, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerEq, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerNeq, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GT, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerAdd, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GTE, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerAdd, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LT, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerAdd, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LTE, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerAdd, TypeIdentifierInfo.BOOLEAN),
 
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_GT, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_GTE, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_LT, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_LTE, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.IntegerAdd, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.IntegerAdd, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GT, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.IntegerAdd, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GTE, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.IntegerAdd, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LT, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.IntegerAdd, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LTE, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.IntegerAdd, TypeIdentifierInfo.BOOLEAN),
 
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, IdentifierType.BOOLEAN, IdentifierType.BOOLEAN, ExprOperator.BooleanEq, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, IdentifierType.BOOLEAN, IdentifierType.BOOLEAN, ExprOperator.BooleanNeq, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, TypeIdentifierInfo.BOOLEAN, TypeIdentifierInfo.BOOLEAN, ExprOperator.BooleanEq, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, TypeIdentifierInfo.BOOLEAN, TypeIdentifierInfo.BOOLEAN, ExprOperator.BooleanNeq, TypeIdentifierInfo.BOOLEAN),
 
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_AND, IdentifierType.BOOLEAN, IdentifierType.BOOLEAN, ExprOperator.BooleanAnd, IdentifierType.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_OR, IdentifierType.BOOLEAN, IdentifierType.BOOLEAN, ExprOperator.BooleanOr, IdentifierType.BOOLEAN)
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_AND, TypeIdentifierInfo.BOOLEAN, TypeIdentifierInfo.BOOLEAN, ExprOperator.BooleanAnd, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_OR, TypeIdentifierInfo.BOOLEAN, TypeIdentifierInfo.BOOLEAN, ExprOperator.BooleanOr, TypeIdentifierInfo.BOOLEAN)
             );
 }

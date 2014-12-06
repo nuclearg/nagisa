@@ -26,7 +26,7 @@ public class IdentifierRegistry {
     /**
      * 类型标识符列表
      */
-    private final Map<String, IdentifierType> typeMap = new HashMap<>(IdentifierType.NAGISA_BASE_TYPES);
+    private final Map<String, TypeIdentifierInfo> typeMap = new HashMap<>(TypeIdentifierInfo.NAGISA_BASE_TYPES);
 
     /**
      * 错误报告器
@@ -58,7 +58,7 @@ public class IdentifierRegistry {
      * @param position
      *            当前位置
      */
-    public void registerVariableInfo(String name, IdentifierType type, SyntaxTreeNode node) {
+    public void registerVariableInfo(String name, TypeIdentifierInfo type, SyntaxTreeNode node) {
         if (this.variableMap.containsKey(name.toUpperCase())) {
             VariableIdentifierInfo info = this.variableMap.get(name.toUpperCase());
             if (info.getType() != type)
@@ -89,7 +89,7 @@ public class IdentifierRegistry {
      *            参数列表
      * @parma node 当前语法树节点
      */
-    public void registerFunctionInfo(String name, IdentifierType type, List<VariableIdentifierInfo> parameters, SyntaxTreeNode node) {
+    public void registerFunctionInfo(String name, TypeIdentifierInfo type, List<VariableIdentifierInfo> parameters, SyntaxTreeNode node) {
         if (this.functionMap.containsKey(name.toUpperCase()))
             errorReporter.report(node, Errors.E1004, name);
         else
@@ -103,7 +103,7 @@ public class IdentifierRegistry {
      *            类型名
      * @return 类型，可能为null
      */
-    public IdentifierType queryTypeInfo(String name) {
+    public TypeIdentifierInfo queryTypeInfo(String name) {
         return this.typeMap.get(name.toUpperCase());
     }
 }

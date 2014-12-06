@@ -14,9 +14,9 @@ public class VariableIdentifierInfo {
     /**
      * 类型
      */
-    private final IdentifierType type;
+    private final TypeIdentifierInfo type;
 
-    public VariableIdentifierInfo(String name, IdentifierType type) {
+    public VariableIdentifierInfo(String name, TypeIdentifierInfo type) {
         this.name = name;
         this.type = type;
     }
@@ -27,7 +27,7 @@ public class VariableIdentifierInfo {
     }
 
     /** 类型 */
-    public IdentifierType getType() {
+    public TypeIdentifierInfo getType() {
         return this.type;
     }
 

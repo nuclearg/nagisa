@@ -2,7 +2,7 @@ package com.github.nuclearg.nagisa.frontend.ast;
 
 import org.apache.commons.lang3.SystemUtils;
 
-import com.github.nuclearg.nagisa.frontend.identifier.IdentifierType;
+import com.github.nuclearg.nagisa.frontend.identifier.TypeIdentifierInfo;
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
 /**
@@ -31,7 +31,7 @@ public final class ForStmt extends Stmt implements StmtBlockSupported {
 
     ForStmt(SyntaxTreeNode node, Context ctx) {
         this.symbol = node.getChildren().get(1).getToken().getText();
-        ctx.registry.registerVariableInfo(this.symbol, IdentifierType.INTEGER, node.getChildren().get(1));
+        ctx.registry.registerVariableInfo(this.symbol, TypeIdentifierInfo.INTEGER, node.getChildren().get(1));
 
         this.initValue = Expr.resolveExpr(node.getChildren().get(3), ctx);
         this.targetValue = Expr.resolveExpr(node.getChildren().get(5), ctx);

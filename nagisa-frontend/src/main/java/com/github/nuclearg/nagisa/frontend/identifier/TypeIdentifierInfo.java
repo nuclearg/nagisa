@@ -10,31 +10,31 @@ import java.util.Map;
  * @author ng
  *
  */
-public final class IdentifierType {
+public final class TypeIdentifierInfo {
     /**
      * 整型
      */
-    public static final IdentifierType INTEGER = new IdentifierType("INTEGER");
+    public static final TypeIdentifierInfo INTEGER = new TypeIdentifierInfo("INTEGER");
     /**
      * 字符串
      */
-    public static final IdentifierType STRING = new IdentifierType("STRING");
+    public static final TypeIdentifierInfo STRING = new TypeIdentifierInfo("STRING");
     /**
      * 布尔
      */
-    public static final IdentifierType BOOLEAN = new IdentifierType("BOOLEAN");
+    public static final TypeIdentifierInfo BOOLEAN = new TypeIdentifierInfo("BOOLEAN");
     /**
      * 字符串
      */
-    public static final IdentifierType VOID = new IdentifierType("VOID");
+    public static final TypeIdentifierInfo VOID = new TypeIdentifierInfo("VOID");
 
     /**
      * 基础类型列表
      */
-    public static final Map<String, IdentifierType> NAGISA_BASE_TYPES;
+    public static final Map<String, TypeIdentifierInfo> NAGISA_BASE_TYPES;
 
     static {
-        Map<String, IdentifierType> types = new HashMap<>();
+        Map<String, TypeIdentifierInfo> types = new HashMap<>();
 
         types.put(INTEGER.name, INTEGER);
         types.put(STRING.name, STRING);
@@ -49,7 +49,7 @@ public final class IdentifierType {
      */
     private final String name;
 
-    public IdentifierType(String name) {
+    public TypeIdentifierInfo(String name) {
         this.name = name;
     }
 

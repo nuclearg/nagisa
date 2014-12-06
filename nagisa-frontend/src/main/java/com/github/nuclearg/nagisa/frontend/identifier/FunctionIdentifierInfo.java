@@ -17,13 +17,13 @@ public class FunctionIdentifierInfo {
     /**
      * 返回类型
      */
-    private final IdentifierType type;
+    private final TypeIdentifierInfo type;
     /**
      * 形参列表
      */
     private final List<VariableIdentifierInfo> parameters;
 
-    public FunctionIdentifierInfo(String name, IdentifierType type, List<VariableIdentifierInfo> parameters) {
+    public FunctionIdentifierInfo(String name, TypeIdentifierInfo type, List<VariableIdentifierInfo> parameters) {
         this.name = name;
         this.type = type;
         this.parameters = Collections.unmodifiableList(parameters);
@@ -35,7 +35,7 @@ public class FunctionIdentifierInfo {
     }
 
     /** 返回类型 */
-    public IdentifierType getType() {
+    public TypeIdentifierInfo getType() {
         return this.type;
     }
 
