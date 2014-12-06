@@ -2,8 +2,6 @@ package com.github.nuclearg.nagisa.frontend.ast;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
 /**
@@ -31,6 +29,6 @@ public class CompilationUnit {
 
     @Override
     public String toString() {
-        return StringUtils.join(this.stmts, "");
+        return Stmt.toString(this.stmts, "");
     }
 }

@@ -25,8 +25,8 @@ final class SequenceRule extends SyntaxRule {
     }
 
     @Override
-    boolean tryToken(LexTokenType tokenType) {
-        return this.rules.get(0).tryToken(tokenType);
+    boolean tryToken(LexTokenType tokenType, SyntaxErrorReporter errorReporter) {
+        return this.rules.get(0).tryToken(tokenType, errorReporter);
     }
 
     @Override

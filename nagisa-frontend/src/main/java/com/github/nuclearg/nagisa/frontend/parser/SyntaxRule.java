@@ -27,8 +27,14 @@ abstract class SyntaxRule {
 
     /**
      * 判断是否可以接受指定的{@link LexTokenType}作为这条规则的第一个词法元素
+     * 
+     * @param tokenType
+     *            尝试进行匹配的{@link LexTokenType}
+     * @param errorReporter
+     *            错误报告器
+     * @return
      */
-    abstract boolean tryToken(LexTokenType tokenType);
+    abstract boolean tryToken(LexTokenType tokenType, SyntaxErrorReporter errorReporter);
 
     /**
      * 尝试解析语法规则，如果当前词解析失败则尝试跳过当前的词，或者遇到EOL或EOF

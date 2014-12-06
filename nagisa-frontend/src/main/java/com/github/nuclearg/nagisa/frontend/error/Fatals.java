@@ -11,10 +11,12 @@ package com.github.nuclearg.nagisa.frontend.error;
  *
  */
 public enum Fatals implements SyntaxErrorType {
-    F0001("源文件读取失败"),
+    F0001("Nagisa解析器内部错误 %s"),
+
+    F0100("源文件读取失败"),
 
     F1000("语法错误过多，编译过程中断"),
-    F1001("有剩余的字符未被解析"),
+    F1001("有剩余的字符未被解析。已解析成功的语法树如下：%s"),
 
     ;
     private final String message;

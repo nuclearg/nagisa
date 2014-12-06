@@ -1,6 +1,5 @@
 package com.github.nuclearg.nagisa.frontend.util;
 
-
 /**
  * 表示范围
  * 
@@ -8,6 +7,8 @@ package com.github.nuclearg.nagisa.frontend.util;
  *
  */
 public final class Range {
+    public static final Range EMPTY = new Range(Position.EMPTY, Position.EMPTY);
+
     /**
      * 起始位置
      */

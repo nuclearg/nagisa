@@ -2,18 +2,18 @@ package com.github.nuclearg.nagisa.frontend.ast;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.nuclearg.nagisa.frontend.error.Errors;
+import com.github.nuclearg.nagisa.frontend.error.Fatals;
 import com.github.nuclearg.nagisa.frontend.identifier.FunctionIdentifierInfo;
 import com.github.nuclearg.nagisa.frontend.identifier.IdentifierType;
 import com.github.nuclearg.nagisa.frontend.identifier.VariableIdentifierInfo;
 import com.github.nuclearg.nagisa.frontend.lexer.LexToken;
+import com.github.nuclearg.nagisa.frontend.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.frontend.lexer.NagisaLexDefinition.NagisaLexTokenType;
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
@@ -24,11 +24,6 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  *
  */
 public final class Expr {
-    /**
-     * value的顺序为integer、string、boolean时对应的操作
-     */
-    private static final Map<NagisaLexTokenType, ExprOperator[]> OPERATOR_MAP;
-
     /**
      * 表达式类型
      */
@@ -166,7 +161,8 @@ public final class Expr {
             case 4:
                 return resolveFunctionCallExpr(node, ctx);
             default:
-                throw new UnsupportedOperationException("node: " + node);
+                ctx.errorReporter.report(node, Fatals.F0001, "unsupported expr syntax. node: " + node);
+                return null;
         }
     }
 
@@ -180,9 +176,9 @@ public final class Expr {
             case LITERAL_STRING:
                 return new Expr(IdentifierType.STRING, ExprOperator.StringLiteral, text);
             case IDENTIFIER:
-                VariableIdentifierInfo info = ctx.registry.queryVariableInfo(text, node.getRange().getStartPosition());
+                VariableIdentifierInfo info = ctx.registry.queryVariableInfo(text);
                 if (info == null) {
-                    ctx.errorReporter.report(Errors.E1002, node.getRange().getStartPosition(), text);
+                    ctx.errorReporter.report(node, Errors.E1001, text);
                     return null;
                 }
                 return new Expr(info.getType(), ExprOperator.VariableRef, text);
@@ -201,11 +197,11 @@ public final class Expr {
         switch ((NagisaLexTokenType) opToken.getType()) {
             case SYMBOL_SUB:
                 if (param.type != IdentifierType.INTEGER)
-                    ctx.errorReporter.report(Errors.E1004, node.getRange().getStartPosition(), IdentifierType.INTEGER, param.type);
+                    ctx.errorReporter.report(node, Errors.E1101, IdentifierType.INTEGER, param.type);
                 return new Expr(IdentifierType.INTEGER, ExprOperator.IntegerNegative, opToken.getText(), param);
             case SYMBOL_NOT:
                 if (param.type != IdentifierType.STRING)
-                    ctx.errorReporter.report(Errors.E1004, node.getRange().getStartPosition(), IdentifierType.BOOLEAN, param.type);
+                    ctx.errorReporter.report(node, Errors.E1101, IdentifierType.BOOLEAN, param.type);
                 return new Expr(IdentifierType.BOOLEAN, ExprOperator.BooleanNot, opToken.getText(), param);
             default:
                 throw new UnsupportedOperationException("token: " + opToken + ", node: " + node);
@@ -220,32 +216,14 @@ public final class Expr {
         if (left == null || right == null)
             return null;
 
-        // 判断两个表达式的类型是否一致
-        // TODO 隐式类型转换
-        if (left.type != right.type) {
-            ctx.errorReporter.report(Errors.E1005, node.getRange().getStartPosition(), left.type, right.type);
-            return null;
-        }
+        // 找到与当前的运算符、左表达式类型、右表达式类型都匹配的运算符
+        for (OperatorInfo info : OPERATORS)
+            if (info.opTokenType == opToken.getType() && info.leftType == left.type && info.rightType == right.type)
+                return new Expr(info.resultType, info.operator, opToken.getText(), left, right);
 
-        // 根据表达式类型从表中获取对应的表达式运算符
-        ExprOperator[] array = OPERATOR_MAP.get(opToken.getType());
-        if (array == null)
-            throw new UnsupportedOperationException("token: " + opToken + ", node: " + node);
-
-        IdentifierType type = left.type;
-        ExprOperator op = null;
-
-        if (type == IdentifierType.INTEGER)
-            op = array[0];
-        if (type == IdentifierType.STRING)
-            op = array[1];
-        if (type == IdentifierType.BOOLEAN)
-            op = array[2];
-
-        if (op == null)
-            ctx.errorReporter.report(Errors.E1006, node.getRange().getStartPosition(), type, opToken.getText());
-
-        return new Expr(type, op, opToken.getText(), left, right);
+        // 找不到，报错
+        ctx.errorReporter.report(node, Errors.E1102, left.type, right.type, opToken.getText());
+        return null;
     }
 
     private static Expr resolveParentheseExpr(SyntaxTreeNode node, Context ctx) {
@@ -270,52 +248,77 @@ public final class Expr {
                 .map(n -> resolveExpr(n, ctx))
                 .collect(Collectors.toList());
 
-        FunctionIdentifierInfo info = ctx.registry.queryFunctionInfo(name, node.getRange().getStartPosition());
+        FunctionIdentifierInfo info = ctx.registry.queryFunctionInfo(name);
         if (info == null)
             return null;
 
         // 不能以表达式的方式调用方法
         if (info.getType() == IdentifierType.VOID) {
-            ctx.errorReporter.report(Errors.E2003, node.getRange().getStartPosition(), info.getName());
+            ctx.errorReporter.report(node, Errors.E2003, info.getName());
             return null;
         }
 
         // 检查形参和实参的数量是否匹配
         if (args.size() != info.getParameters().size()) {
-            ctx.errorReporter.report(Errors.E2004, node.getRange().getStartPosition(), info.getName());
+            ctx.errorReporter.report(node, Errors.E2004, info.getName());
             return null;
         }
 
         // 检查形参和实参的类型是否匹配
         for (int i = 0; i < args.size(); i++)
             if (args.get(i).type != info.getParameters().get(i).getType()) {
-                ctx.errorReporter.report(Errors.E2005, node.getRange().getStartPosition(), info.getName(), i, info.getParameters().get(i), args.get(i).type);
+                ctx.errorReporter.report(node, Errors.E2005, info.getName(), i, info.getParameters().get(i), args.get(i).type);
                 return null;
             }
 
         return new Expr(info.getType(), ExprOperator.FunctionInvocation, info.getName(), args);
     }
 
-    static {
-        Map<NagisaLexTokenType, ExprOperator[]> map = new HashMap<>();
+    private static class OperatorInfo {
+        private final LexTokenType opTokenType;
+        private final IdentifierType leftType;
+        private final IdentifierType rightType;
 
-        map.put(NagisaLexTokenType.SYMBOL_ADD, new ExprOperator[] { ExprOperator.IntegerAdd, ExprOperator.StringAdd, null });
-        map.put(NagisaLexTokenType.SYMBOL_SUB, new ExprOperator[] { ExprOperator.IntegerSub, null, null });
-        map.put(NagisaLexTokenType.SYMBOL_MUL, new ExprOperator[] { ExprOperator.IntegerMul, null, null });
-        map.put(NagisaLexTokenType.SYMBOL_DIV, new ExprOperator[] { ExprOperator.IntegerDiv, null, null });
-        map.put(NagisaLexTokenType.SYMBOL_MOD, new ExprOperator[] { ExprOperator.IntegerDiv, null, null });
+        private final ExprOperator operator;
+        private final IdentifierType resultType;
 
-        map.put(NagisaLexTokenType.SYMBOL_EQ, new ExprOperator[] { ExprOperator.IntegerEq, ExprOperator.StringEq, null });
-        map.put(NagisaLexTokenType.SYMBOL_NEQ, new ExprOperator[] { ExprOperator.IntegerNeq, ExprOperator.StringNeq, null });
-        map.put(NagisaLexTokenType.SYMBOL_GT, new ExprOperator[] { ExprOperator.IntegerGt, ExprOperator.StringGt, null });
-        map.put(NagisaLexTokenType.SYMBOL_GTE, new ExprOperator[] { ExprOperator.IntegerGte, ExprOperator.StringGte, null });
-        map.put(NagisaLexTokenType.SYMBOL_LT, new ExprOperator[] { ExprOperator.IntegerLt, ExprOperator.StringLt, null });
-        map.put(NagisaLexTokenType.SYMBOL_LTE, new ExprOperator[] { ExprOperator.IntegerLte, ExprOperator.StringLte, null });
+        OperatorInfo(LexTokenType opTokenType, IdentifierType leftType, IdentifierType rightType, ExprOperator operator, IdentifierType resultType) {
+            this.opTokenType = opTokenType;
+            this.leftType = leftType;
+            this.rightType = rightType;
+            this.operator = operator;
+            this.resultType = resultType;
+        }
 
-        map.put(NagisaLexTokenType.SYMBOL_AND, new ExprOperator[] { null, null, ExprOperator.BooleanAnd });
-        map.put(NagisaLexTokenType.SYMBOL_OR, new ExprOperator[] { null, null, ExprOperator.BooleanOr });
-        map.put(NagisaLexTokenType.SYMBOL_XOR, new ExprOperator[] { null, null, ExprOperator.BooleanXor });
-
-        OPERATOR_MAP = Collections.unmodifiableMap(map);
     }
+
+    private static final List<OperatorInfo> OPERATORS = Arrays.asList(
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_ADD, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerAdd, IdentifierType.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_SUB, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerSub, IdentifierType.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_MUL, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerMul, IdentifierType.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_DIV, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerDiv, IdentifierType.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_MOD, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerMod, IdentifierType.INTEGER),
+
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_ADD, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.StringAdd, IdentifierType.STRING),
+
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerEq, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerNeq, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GT, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GTE, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LT, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LTE, IdentifierType.INTEGER, IdentifierType.INTEGER, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GT, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GTE, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LT, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LTE, IdentifierType.STRING, IdentifierType.STRING, ExprOperator.IntegerAdd, IdentifierType.BOOLEAN),
+
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, IdentifierType.BOOLEAN, IdentifierType.BOOLEAN, ExprOperator.BooleanEq, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, IdentifierType.BOOLEAN, IdentifierType.BOOLEAN, ExprOperator.BooleanNeq, IdentifierType.BOOLEAN),
+
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_AND, IdentifierType.BOOLEAN, IdentifierType.BOOLEAN, ExprOperator.BooleanAnd, IdentifierType.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_OR, IdentifierType.BOOLEAN, IdentifierType.BOOLEAN, ExprOperator.BooleanOr, IdentifierType.BOOLEAN)
+            );
 }

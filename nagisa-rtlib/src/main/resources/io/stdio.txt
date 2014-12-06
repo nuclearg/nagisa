@@ -1,0 +1,4 @@
+NATIVESUB PRINT(msg AS STRING)
+    "StdIO"
+    "print"
+END SUB

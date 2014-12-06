@@ -16,13 +16,13 @@ import com.github.nuclearg.nagisa.frontend.lexer.LexTokenizer;
 final class NullRule extends SyntaxRule {
 
     @Override
-    SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
-        return new SyntaxTreeNode(this);
+    boolean tryToken(LexTokenType tokenType, SyntaxErrorReporter errorReporter) {
+        return true;
     }
 
     @Override
-    boolean tryToken(LexTokenType tokenType) {
-        return true;
+    SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
+        return new SyntaxTreeNode(this);
     }
 
     @Override

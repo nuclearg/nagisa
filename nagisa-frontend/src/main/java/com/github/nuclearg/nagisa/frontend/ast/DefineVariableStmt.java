@@ -36,13 +36,17 @@ public class DefineVariableStmt extends Stmt {
             case "BOOLEAN":
                 this.type = IdentifierType.BOOLEAN;
                 break;
+            case "VOID":
+                ctx.errorReporter.report(node, Errors.E1104);
+                this.type = null;
+                break;
             default:
-                ctx.errorReporter.report(Errors.E3001, node.getRange().getStartPosition(), typeName);
+                ctx.errorReporter.report(node, Errors.E1005, typeName);
                 this.type = null;
         }
 
         if (this.type != null)
-            ctx.registry.registerVariableInfo(this.name, this.type, node.getRange().getStartPosition());
+            ctx.registry.registerVariableInfo(this.name, this.type, node);
     }
 
     @Override

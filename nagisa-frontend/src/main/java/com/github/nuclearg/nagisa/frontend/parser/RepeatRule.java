@@ -25,6 +25,11 @@ final class RepeatRule extends SyntaxRule {
     }
 
     @Override
+    boolean tryToken(LexTokenType tokenType, SyntaxErrorReporter errorReporter) {
+        return true;
+    }
+
+    @Override
     SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         List<SyntaxTreeNode> children = new ArrayList<>();
 
@@ -33,18 +38,13 @@ final class RepeatRule extends SyntaxRule {
             LexToken token = lexer.peek();
 
             // 判断这个词是否可以被规则接收
-            if (this.rule.tryToken(token.getType()))
+            if (this.rule.tryToken(token.getType(), errorReporter))
                 children.add(this.tryParse(lexer, rule, errorReporter));
             else
                 break;
         }
 
         return new SyntaxTreeNode(this, children);
-    }
-
-    @Override
-    boolean tryToken(LexTokenType tokenType) {
-        return true;
     }
 
     @Override

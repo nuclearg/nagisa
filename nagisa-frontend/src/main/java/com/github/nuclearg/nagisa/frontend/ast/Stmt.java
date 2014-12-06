@@ -1,8 +1,12 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import com.github.nuclearg.nagisa.frontend.error.Fatals;
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
 /**
@@ -50,35 +54,35 @@ public abstract class Stmt {
      * @return 语句
      */
     private static Stmt resolveStmt(SyntaxTreeNode node, Context ctx) {
-        switch (node.getRuleName()) {
-            case "EmptyStmt":
-                return new EmptyStmt();
-            case "DefineVariableStmt":
-                return new DefineVariableStmt(node, ctx);
-            case "VariableSetStmt":
-                return new VariableSetStmt(node, ctx);
-            case "IfStmt":
-                return new IfStmt(node, ctx);
-            case "ForStmt":
-                return new ForStmt(node, ctx);
-            case "WhileStmt":
-                return new WhileStmt(node, ctx);
-            case "BreakStmt":
-                return new BreakStmt();
-            case "ContinueStmt":
-                return new ContinueStmt();
-            case "CallSubStmt":
-                return new CallSubStmt(node, ctx);
-            case "DefineFunctionStmt":
-            case "DefineSubStmt":
-                return new DefineFunctionStmt(node, ctx);
-            case "DefineNativeFunctionStmt":
-            case "DefineNativeSubStmt":
-                return new DefineNativeFunctionStmt(node, ctx);
-            case "ReturnStmt":
-                return new ReturnStmt(node, ctx);
-            default:
-                throw new UnsupportedOperationException(node.getRuleName() + ", node: " + node);
+        // 尝试直接创建一个与语法规则名称匹配的类实例
+        try {
+            String ruleName = node.getRuleName();
+            String stmtClsName = Stmt.class.getPackage().getName() + "." + ruleName;
+            Class<?> cls = Class.forName(stmtClsName);
+            Class<? extends Stmt> stmtCls = cls.asSubclass(Stmt.class);
+            Constructor<? extends Stmt> constructor = stmtCls.getDeclaredConstructor(SyntaxTreeNode.class, Context.class);
+            return constructor.newInstance(node, ctx);
+        } catch (Exception ex) {
+            ctx.errorReporter.report(node, Fatals.F0001, ExceptionUtils.getStackTrace(ex));
+            return null;
         }
+    }
+
+    /**
+     * 将一系列语句输出为字符串形式
+     * 
+     * @param stmts
+     *            语句列表
+     * @param prefix
+     *            前缀
+     * @return 这些语句的字符串形式
+     */
+    static String toString(Iterable<Stmt> stmts, String prefix) {
+        StringBuilder builder = new StringBuilder();
+
+        for (Stmt stmt : stmts)
+            builder.append(stmt.toString(prefix));
+
+        return builder.toString();
     }
 }

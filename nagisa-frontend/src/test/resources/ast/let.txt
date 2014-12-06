@@ -1,16 +1,21 @@
 let a=0
 let b=-1
-let b2=(1)
+let b=(1)
 let c=a+b
 let c=(a+b)
 let c=(a)+(b)
 let c=((((a))+((b))))
-let d=a+b*c-d
-let e=(a+b)*(c-d)%f
+let d=a+b*c
+let e=(a+b)*(c-d)%5
 
-let a="asdf"
-let b="ddd" +( "asdf")
-let c=a+b
+let aa="asdf"
+let bb="ddd" +( "asdf")
+let cc=a+b
+
+let t=1==1
+let f=1==0
+let aaa=t&&f
+let aaa=t||f
 
 let a=rnd()
 let a=test()

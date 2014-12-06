@@ -1,4 +1,5 @@
 let i=0
+dim sum as integer
 while i<100
 	let sum = sum + i
 	let i = i + 1

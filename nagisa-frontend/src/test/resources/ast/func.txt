@@ -1,11 +1,19 @@
-let a = asdf()
-print asdf()
+sub sub1(i as integer, foo as string, bar as boolean)
+	"hello"
+	"world"
+end sub
 
+sub sub2()
+	"hello"
+	"world"
+end sub
 
-function asdf() as integer
-	return r
+function func1(i as integer, foo as string, bar as boolean) as integer
+	"hello"
+	"world"
 end function
 
-sub print()
-	print asdf
-end sub
+function func2() as string
+	"hello"
+	"world"
+end function

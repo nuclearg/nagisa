@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 import com.github.nuclearg.nagisa.frontend.util.Position;
 
 /**
@@ -32,23 +33,23 @@ public final class SyntaxErrorReporter {
      *            参数列表
      */
     public void report(SyntaxErrorType errorType, Object... args) {
-        report(errorType, Position.EMPTY, args);
+        report(Position.EMPTY, errorType, args);
     }
 
     /**
      * 报告一个错误
      * 
+     * @param range
+     *            发生错误的位置
      * @param errorType
      *            要报告的错误类型
-     * @param position
-     *            发生错误的位置
      * @param args
      *            参数列表
      */
-    public void report(SyntaxErrorType errorType, Position position, Object... args) {
+    public void report(Position position, SyntaxErrorType errorType, Object... args) {
         SyntaxErrorLogItem error = new SyntaxErrorLogItem(errorType, args, position);
         this.errors.add(error);
-        System.out.println(error);
+        System.err.println(error);
 
         // 判断是否是致命错误
         if (errorType.level() == SyntaxErrorLevel.Fatal)
@@ -56,7 +57,21 @@ public final class SyntaxErrorReporter {
 
         // 判断是否超过上限
         if (this.errors.size() > ERROR_MAX_COUNT)
-            report(Fatals.F1000, position);
+            report(position, Fatals.F1000);
+    }
+
+    /**
+     * 报告一个错误
+     * 
+     * @param node
+     *            发生错误的语法树节点
+     * @param errorType
+     *            要报告的错误类型
+     * @param args
+     *            参数列表
+     */
+    public void report(SyntaxTreeNode node, SyntaxErrorType errorType, Object... args) {
+        report(node.getRange().getStartPosition(), errorType, args);
     }
 
     /** 错误列表 */

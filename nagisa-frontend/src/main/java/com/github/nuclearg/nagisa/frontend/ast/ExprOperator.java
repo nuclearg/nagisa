@@ -57,14 +57,16 @@ public enum ExprOperator {
     /** 字符串小于等于 */
     StringLte,
 
+    /** 逻辑相等 */
+    BooleanEq,
+    /** 逻辑不相等 */
+    BooleanNeq,
     /** 逻辑取反 */
     BooleanNot,
     /** 逻辑与 */
     BooleanAnd,
     /** 逻辑或 */
     BooleanOr,
-    /** 逻辑异或 */
-    BooleanXor,
 
     /** 函数调用 */
     FunctionInvocation,

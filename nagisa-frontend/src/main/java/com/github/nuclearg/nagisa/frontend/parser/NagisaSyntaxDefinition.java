@@ -2,7 +2,10 @@ package com.github.nuclearg.nagisa.frontend.parser;
 
 import static com.github.nuclearg.nagisa.frontend.lexer.NagisaLexDefinition.NagisaLexTokenType.*;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.github.nuclearg.nagisa.frontend.error.Fatals;
+import com.github.nuclearg.nagisa.frontend.error.NagisaFrontEndFatalErrorException;
 import com.github.nuclearg.nagisa.frontend.error.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.frontend.lexer.LexTokenizer;
 import com.github.nuclearg.nagisa.frontend.lexer.NagisaLexDefinition;
@@ -24,17 +27,22 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
      *            待解析的文本
      * @return 解析出的语法节点树
      */
-    public static SyntaxTreeNode parse(String text) {
-        LexTokenizer lexer = NagisaLexDefinition.lexer(text);
-        SyntaxErrorReporter errorReporter = new SyntaxErrorReporter();
+    public static SyntaxTreeNode parse(String text, SyntaxErrorReporter errorReporter) {
+        try {
+            LexTokenizer lexer = NagisaLexDefinition.lexer(text);
 
-        SyntaxTreeNode node = INSTANCE.getRule(ROOT_RULE).parse(lexer, errorReporter);
+            SyntaxTreeNode node = INSTANCE.getRule(ROOT_RULE).parse(lexer, errorReporter);
 
-        if (!lexer.eof())
-            errorReporter.report(Fatals.F1001, lexer.position());
+            if (!lexer.eof())
+                errorReporter.report(lexer.position(), Fatals.F1001, node);
 
-        return node;
-
+            return node;
+        } catch (NagisaFrontEndFatalErrorException ex) {
+            return null;
+        } catch (Exception ex) {
+            errorReporter.report(Fatals.F0001, ExceptionUtils.getStackTrace(ex));
+            return null;
+        }
     }
 
     private NagisaSyntaxDefinition() {
@@ -89,17 +97,16 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                         opt(seq(
                                 or(
                                         lex(SYMBOL_AND),
-                                        lex(SYMBOL_OR),
-                                        lex(SYMBOL_XOR)),
+                                        lex(SYMBOL_OR)),
                                 ref("CompareExprTerm")))));
 
         // 形参列表
         define("ParamList",
                 seq(
-                        opt(lex(IDENTIFIER)), rep(ref("RestParam"))));
+                        opt(seq(lex(IDENTIFIER), lex(KEYWORD_AS), lex(IDENTIFIER))), rep(ref("RestParam"))));
         define("RestParam",
                 seq(
-                        lex(SYMBOL_COMMA), lex(IDENTIFIER)));
+                        lex(SYMBOL_COMMA), lex(IDENTIFIER), lex(KEYWORD_AS), lex(IDENTIFIER)));
 
         // 实参列表
         define("ArgumentList",
@@ -145,14 +152,6 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                         ref("StmtList"),
                         lex(KEYWORD_END), lex(KEYWORD_WHILE), lex(EOL)));
 
-        // break
-        define("BreakStmt",
-                seq(lex(KEYWORD_BREAK), lex(EOL)));
-
-        // continue
-        define("ContinueStmt",
-                seq(lex(KEYWORD_CONTINUE), lex(EOL)));
-
         // 调用方法
         define("CallSubStmt",
                 seq(
@@ -174,13 +173,15 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
 
         // 定义函数
         define("DefineNativeFunctionStmt",
-                seq(lex(KEYWORD_FUNCTION), lex(IDENTIFIER), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(KEYWORD_AS), lex(IDENTIFIER), lex(EOL),
-                        ref("StmtList"),
+                seq(lex(KEYWORD_NATIVEFUNCTION), lex(IDENTIFIER), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(KEYWORD_AS), lex(IDENTIFIER), lex(EOL),
+                        lex(LITERAL_STRING), lex(EOL),
+                        lex(LITERAL_STRING), lex(EOL),
                         lex(KEYWORD_END), lex(KEYWORD_FUNCTION)));
         // 定义方法
         define("DefineNativeSubStmt",
-                seq(lex(KEYWORD_SUB), lex(IDENTIFIER), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(EOL),
-                        ref("StmtList"),
+                seq(lex(KEYWORD_NATIVESUB), lex(IDENTIFIER), lex(SYMBOL_PARENTHESE_LEFT), ref("ParamList"), lex(SYMBOL_PARENTHESE_RIGHT), lex(EOL),
+                        lex(LITERAL_STRING), lex(EOL),
+                        lex(LITERAL_STRING), lex(EOL),
                         lex(KEYWORD_END), lex(KEYWORD_SUB)));
 
         // 普通语句
@@ -192,8 +193,6 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                         ref("IfStmt"),
                         ref("ForStmt"),
                         ref("WhileStmt"),
-                        ref("BreakStmt"),
-                        ref("ContinueStmt"),
                         ref("CallSubStmt"),
                         ref("ReturnStmt")));
         define("StmtList",
@@ -206,6 +205,8 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                         rep(or(
                                 ref("DefineFunctionStmt"),
                                 ref("DefineSubStmt"),
+                                ref("DefineNativeFunctionStmt"),
+                                ref("DefineNativeSubStmt"),
                                 ref("EmptyStmt")))));
     }
 }

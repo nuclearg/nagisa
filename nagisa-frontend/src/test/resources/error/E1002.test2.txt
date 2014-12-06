@@ -1,0 +1,2 @@
+dim a as integer
+let a = "asdf"

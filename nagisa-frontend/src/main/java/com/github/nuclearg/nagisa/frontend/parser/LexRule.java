@@ -25,6 +25,11 @@ final class LexRule extends SyntaxRule {
     }
 
     @Override
+    boolean tryToken(LexTokenType tokenType, SyntaxErrorReporter errorReporter) {
+        return this.tokenType == tokenType;
+    }
+
+    @Override
     SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         LexToken token = lexer.peek();
 
@@ -37,18 +42,13 @@ final class LexRule extends SyntaxRule {
 
             String exptected = this.tokenType.literal() != null ? this.tokenType.literal() : this.tokenType.toString();
 
-            errorReporter.report(Errors.E0001, lexer.prevPosition(), current, exptected);
+            errorReporter.report(lexer.prevPosition(), Errors.E0001, current, exptected);
             return null;
         }
 
         // 解析成功，返回语法树节点
         lexer.next();
         return new SyntaxTreeNode(this, token);
-    }
-
-    @Override
-    boolean tryToken(LexTokenType tokenType) {
-        return this.tokenType == tokenType;
     }
 
     @Override

@@ -55,8 +55,6 @@ public final class NagisaLexDefinition extends LexDefinition {
         KEYWORD_FOR("FOR"),
         KEYWORD_TO("TO"),
         KEYWORD_NEXT("NEXT"),
-        KEYWORD_BREAK("BREAK"),
-        KEYWORD_CONTINUE("CONTINUE"),
         KEYWORD_WHILE("WHILE"),
 
         KEYWORD_FUNCTION("FUNCTION"),
@@ -64,7 +62,7 @@ public final class NagisaLexDefinition extends LexDefinition {
         KEYWORD_NATIVEFUNCTION("NATIVEFUNCTION"),
         KEYWORD_NATIVESUB("NATIVESUB"),
         KEYWORD_RETURN("RETURN"),
-
+        
         /**
          * 符号名
          */
@@ -91,7 +89,6 @@ public final class NagisaLexDefinition extends LexDefinition {
         SYMBOL_LTE("<="),
         SYMBOL_AND("&&"),
         SYMBOL_OR("||"),
-        SYMBOL_XOR("^"),
         SYMBOL_NOT("!"),
         SYMBOL_LET("="),
 

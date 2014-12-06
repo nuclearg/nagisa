@@ -1,0 +1,19 @@
+nativesub nativesub1(i as integer, foo as string, bar as boolean)
+	"hello"
+	"world"
+end sub
+
+nativesub nativesub2()
+	"hello"
+	"world"
+end sub
+
+nativefunction nativefunc1(i as integer, foo as string, bar as boolean) as integer
+	"hello"
+	"world"
+end function
+
+nativefunction nativefunc2() as string
+	"hello"
+	"world"
+end function

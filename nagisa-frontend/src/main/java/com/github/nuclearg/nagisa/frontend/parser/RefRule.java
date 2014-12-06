@@ -1,5 +1,6 @@
 package com.github.nuclearg.nagisa.frontend.parser;
 
+import com.github.nuclearg.nagisa.frontend.error.Fatals;
 import com.github.nuclearg.nagisa.frontend.error.SyntaxErrorReporter;
 import com.github.nuclearg.nagisa.frontend.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.frontend.lexer.LexTokenizer;
@@ -25,21 +26,14 @@ final class RefRule extends SyntaxRule {
         this.name = name;
     }
 
-    private SyntaxRule rule() {
-        SyntaxRule rule = this.definition.getRule(this.name);
-        if (rule == null)
-            throw new NullPointerException("syntax rule not exists. ruleName: " + this.name);
-        return rule;
-    }
-
     @Override
-    boolean tryToken(LexTokenType tokenType) {
-        return this.rule().tryToken(tokenType);
+    boolean tryToken(LexTokenType tokenType, SyntaxErrorReporter errorReporter) {
+        return this.rule(errorReporter).tryToken(tokenType, errorReporter);
     }
 
     @Override
     SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
-        SyntaxTreeNode node = this.rule().parse(lexer, errorReporter);
+        SyntaxTreeNode node = this.rule(errorReporter).parse(lexer, errorReporter);
 
         if (node == null)
             return null;
@@ -48,6 +42,13 @@ final class RefRule extends SyntaxRule {
             return node;
         else
             return new SyntaxTreeNode(this.name, node);
+    }
+
+    private SyntaxRule rule(SyntaxErrorReporter errorReporter) {
+        SyntaxRule rule = this.definition.getRule(this.name);
+        if (rule == null)
+            errorReporter.report(Fatals.F0001, "syntax rule not exists. ruleName: " + this.name);
+        return rule;
     }
 
     @Override

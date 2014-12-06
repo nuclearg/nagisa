@@ -17,8 +17,8 @@ if a<b then
 
 else
 	if b>c then
-		if c>d then
-			let x=x+1
+		if c>c+1 then
+			let x=c+1
 		else
 		end if
 	end if

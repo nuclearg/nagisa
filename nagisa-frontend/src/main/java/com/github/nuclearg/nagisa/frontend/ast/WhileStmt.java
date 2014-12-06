@@ -39,10 +39,8 @@ public final class WhileStmt extends Stmt {
 
     @Override
     public String toString(String prefix) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(prefix).append("WHILE ").append(this.condition).append(SystemUtils.LINE_SEPARATOR);
-        this.stmts.stream().forEach(s -> builder.append(s.toString(prefix + "    ")));
-        builder.append(prefix).append("WEND").append(SystemUtils.LINE_SEPARATOR);
-        return builder.toString();
+        return prefix + "WHILE " + this.condition + SystemUtils.LINE_SEPARATOR
+                + Stmt.toString(this.stmts, prefix + "    ")
+                + prefix + "END WHILE" + SystemUtils.LINE_SEPARATOR;
     }
 }

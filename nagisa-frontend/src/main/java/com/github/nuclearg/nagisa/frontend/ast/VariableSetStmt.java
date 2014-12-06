@@ -26,10 +26,9 @@ public final class VariableSetStmt extends Stmt {
 
         if (this.expr == null)
             return;
-        
-        
+
         // 注册变量名
-            ctx.registry.registerVariableInfo(this.symbol, this.expr.getType(), node.getRange().getStartPosition());
+        ctx.registry.registerVariableInfo(this.symbol, this.expr.getType(), node);
     }
 
     /** 变量名 */

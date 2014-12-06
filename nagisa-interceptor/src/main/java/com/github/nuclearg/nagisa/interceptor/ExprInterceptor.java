@@ -40,6 +40,7 @@ class ExprInterceptor {
 
     Value eval(Context ctx) {
         List<Value> values = this.children.stream().map(e -> e.eval(ctx)).collect(Collectors.toList());
+
         long int0 = values.size() > 0 ? values.get(0).getIntegerValue() : 0;
         long int1 = values.size() > 1 ? values.get(1).getIntegerValue() : 0;
         String str0 = values.size() > 0 ? values.get(0).getStringValue() : null;
@@ -100,12 +101,14 @@ class ExprInterceptor {
             case StringLte:
                 return new Value(str0.compareTo(str1) <= 0);
 
+            case BooleanEq:
+                return new Value(bool0 == bool1);
+            case BooleanNeq:
+                return new Value(bool0 != bool1);
             case BooleanAnd:
                 return new Value(bool0 && bool1);
             case BooleanOr:
                 return new Value(bool0 || bool1);
-            case BooleanXor:
-                return new Value(bool0 != bool1);
 
             case FunctionInvocation:
                 return null;

@@ -25,24 +25,24 @@ final class OrRule extends SyntaxRule {
     }
 
     @Override
+    boolean tryToken(LexTokenType tokenType, SyntaxErrorReporter errorReporter) {
+        for (SyntaxRule rule : this.rules)
+            if (rule.tryToken(tokenType, errorReporter))
+                return true;
+        return false;
+    }
+
+    @Override
     SyntaxTreeNode parse(LexTokenizer lexer, SyntaxErrorReporter errorReporter) {
         // 需要根据下一个词法元素类型来选择使用哪一条规则
         LexToken token = lexer.peek();
         for (SyntaxRule rule : this.rules)
-            if (rule.tryToken(token.getType()))
+            if (rule.tryToken(token.getType(), errorReporter))
                 return tryParse(lexer, rule, errorReporter);
 
         // 没有规则支持当前的符号，报错返回
-        errorReporter.report(Errors.E0002, lexer.position(), token);
+        errorReporter.report(lexer.position(), Errors.E0002, token);
         return null;
-    }
-
-    @Override
-    boolean tryToken(LexTokenType tokenType) {
-        for (SyntaxRule rule : this.rules)
-            if (rule.tryToken(tokenType))
-                return true;
-        return false;
     }
 
     @Override
