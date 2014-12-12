@@ -29,19 +29,20 @@ public final class CompilationUnit implements StmtBlockSupported {
         this.initStmtBlock();
     }
 
-    /**
-     * 获取程序中的各条语句
-     */
+    /** 程序体中的各条语句 */
     public Iterable<Stmt> getBodyStmts() {
         return this.bodyStmts;
     }
 
-    public Iterable<Stmt> geetFunctionStmts() {
+    /** 函数和方法声明语句 */
+    public Iterable<Stmt> getFunctionStmts() {
         return this.functionStmts;
     }
 
     @Override
     public void initStmtBlock() {
+        // 必须先初始化函数声明再初始化程序体，否则程序体中调用函数时会找不到符号
+
         this.functionStmts.init();
 
         this.bodyStmts.init();

@@ -50,6 +50,16 @@ public final class CallSubStmt extends Stmt {
         }
     }
 
+    /** 要调用的方法名 */
+    public String getName() {
+        return this.name;
+    }
+
+    /** 参数列表 */
+    public List<Expr> getArguments() {
+        return this.arguments;
+    }
+
     @Override
     protected String toString(String prefix) {
         return prefix + this.name + " " + StringUtils.join(this.arguments, ", ");

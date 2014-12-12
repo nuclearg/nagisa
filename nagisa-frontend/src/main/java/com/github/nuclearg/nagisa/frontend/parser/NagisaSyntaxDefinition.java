@@ -189,7 +189,7 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
 
         // 普通语句
         define("Stmt",
-                or(
+                stmt(
                         ref("EmptyStmt"),
                         ref("DefineVariableStmt"),
                         ref("VariableSetStmt"),
@@ -211,7 +211,7 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                 ref("StmtList"));
         // 编译单元中的定义部分
         define("CompilationUnitDeclareStmts",
-                rep(or(
+                rep(stmt(
                         ref("DefineFunctionStmt"),
                         ref("DefineSubStmt"),
                         ref("DefineNativeFunctionStmt"),

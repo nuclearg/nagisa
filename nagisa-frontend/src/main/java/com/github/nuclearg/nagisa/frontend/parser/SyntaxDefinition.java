@@ -54,4 +54,8 @@ public abstract class SyntaxDefinition {
     protected final SyntaxRule rep(SyntaxRule rule) {
         return new RepeatRule(rule);
     }
+
+    protected final SyntaxRule stmt(SyntaxRule... rules) {
+        return new StmtRule(Arrays.asList(rules));
+    }
 }

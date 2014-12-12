@@ -1,7 +1,7 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
 /**
- * 表达式类型
+ * 表达式运算符
  * 
  * @author ng
  *

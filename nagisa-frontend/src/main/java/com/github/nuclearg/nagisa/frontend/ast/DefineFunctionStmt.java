@@ -23,6 +23,11 @@ public final class DefineFunctionStmt extends DefineFunctionStmtBase implements 
         this.stmts = new StmtBlock(node.getChildren().get(6).getChildren(), ctx);
     }
 
+    /** 函数体 */
+    public StmtBlock getStmts() {
+        return this.stmts;
+    }
+
     @Override
     public void initStmtBlock() {
         this.stmts.init();

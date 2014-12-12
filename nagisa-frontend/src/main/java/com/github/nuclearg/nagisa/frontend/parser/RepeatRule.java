@@ -39,7 +39,7 @@ final class RepeatRule extends SyntaxRule {
 
             // 判断这个词是否可以被规则接收
             if (this.rule.tryToken(token.getType(), errorReporter))
-                children.add(this.tryParse(lexer, rule, errorReporter));
+                children.add(this.rule.parse(lexer, errorReporter));
             else
                 break;
         }

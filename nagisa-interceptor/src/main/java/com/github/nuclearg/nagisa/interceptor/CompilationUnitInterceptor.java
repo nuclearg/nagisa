@@ -10,13 +10,15 @@ import com.github.nuclearg.nagisa.frontend.ast.CompilationUnit;
  * @author ng
  *
  */
-class CompilationUnitInterceptor {
+final class CompilationUnitInterceptor {
     private final List<StmtInterceptor> bodyStmts;
-    private final List<StmtInterceptor> functionStmts;
 
-    CompilationUnitInterceptor(CompilationUnit cu) {
+    CompilationUnitInterceptor(CompilationUnit cu, Context ctx) {
+        // 主程序
         this.bodyStmts = StmtInterceptor.buildInterceptors(cu.getBodyStmts());
-        this.functionStmts = StmtInterceptor.buildInterceptors(cu.getBodyStmts());
+
+        // 函数列表
+        cu.getFunctionStmts().forEach(stmt -> ctx.registerFunction(new FunctionInterceptor(stmt)));
     }
 
     /**
@@ -26,7 +28,6 @@ class CompilationUnitInterceptor {
      *            上下文
      */
     void eval(Context ctx) {
-        StmtInterceptor.eval(this.functionStmts, ctx);
         StmtInterceptor.eval(this.bodyStmts, ctx);
     }
 

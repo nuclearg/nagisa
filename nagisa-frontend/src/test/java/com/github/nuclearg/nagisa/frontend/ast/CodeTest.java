@@ -3,15 +3,17 @@ package com.github.nuclearg.nagisa.frontend.ast;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.github.nuclearg.nagisa.frontend.ast.NagisaFrontend.LoadResult;
+
 public class CodeTest {
     @Test
     public void test() {
-        String code = "// let a = 3  - - - - - 4\r\n";
+        String code = "function a()\r\nend function\r\n";
 
-        ParseResult result = ParserUtils.parse(code);
+        LoadResult result = NagisaFrontend.loadCompilationUnit(code);
 
-        Assert.assertTrue(result.errors.isEmpty());
+        Assert.assertTrue(result.getErrors().isEmpty());
 
-        System.out.println(result.cu);
+        System.out.println(result.getCu());
     }
 }

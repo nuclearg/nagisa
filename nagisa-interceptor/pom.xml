@@ -20,6 +20,11 @@
             <artifactId>nagisa-frontend</artifactId>
             <version>${nagisa.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.nuclearg.nagisa</groupId>
+            <artifactId>nagisa-rtlib</artifactId>
+            <version>${nagisa.version}</version>
+        </dependency>
 
         <!-- junit -->
         <dependency>

@@ -28,6 +28,16 @@ public final class DefineNativeFunctionStmt extends DefineFunctionStmtBase {
         this.javaMethodName = "asdfasdf";
     }
 
+    /** 对应的java类名 */
+    public String getJavaClassName() {
+        return this.javaClassName;
+    }
+
+    /** 对应的java方法名 */
+    public String getJavaMethodName() {
+        return this.javaMethodName;
+    }
+
     @Override
     protected String toString(String prefix) {
         return prefix + "NATIVEFUNCTION " + this.name + " (" + StringUtils.join(this.parameters, ", ") + ") AS " + this.type + SystemUtils.LINE_SEPARATOR

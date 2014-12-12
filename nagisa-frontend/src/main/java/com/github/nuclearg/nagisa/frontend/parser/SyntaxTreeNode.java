@@ -56,7 +56,11 @@ public final class SyntaxTreeNode {
         else {
             SyntaxTreeNode first = children.get(0);
             SyntaxTreeNode last = children.get(children.size() - 1);
-            this.range = new Range(first.range.getStartPosition(), last.range.getEndPosition());
+
+            Position startPos = first != null ? first.getRange().getStartPosition() : Position.EMPTY;
+            Position endPos = last != null ? last.getRange().getEndPosition() : Position.EMPTY;
+
+            this.range = new Range(startPos, endPos);
         }
     }
 

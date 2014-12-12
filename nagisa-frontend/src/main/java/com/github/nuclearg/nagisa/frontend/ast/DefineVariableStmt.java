@@ -49,6 +49,16 @@ public final class DefineVariableStmt extends Stmt {
             ctx.registry.registerVariableInfo(this.name, this.type, node);
     }
 
+    /** 变量名 */
+    public String getName() {
+        return this.name;
+    }
+
+    /** 类型 */
+    public TypeIdentifierInfo getType() {
+        return this.type;
+    }
+
     @Override
     protected String toString(String prefix) {
         return prefix + "DIM " + this.name + " AS " + this.type + SystemUtils.LINE_SEPARATOR;

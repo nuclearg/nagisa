@@ -8,7 +8,7 @@ import com.github.nuclearg.nagisa.frontend.ast.VariableSetStmt;
  * @author ng
  *
  */
-class VariableSetStmtInterceptor extends StmtInterceptor {
+final class VariableSetStmtInterceptor extends StmtInterceptor {
     /**
      * 变量名称
      */

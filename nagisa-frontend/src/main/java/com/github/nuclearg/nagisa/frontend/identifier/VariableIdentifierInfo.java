@@ -6,7 +6,7 @@ package com.github.nuclearg.nagisa.frontend.identifier;
  * @author ng
  *
  */
-public class VariableIdentifierInfo {
+public final class VariableIdentifierInfo {
     /**
      * 变量名
      */

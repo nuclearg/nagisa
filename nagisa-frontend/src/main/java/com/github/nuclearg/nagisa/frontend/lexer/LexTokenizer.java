@@ -85,7 +85,7 @@ public final class LexTokenizer {
     /**
      * 向前看一个词法元素，但不从流中读出
      * 
-     * @return 同{@link #next()}
+     * @return 下一个词法元素，如果无法与任何词法规则匹配则返回一个type为ERROR的token，如果遇到EOF则返回一个type为null的token
      */
     public LexToken peek() {
         Position snapshot = this.position();

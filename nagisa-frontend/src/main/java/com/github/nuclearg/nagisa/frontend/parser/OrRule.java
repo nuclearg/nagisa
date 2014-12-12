@@ -38,7 +38,7 @@ final class OrRule extends SyntaxRule {
         LexToken token = lexer.peek();
         for (SyntaxRule rule : this.rules)
             if (rule.tryToken(token.getType(), errorReporter))
-                return tryParse(lexer, rule, errorReporter);
+                return rule.parse(lexer, errorReporter);
 
         // 没有规则支持当前的符号，报错返回
         errorReporter.report(lexer.position(), Errors.E0002, token);

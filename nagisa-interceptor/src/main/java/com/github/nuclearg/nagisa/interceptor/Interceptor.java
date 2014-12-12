@@ -1,5 +1,7 @@
 package com.github.nuclearg.nagisa.interceptor;
 
+import java.util.List;
+
 import com.github.nuclearg.nagisa.frontend.ast.CompilationUnit;
 
 /**
@@ -14,10 +16,22 @@ public final class Interceptor {
      * 
      * @param cu
      *            待执行的程序
+     * @param libs
+     *            依赖的库
      */
-    public void eval(CompilationUnit cu) {
-        RuntimeErrorReporter errorReporter = new RuntimeErrorReporter();
+    public static void eval(CompilationUnit cu, List<CompilationUnit> libs, List<CompilationUnit> rtlibs) {
+        Context ctx = new Context();
 
-        new CompilationUnitInterceptor(cu).eval(new Context(errorReporter));
+        // 先加载运行库
+        rtlibs.stream().forEach(lib -> new CompilationUnitInterceptor(lib, ctx));
+
+        // 再加载用户库
+        libs.stream().forEach(lib -> new CompilationUnitInterceptor(lib, ctx));
+
+        // 再加载主程序
+        CompilationUnitInterceptor main = new CompilationUnitInterceptor(cu, ctx);
+
+        // 执行主程序
+        main.eval(ctx);
     }
 }

@@ -1,4 +1,4 @@
-package com.github.nuclearg.nagisa.frontend.ast;
+package com.github.nuclearg.nagisa.frontend.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

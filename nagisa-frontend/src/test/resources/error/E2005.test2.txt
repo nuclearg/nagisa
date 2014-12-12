@@ -1,4 +1,4 @@
 let a = asdf("asdf")
 
-function asdf(a as integer) as integer
+function asdf(a as integer)
 end function

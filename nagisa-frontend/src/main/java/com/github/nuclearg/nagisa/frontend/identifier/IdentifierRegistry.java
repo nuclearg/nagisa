@@ -14,7 +14,7 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public class IdentifierRegistry {
+public final class IdentifierRegistry {
     /**
      * 变量标识符注册表
      */

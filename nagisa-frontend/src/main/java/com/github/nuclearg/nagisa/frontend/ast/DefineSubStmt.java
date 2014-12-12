@@ -13,7 +13,7 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  */
 public final class DefineSubStmt extends DefineFunctionStmtBase implements StmtBlockSupported {
     /**
-     * 函数体
+     * 方法体
      */
     private final StmtBlock stmts;
 
@@ -21,6 +21,11 @@ public final class DefineSubStmt extends DefineFunctionStmtBase implements StmtB
         super(node, ctx);
 
         this.stmts = new StmtBlock(node.getChildren().get(6).getChildren(), ctx);
+    }
+
+    /** 方法体 */
+    public StmtBlock getStmts() {
+        return this.stmts;
     }
 
     @Override

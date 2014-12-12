@@ -1,7 +1,9 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,6 +14,9 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
+
+import com.github.nuclearg.nagisa.frontend.ast.NagisaFrontend.LoadResult;
+import com.github.nuclearg.nagisa.frontend.util.InputStreamUtils;
 
 @RunWith(AstTest.class)
 public class AstTest extends ParentRunner<File> {
@@ -40,11 +45,13 @@ public class AstTest extends ParentRunner<File> {
 
             @Override
             public void evaluate() throws Throwable {
-                ParseResult result = ParserUtils.parse(child);
+                String code = InputStreamUtils.read(new FileInputStream(child), Charset.forName("utf-8"));
 
-                System.out.println(result.cu);
+                LoadResult result = NagisaFrontend.loadCompilationUnit(code);
 
-                Assert.assertTrue(result.errors.isEmpty());
+                System.out.println(result.getCu());
+
+                Assert.assertTrue(result.getErrors().isEmpty());
             }
         };
         this.runLeaf(statement, this.describeChild(child), notifier);

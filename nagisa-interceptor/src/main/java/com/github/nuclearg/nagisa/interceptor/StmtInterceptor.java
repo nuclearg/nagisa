@@ -1,7 +1,8 @@
 package com.github.nuclearg.nagisa.interceptor;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.github.nuclearg.nagisa.frontend.ast.Stmt;
 
@@ -12,6 +13,11 @@ import com.github.nuclearg.nagisa.frontend.ast.Stmt;
  *
  */
 abstract class StmtInterceptor {
+
+    StmtInterceptor() {
+        // 禁止这个包外面的类继承这个类
+    }
+
     /**
      * 执行语句
      * 
@@ -28,11 +34,9 @@ abstract class StmtInterceptor {
      * @return 解释器列表
      */
     public static List<StmtInterceptor> buildInterceptors(Iterable<Stmt> stmts) {
-        List<StmtInterceptor> interceptors = new ArrayList<>();
-
-        stmts.forEach(s -> interceptors.add(buildInterceptor(s)));
-
-        return interceptors;
+        return StreamSupport.stream(stmts.spliterator(), false)
+                .map(s -> buildInterceptor(s))
+                .collect(Collectors.toList());
     }
 
     /**

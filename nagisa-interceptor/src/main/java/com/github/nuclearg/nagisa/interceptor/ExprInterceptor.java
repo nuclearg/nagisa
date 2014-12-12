@@ -8,7 +8,7 @@ import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.github.nuclearg.nagisa.frontend.ast.Expr;
-import com.github.nuclearg.nagisa.frontend.ast.ExprOperator;
+import com.github.nuclearg.nagisa.frontend.identifier.TypeIdentifierInfo;
 
 /**
  * 表达式的解释器
@@ -16,45 +16,42 @@ import com.github.nuclearg.nagisa.frontend.ast.ExprOperator;
  * @author ng
  *
  */
-class ExprInterceptor {
+final class ExprInterceptor {
     /**
      * 表达式
      */
-    private final ExprOperator operator;
-    /**
-     * 表达式字面量
-     */
-    private final String text;
+    private final Expr expr;
     /**
      * 子表达式解释器列表
      */
     private final List<ExprInterceptor> children;
 
     private ExprInterceptor(Expr expr) {
-        this.operator = expr.getOperator();
-        this.text = expr.getText();
+        this.expr = expr;
         this.children = Collections.unmodifiableList(StreamSupport.stream(expr.getChildren().spliterator(), false)
                 .map(e -> new ExprInterceptor(e))
                 .collect(Collectors.toList()));
     }
 
     Value eval(Context ctx) {
-        List<Value> values = this.children.stream().map(e -> e.eval(ctx)).collect(Collectors.toList());
+        List<Value> values = this.children.stream()
+                .map(e -> e.eval(ctx))
+                .collect(Collectors.toList());
 
-        long int0 = values.size() > 0 ? values.get(0).getIntegerValue() : 0;
-        long int1 = values.size() > 1 ? values.get(1).getIntegerValue() : 0;
-        String str0 = values.size() > 0 ? values.get(0).getStringValue() : null;
-        String str1 = values.size() > 1 ? values.get(1).getStringValue() : null;
-        boolean bool0 = values.size() > 0 ? values.get(0).getBooleanValue() : false;
-        boolean bool1 = values.size() > 1 ? values.get(1).getBooleanValue() : false;
+        long int0 = values.size() > 0 && values.get(0).getType() == TypeIdentifierInfo.INTEGER ? (Long) values.get(0).getValue() : 0;
+        long int1 = values.size() > 1 && values.get(1).getType() == TypeIdentifierInfo.INTEGER ? (Long) values.get(1).getValue() : 0;
+        String str0 = values.size() > 0 && values.get(0).getType() == TypeIdentifierInfo.STRING ? (String) values.get(0).getValue() : null;
+        String str1 = values.size() > 1 && values.get(1).getType() == TypeIdentifierInfo.STRING ? (String) values.get(1).getValue() : null;
+        boolean bool0 = values.size() > 0 && values.get(0).getType() == TypeIdentifierInfo.BOOLEAN ? (Boolean) values.get(0).getValue() : false;
+        boolean bool1 = values.size() > 1 && values.get(0).getType() == TypeIdentifierInfo.BOOLEAN ? (Boolean) values.get(1).getValue() : false;
 
-        switch (this.operator) {
+        switch (this.expr.getOperator()) {
             case IntegerLiteral:
-                return new Value(NumberUtils.toLong(this.text));
+                return new Value(NumberUtils.toLong(this.expr.getText()));
             case StringLiteral:
-                return new Value(this.text);
+                return new Value(this.expr.getText());
             case VariableRef:
-                return new Value(ctx.getIntegerVariableValue(this.text));
+                return new Value(ctx.getIntegerVariableValue(this.expr.getText()));
 
             case IntegerNegative:
                 return new Value(0 - int0);
@@ -111,14 +108,39 @@ class ExprInterceptor {
                 return new Value(bool0 || bool1);
 
             case FunctionInvocation:
-                return null;
+                return ctx.invokeFunction(this.expr.getText(), values);
 
             default:
-                throw new UnsupportedOperationException("operation: " + this.operator);
+                throw new UnsupportedOperationException("operation: " + this.expr.getOperator());
         }
     }
 
+    @Override
+    public String toString() {
+        return this.expr.toString();
+    }
+
+    /**
+     * 构造表达式的解释器
+     * 
+     * @param expr
+     *            表达式
+     * @return 表达式的解释器
+     */
     static ExprInterceptor buildInterceptor(Expr expr) {
         return new ExprInterceptor(expr);
+    }
+
+    /**
+     * 构造表达式的解释器
+     * 
+     * @param exprs
+     *            表达式列表
+     * @return 表达式列表对应的解释器列表
+     */
+    static List<ExprInterceptor> buildInterceptors(List<Expr> exprs) {
+        return exprs.stream()
+                .map(e -> buildInterceptor(e))
+                .collect(Collectors.toList());
     }
 }

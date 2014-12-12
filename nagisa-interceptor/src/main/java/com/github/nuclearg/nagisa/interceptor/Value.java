@@ -1,6 +1,7 @@
 package com.github.nuclearg.nagisa.interceptor;
 
 import com.github.nuclearg.nagisa.frontend.identifier.TypeIdentifierInfo;
+import com.github.nuclearg.nagisa.interceptor.ex.NagisaInterceptorInternalException;
 
 /**
  * 解释器中各个表达式运算出的值
@@ -14,37 +15,30 @@ class Value {
      */
     private final TypeIdentifierInfo type;
     /**
-     * 数字值
+     * 值
      */
-    private final long intValue;
-    /**
-     * 字符串值
-     */
-    private final String strValue;
-    /**
-     * 布尔值
-     */
-    private final boolean boolValue;
+    private final Object value;
+
+    Value(Object value, TypeIdentifierInfo type) {
+        if (type == null)
+            throw new NagisaInterceptorInternalException("value.type is null");
+        if (value == null)
+            throw new NagisaInterceptorInternalException("value.value is null");
+
+        this.type = type;
+        this.value = value;
+    }
 
     Value(long value) {
-        this.type = TypeIdentifierInfo.INTEGER;
-        this.intValue = value;
-        this.strValue = null;
-        this.boolValue = false;
+        this(value, TypeIdentifierInfo.INTEGER);
     }
 
     Value(String value) {
-        this.type = TypeIdentifierInfo.STRING;
-        this.intValue = 0;
-        this.strValue = value;
-        this.boolValue = false;
+        this(value, TypeIdentifierInfo.STRING);
     }
 
     Value(boolean value) {
-        this.type = TypeIdentifierInfo.BOOLEAN;
-        this.intValue = 0;
-        this.strValue = null;
-        this.boolValue = value;
+        this(value, TypeIdentifierInfo.BOOLEAN);
     }
 
     /** 值的类型 */
@@ -52,29 +46,19 @@ class Value {
         return this.type;
     }
 
-    /** 数字值 */
-    public long getIntegerValue() {
-        return this.intValue;
-    }
-
-    /** 字符串值 */
-    public String getStringValue() {
-        return this.strValue;
-    }
-
-    /** 布尔值 */
-    public boolean getBooleanValue() {
-        return this.boolValue;
+    /** 值 */
+    public Object getValue() {
+        return this.value;
     }
 
     @Override
     public String toString() {
         if (this.type == TypeIdentifierInfo.INTEGER)
-            return "[I]" + this.intValue;
+            return "[I]" + this.value;
         if (this.type == TypeIdentifierInfo.STRING)
-            return "[S]" + this.strValue;
+            return "[S]" + this.value;
         if (this.type == TypeIdentifierInfo.BOOLEAN)
-            return "[B]" + this.boolValue;
+            return "[B]" + this.value;
 
         return "[" + this.type + "]UNKNOWN";
     }

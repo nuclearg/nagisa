@@ -9,7 +9,7 @@ import java.util.List;
  * @author ng
  *
  */
-public class FunctionIdentifierInfo {
+public final class FunctionIdentifierInfo {
     /**
      * 函数名
      */

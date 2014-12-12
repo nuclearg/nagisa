@@ -15,7 +15,7 @@ abstract class LexDefinition {
      */
     private final List<LexTokenType> types;
 
-    protected LexDefinition(List<LexTokenType> types) {
+    LexDefinition(List<LexTokenType> types) {
         this.types = Collections.unmodifiableList(types);
     }
 

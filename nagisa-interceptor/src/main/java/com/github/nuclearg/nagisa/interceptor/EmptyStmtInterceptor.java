@@ -6,7 +6,7 @@ package com.github.nuclearg.nagisa.interceptor;
  * @author ng
  *
  */
-class EmptyStmtInterceptor extends StmtInterceptor {
+final class EmptyStmtInterceptor extends StmtInterceptor {
     @Override
     public void eval(Context ctx) {
         // do nothing

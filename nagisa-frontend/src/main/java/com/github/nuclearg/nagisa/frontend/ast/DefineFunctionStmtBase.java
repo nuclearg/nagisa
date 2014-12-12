@@ -16,7 +16,7 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-abstract class DefineFunctionStmtBase extends Stmt {
+public abstract class DefineFunctionStmtBase extends Stmt {
     /**
      * 函数名
      */
@@ -71,4 +71,20 @@ abstract class DefineFunctionStmtBase extends Stmt {
 
         ctx.registry.registerFunctionInfo(this.name, this.type, this.parameters, node);
     }
+
+    /** 函数名 */
+    public String getName() {
+        return this.name;
+    }
+
+    /** 返回类型 */
+    public TypeIdentifierInfo getType() {
+        return this.type;
+    }
+
+    /** 形参列表 */
+    public List<VariableIdentifierInfo> getParameters() {
+        return this.parameters;
+    }
+
 }
