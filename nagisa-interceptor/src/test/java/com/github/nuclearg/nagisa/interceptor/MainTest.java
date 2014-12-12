@@ -50,11 +50,11 @@ public class MainTest extends ParentRunner<File> {
             public void evaluate() throws Throwable {
                 String code = InputStreamUtils.read(new FileInputStream(child), Charset.forName("utf-8"));
 
-                LoadResult result = NagisaFrontend.loadCompilationUnit(code);
+                LoadResult result = NagisaFrontend.loadCompilationUnit(code, Rtlib.LOAD_LIB_RESULT);
 
                 Assert.assertTrue(result.getErrors().isEmpty());
 
-                Interceptor.eval(result.getCu(), new ArrayList<>(), Rtlib.LIBS);
+                NagisaInterceptor.eval(result.getCu(), new ArrayList<>(), Rtlib.LIBS);
             }
         };
         this.runLeaf(statement, this.describeChild(child), notifier);

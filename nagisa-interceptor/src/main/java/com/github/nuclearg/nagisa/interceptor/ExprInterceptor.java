@@ -49,7 +49,7 @@ final class ExprInterceptor {
             case IntegerLiteral:
                 return new Value(NumberUtils.toLong(this.expr.getText()));
             case StringLiteral:
-                return new Value(this.expr.getText());
+                return new Value(this.expr.getText().substring(1, this.expr.getText().length() - 1));
             case VariableRef:
                 return new Value(ctx.getIntegerVariableValue(this.expr.getText()));
 

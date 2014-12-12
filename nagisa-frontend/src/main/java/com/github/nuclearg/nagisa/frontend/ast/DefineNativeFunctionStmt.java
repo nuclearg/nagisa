@@ -24,8 +24,13 @@ public final class DefineNativeFunctionStmt extends DefineFunctionStmtBase {
     DefineNativeFunctionStmt(SyntaxTreeNode node, Context ctx) {
         super(node, ctx);
 
-        this.javaClassName = "aaa";
-        this.javaMethodName = "asdfasdf";
+        String javaClassName = node.getChildren().get(8).getToken().getText();
+        javaClassName = javaClassName.substring(1, javaClassName.length() - 1);
+        String javaMethodName = node.getChildren().get(10).getToken().getText();
+        javaMethodName = javaMethodName.substring(1, javaMethodName.length() - 1);
+
+        this.javaClassName = javaClassName;
+        this.javaMethodName = javaMethodName;
     }
 
     /** 对应的java类名 */

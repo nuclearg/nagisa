@@ -1,5 +1,8 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.apache.commons.lang3.SystemUtils;
 
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
@@ -17,7 +20,7 @@ public final class CompilationUnit implements StmtBlockSupported {
     private final StmtBlock bodyStmts;
 
     /**
-     * 函数和方法声明语句
+     * 函数和方法声明语句，可能会夹杂着空语句
      */
     private final StmtBlock functionStmts;
 
@@ -36,7 +39,9 @@ public final class CompilationUnit implements StmtBlockSupported {
 
     /** 函数和方法声明语句 */
     public Iterable<Stmt> getFunctionStmts() {
-        return this.functionStmts;
+        return StreamSupport.stream(this.functionStmts.spliterator(), false)
+                .filter(s -> s instanceof DefineFunctionStmtBase)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -17,10 +17,11 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  */
 public final class NagisaFrontend {
     /**
-     * 将源代码解析为
+     * 解析源代码
      * 
-     * @param text
-     * @return
+     * @param code
+     *            源代码
+     * @return 解析结果
      */
     public static LoadResult loadCompilationUnit(String code) {
         SyntaxErrorReporter errorReporter = new SyntaxErrorReporter();
@@ -29,11 +30,32 @@ public final class NagisaFrontend {
 
         SyntaxTreeNode node = NagisaSyntaxDefinition.parse(code, errorReporter);
         if (node == null)
-            return new LoadResult(code, null, errorReporter.getErrors());
+            return new LoadResult(code, null, errorReporter.getErrors(), ctx);
 
         CompilationUnit cu = new CompilationUnit(node, ctx);
 
-        return new LoadResult(code, cu, errorReporter.getErrors());
+        return new LoadResult(code, cu, errorReporter.getErrors(), ctx);
+    }
+
+    /**
+     * 在上一个文件的解析结果基础上解析源代码
+     * 
+     * @param code
+     *            源代码
+     * @param prevResult
+     *            上一个文件的解析结果
+     * @return 解析结果
+     */
+    public static LoadResult loadCompilationUnit(String code, LoadResult prevResult) {
+        Context ctx = prevResult.getCtx().clone();
+
+        SyntaxTreeNode node = NagisaSyntaxDefinition.parse(code, ctx.errorReporter);
+        if (node == null)
+            return new LoadResult(code, null, ctx.errorReporter.getErrors(), ctx);
+
+        CompilationUnit cu = new CompilationUnit(node, ctx);
+
+        return new LoadResult(code, cu, ctx.errorReporter.getErrors(), ctx);
     }
 
     /**
@@ -56,10 +78,16 @@ public final class NagisaFrontend {
          */
         private final List<SyntaxErrorLogItem> errors;
 
-        LoadResult(String code, CompilationUnit cu, List<SyntaxErrorLogItem> errors) {
+        /**
+         * 上下文
+         */
+        private final Context ctx;
+
+        LoadResult(String code, CompilationUnit cu, List<SyntaxErrorLogItem> errors, Context ctx) {
             this.code = code;
             this.cu = cu;
             this.errors = Collections.unmodifiableList(errors);
+            this.ctx = ctx;
         }
 
         /** 被解析的源代码 */
@@ -77,5 +105,10 @@ public final class NagisaFrontend {
             return this.errors;
         }
 
+        /** 上下文 */
+
+        Context getCtx() {
+            return this.ctx;
+        }
     }
 }

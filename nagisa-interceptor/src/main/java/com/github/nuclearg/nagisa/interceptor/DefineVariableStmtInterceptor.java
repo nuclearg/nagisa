@@ -32,11 +32,11 @@ final class DefineVariableStmtInterceptor extends StmtInterceptor {
 
     private Value getTypeDefaultValue(TypeIdentifierInfo type) {
         if (type == TypeIdentifierInfo.INTEGER)
-            return new Value(0, type);
+            return new Value(0);
         if (type == TypeIdentifierInfo.STRING)
-            return new Value("", type);
+            return new Value("");
         if (type == TypeIdentifierInfo.BOOLEAN)
-            return new Value(false, type);
+            return new Value(false);
         throw new NagisaInterceptorInternalException("unsupported value type " + type);
     }
 }

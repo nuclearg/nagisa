@@ -10,7 +10,7 @@ import com.github.nuclearg.nagisa.frontend.ast.CompilationUnit;
  * @author ng
  *
  */
-public final class Interceptor {
+public final class NagisaInterceptor {
     /**
      * 执行一段程序
      * 

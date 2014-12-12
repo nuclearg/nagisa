@@ -24,4 +24,8 @@ final class Context {
         this.errorReporter = errorReporter;
     }
 
+    @Override
+    protected Context clone() {
+        return new Context(this.registry.clone(), this.errorReporter);
+    }
 }

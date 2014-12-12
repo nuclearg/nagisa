@@ -37,6 +37,17 @@ public final class IdentifierRegistry {
         this.errorReporter = errorReporter;
     }
 
+    @Override
+    public IdentifierRegistry clone() {
+        IdentifierRegistry clone = new IdentifierRegistry(errorReporter);
+
+        clone.variableMap.putAll(this.variableMap);
+        clone.functionMap.putAll(this.functionMap);
+        clone.typeMap.putAll(this.typeMap);
+
+        return clone;
+    }
+
     /**
      * 查询一个变量
      * 

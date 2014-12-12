@@ -1,1 +1,7 @@
-print "hello world!"
+dim sum as integer
+
+for i=0 to 100
+	let sum = sum + i
+next
+
+print "hello world! sum = " + itoa(sum)
