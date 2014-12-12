@@ -1,11 +1,11 @@
 package com.github.nuclearg.nagisa.rtlib.nativelib;
 
 public class Type {
-    public static String itoa(long i) {
-        return String.valueOf(i);
+    public static String chr(long i) {
+        return "" + (char) i;
     }
 
-    public static long atoi(String str) {
-        return Long.parseLong(str);
+    public static long asc(String ch) {
+        return (long) ch.charAt(0);
     }
 }

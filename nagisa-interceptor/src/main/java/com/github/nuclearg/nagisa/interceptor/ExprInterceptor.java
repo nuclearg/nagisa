@@ -51,7 +51,7 @@ final class ExprInterceptor {
             case StringLiteral:
                 return new Value(this.expr.getText().substring(1, this.expr.getText().length() - 1));
             case VariableRef:
-                return new Value(ctx.getIntegerVariableValue(this.expr.getText()));
+                return ctx.getVariableValue(this.expr.getText());
 
             case IntegerNegative:
                 return new Value(0 - int0);

@@ -53,7 +53,8 @@ public abstract class DefineFunctionStmtBase extends Stmt {
         List<VariableIdentifierInfo> parameters = parametersNode.getChildren().stream()
                 .map(n -> "RestParam".equals(n.getRuleName()) ? n.getChildren().get(1) : n)
                 .map(n -> {
-                    String name = n.getChildren().get(0).getToken().getText();
+                    SyntaxTreeNode nameNode = n.getChildren().get(0);
+                    String name = nameNode.getToken().getText();
                     SyntaxTreeNode typeNode = n.getChildren().get(2);
                     String typeName = typeNode.getToken().getText();
 
@@ -63,10 +64,11 @@ public abstract class DefineFunctionStmtBase extends Stmt {
                     if (type == TypeIdentifierInfo.VOID)
                         ctx.errorReporter.report(typeNode, Errors.E1104);
 
+                    ctx.registry.registerVariableInfo(name, type, nameNode);
+
                     return new VariableIdentifierInfo(name, type);
                 })
                 .collect(Collectors.toList());
-
         this.parameters = Collections.unmodifiableList(parameters);
 
         ctx.registry.registerFunctionInfo(this.name, this.type, this.parameters, node);

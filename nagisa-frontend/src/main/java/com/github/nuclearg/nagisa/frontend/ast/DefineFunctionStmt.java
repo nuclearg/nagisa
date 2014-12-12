@@ -20,7 +20,7 @@ public final class DefineFunctionStmt extends DefineFunctionStmtBase implements 
     DefineFunctionStmt(SyntaxTreeNode node, Context ctx) {
         super(node, ctx);
 
-        this.stmts = new StmtBlock(node.getChildren().get(6).getChildren(), ctx);
+        this.stmts = new StmtBlock(node.getChildren().get(8).getChildren(), ctx);
     }
 
     /** 函数体 */
