@@ -1,9 +1,8 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.LN;
 
-import org.apache.commons.lang3.SystemUtils;
+import java.util.List;
 
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
@@ -13,50 +12,35 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class CompilationUnit implements StmtBlockSupported {
+public final class CompilationUnit {
     /**
      * 程序体中的各条语句
      */
-    private final StmtBlock bodyStmts;
+    private final List<Stmt> mainStmts;
 
     /**
-     * 函数和方法声明语句，可能会夹杂着空语句
+     * 函娄定义列表
      */
-    private final StmtBlock functionStmts;
+    private final List<Stmt> definitionStmts;
 
     CompilationUnit(SyntaxTreeNode node, Context ctx) {
-        this.bodyStmts = new StmtBlock(node.getChildren().get(0).getChildren(), ctx);
-        this.functionStmts = new StmtBlock(node.getChildren().get(1).getChildren(), ctx);
-
-        // 最后初始化
-        this.initStmtBlock();
+        this.mainStmts = Stmt.buildStmts(node.getChildren().get(0).getChildren(), ctx);
+        this.definitionStmts = Stmt.buildStmts(node.getChildren().get(1).getChildren(), ctx);
     }
 
     /** 程序体中的各条语句 */
-    public Iterable<Stmt> getBodyStmts() {
-        return this.bodyStmts;
+    public Iterable<Stmt> getMainStmts() {
+        return this.mainStmts;
     }
 
     /** 函数和方法声明语句 */
-    public Iterable<Stmt> getFunctionStmts() {
-        return StreamSupport.stream(this.functionStmts.spliterator(), false)
-                .filter(s -> s instanceof DefineFunctionStmtBase)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void initStmtBlock() {
-        // 必须先初始化函数声明再初始化程序体，否则程序体中调用函数时会找不到符号
-
-        this.functionStmts.init();
-
-        this.bodyStmts.init();
+    public Iterable<Stmt> getDefinitionStmts() {
+        return this.definitionStmts;
     }
 
     @Override
     public String toString() {
-        return this.bodyStmts + SystemUtils.LINE_SEPARATOR
-                + this.functionStmts;
+        return Stmt.toString(this.mainStmts, "") + LN
+                + Stmt.toString(this.definitionStmts, "");
     }
-
 }

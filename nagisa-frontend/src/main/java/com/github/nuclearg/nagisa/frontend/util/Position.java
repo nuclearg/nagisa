@@ -1,14 +1,18 @@
 package com.github.nuclearg.nagisa.frontend.util;
 
 /**
- * 词法解析器的快照
+ * 位置，用于在源文件中定位某个具体的点
  * 
  * @author ng
  *
  */
 public final class Position {
-    public static final Position EMPTY = new Position(0, 0, 0);
+    public static final Position EMPTY = new Position("", 0, 0, 0);
 
+    /**
+     * 当前文件名
+     */
+    private final String fileName;
     /**
      * 当前位置
      */
@@ -22,10 +26,16 @@ public final class Position {
      */
     private final int column;
 
-    public Position(int pos, int row, int column) {
+    public Position(String fileName, int pos, int row, int column) {
+        this.fileName = fileName;
         this.pos = pos;
         this.row = row;
         this.column = column;
+    }
+
+    /** 当前文件名 */
+    public String getFileName() {
+        return this.fileName;
     }
 
     /** 当前位置 */
@@ -45,6 +55,6 @@ public final class Position {
 
     @Override
     public String toString() {
-        return "[" + (this.row + 1) + ":" + (this.column + 1) + "]";
+        return this.fileName + "[" + (this.row + 1) + ":" + (this.column + 1) + "]";
     }
 }

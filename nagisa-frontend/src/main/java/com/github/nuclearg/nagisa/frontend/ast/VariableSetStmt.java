@@ -1,6 +1,6 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
-import org.apache.commons.lang3.SystemUtils;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.LN;
 
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
@@ -22,13 +22,13 @@ public final class VariableSetStmt extends Stmt {
 
     VariableSetStmt(SyntaxTreeNode node, Context ctx) {
         this.symbol = node.getChildren().get(1).getToken().getText();
-        this.expr = Expr.resolveExpr(node.getChildren().get(3), ctx);
+        this.expr = Expr.buildExpr(node.getChildren().get(3), ctx);
 
         if (this.expr == null)
             return;
 
         // 注册变量名
-        ctx.registry.registerVariableInfo(this.symbol, this.expr.getType(), node);
+        ctx.getRegistry().registerVariableInfo(this.symbol, this.expr.getType(), node);
     }
 
     /** 变量名 */
@@ -43,6 +43,6 @@ public final class VariableSetStmt extends Stmt {
 
     @Override
     public String toString(String prefix) {
-        return prefix + "LET " + this.symbol + " = " + this.expr + SystemUtils.LINE_SEPARATOR;
+        return prefix + "LET " + this.symbol + " = " + this.expr + LN;
     }
 }

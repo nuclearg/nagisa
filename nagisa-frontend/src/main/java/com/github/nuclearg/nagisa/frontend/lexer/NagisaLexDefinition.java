@@ -21,10 +21,11 @@ public final class NagisaLexDefinition extends LexDefinition {
      * 
      * @param text
      *            被解析的文本
+     * @param 文件名
      * @return 词法解析器
      */
-    public static LexTokenizer lexer(String text) {
-        return new LexTokenizer(INSTANCE, text);
+    public static LexTokenizer lexer(String text, String fileName) {
+        return new LexTokenizer(INSTANCE, text, fileName);
     }
 
     public static enum NagisaLexTokenType implements LexTokenType {
@@ -62,7 +63,7 @@ public final class NagisaLexDefinition extends LexDefinition {
         KEYWORD_NATIVEFUNCTION("NATIVEFUNCTION"),
         KEYWORD_NATIVESUB("NATIVESUB"),
         KEYWORD_RETURN("RETURN"),
-        
+
         /**
          * 符号名
          */

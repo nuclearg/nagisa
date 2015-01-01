@@ -1,10 +1,10 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
-import org.apache.commons.lang3.SystemUtils;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.LN;
 
 import com.github.nuclearg.nagisa.frontend.error.Errors;
-import com.github.nuclearg.nagisa.frontend.identifier.TypeIdentifierInfo;
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
+import com.github.nuclearg.nagisa.frontend.symbol.TypeSymbol;
 
 /**
  * 变量定义语句
@@ -20,7 +20,7 @@ public final class DefineVariableStmt extends Stmt {
     /**
      * 类型
      */
-    private final TypeIdentifierInfo type;
+    private final TypeSymbol type;
 
     DefineVariableStmt(SyntaxTreeNode node, Context ctx) {
         this.name = node.getChildren().get(1).getToken().getText();
@@ -28,25 +28,25 @@ public final class DefineVariableStmt extends Stmt {
         String typeName = node.getChildren().get(3).getToken().getText();
         switch (typeName.toUpperCase()) {
             case "INTEGER":
-                this.type = TypeIdentifierInfo.INTEGER;
+                this.type = TypeSymbol.INTEGER;
                 break;
             case "STRING":
-                this.type = TypeIdentifierInfo.STRING;
+                this.type = TypeSymbol.STRING;
                 break;
             case "BOOLEAN":
-                this.type = TypeIdentifierInfo.BOOLEAN;
+                this.type = TypeSymbol.BOOLEAN;
                 break;
             case "VOID":
-                ctx.errorReporter.report(node, Errors.E1104);
+                ctx.getErrorReporter().report(node, Errors.E1104);
                 this.type = null;
                 break;
             default:
-                ctx.errorReporter.report(node, Errors.E1005, typeName);
+                ctx.getErrorReporter().report(node, Errors.E1005, typeName);
                 this.type = null;
         }
 
         if (this.type != null)
-            ctx.registry.registerVariableInfo(this.name, this.type, node);
+            ctx.getRegistry().registerVariableInfo(this.name, this.type, node);
     }
 
     /** 变量名 */
@@ -55,12 +55,12 @@ public final class DefineVariableStmt extends Stmt {
     }
 
     /** 类型 */
-    public TypeIdentifierInfo getType() {
+    public TypeSymbol getType() {
         return this.type;
     }
 
     @Override
     protected String toString(String prefix) {
-        return prefix + "DIM " + this.name + " AS " + this.type + SystemUtils.LINE_SEPARATOR;
+        return prefix + "DIM " + this.name + " AS " + this.type + LN;
     }
 }

@@ -9,13 +9,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.github.nuclearg.nagisa.frontend.error.Errors;
 import com.github.nuclearg.nagisa.frontend.error.Fatals;
-import com.github.nuclearg.nagisa.frontend.identifier.FunctionIdentifierInfo;
-import com.github.nuclearg.nagisa.frontend.identifier.TypeIdentifierInfo;
-import com.github.nuclearg.nagisa.frontend.identifier.VariableIdentifierInfo;
 import com.github.nuclearg.nagisa.frontend.lexer.LexToken;
 import com.github.nuclearg.nagisa.frontend.lexer.LexTokenType;
 import com.github.nuclearg.nagisa.frontend.lexer.NagisaLexDefinition.NagisaLexTokenType;
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
+import com.github.nuclearg.nagisa.frontend.symbol.FunctionSymbol;
+import com.github.nuclearg.nagisa.frontend.symbol.TypeSymbol;
+import com.github.nuclearg.nagisa.frontend.symbol.VariableSymbol;
 
 /**
  * 表达式
@@ -27,7 +27,7 @@ public final class Expr {
     /**
      * 表达式类型
      */
-    private final TypeIdentifierInfo type;
+    private final TypeSymbol type;
     /**
      * 表达式运算符
      */
@@ -46,7 +46,7 @@ public final class Expr {
      */
     private final boolean priorityRedefined;
 
-    private Expr(TypeIdentifierInfo type, ExprOperator operator, String text) {
+    private Expr(TypeSymbol type, ExprOperator operator, String text) {
         this.type = type;
         this.operator = operator;
         this.text = text;
@@ -54,7 +54,7 @@ public final class Expr {
         this.priorityRedefined = false;
     }
 
-    private Expr(TypeIdentifierInfo type, ExprOperator operator, String text, Expr child) {
+    private Expr(TypeSymbol type, ExprOperator operator, String text, Expr child) {
         this.type = type;
         this.operator = operator;
         this.text = text;
@@ -62,7 +62,7 @@ public final class Expr {
         this.priorityRedefined = false;
     }
 
-    private Expr(TypeIdentifierInfo type, ExprOperator operator, String text, Expr left, Expr right) {
+    private Expr(TypeSymbol type, ExprOperator operator, String text, Expr left, Expr right) {
         this.type = type;
         this.operator = operator;
         this.text = text;
@@ -70,7 +70,7 @@ public final class Expr {
         this.priorityRedefined = false;
     }
 
-    public Expr(TypeIdentifierInfo exprType, ExprOperator operator, String text, List<Expr> children) {
+    public Expr(TypeSymbol exprType, ExprOperator operator, String text, List<Expr> children) {
         this.type = exprType;
         this.operator = operator;
         this.text = text;
@@ -87,7 +87,7 @@ public final class Expr {
     }
 
     /** 表达式类型 */
-    public TypeIdentifierInfo getType() {
+    public TypeSymbol getType() {
         return this.type;
     }
 
@@ -142,7 +142,7 @@ public final class Expr {
      *            上下文
      * @return 表达式语法树
      */
-    static Expr resolveExpr(SyntaxTreeNode node, Context ctx) {
+    static Expr buildExpr(SyntaxTreeNode node, Context ctx) {
         LexToken firstToken = null;
         if (node.getChildren().size() > 1)
             firstToken = node.getChildren().get(0).getToken();
@@ -150,73 +150,72 @@ public final class Expr {
         // 判断表达式有几个组成部分
         switch (node.getChildren().size()) {
             case 0:
-                return resolveNoneParamExpr(node, ctx);
+                return buildNoneParamExpr(node, ctx);
             case 1:
-                return resolveExpr(node.getChildren().get(0), ctx);
+                return buildExpr(node.getChildren().get(0), ctx);
             case 2:
-                return resolveSingleParamExpr(node, ctx);
+                return buildSingleParamExpr(node, ctx);
             case 3:
                 // 判断是双目运算符还是括号表达式
                 if (firstToken != null && firstToken.getType() == NagisaLexTokenType.SYMBOL_PARENTHESE_LEFT)
-                    return resolveParentheseExpr(node, ctx);
+                    return buildParentheseExpr(node, ctx);
                 else
-                    return resolveDoubleParamExpr(node, ctx);
+                    return buildDoubleParamExpr(node, ctx);
             case 4:
-                return resolveFunctionCallExpr(node, ctx);
+                return buildFunctionCallExpr(node, ctx);
             default:
-                ctx.errorReporter.report(node, Fatals.F0001, "unsupported expr children size. size: " + node.getChildren().size() + ", node: " + node);
+                ctx.getErrorReporter().report(node, Fatals.F0001, "unsupported expr children size. size: " + node.getChildren().size() + ", node: " + node);
                 return null;
         }
     }
 
-    private static Expr resolveNoneParamExpr(SyntaxTreeNode node, Context ctx) {
+    private static Expr buildNoneParamExpr(SyntaxTreeNode node, Context ctx) {
         LexToken token = node.getToken();
         String text = token.getText();
 
         switch ((NagisaLexTokenType) token.getType()) {
             case LITERAL_INTEGER:
-                return new Expr(TypeIdentifierInfo.INTEGER, ExprOperator.IntegerLiteral, text);
+                return new Expr(TypeSymbol.INTEGER, ExprOperator.IntegerLiteral, text);
             case LITERAL_STRING:
-                return new Expr(TypeIdentifierInfo.STRING, ExprOperator.StringLiteral, text);
+                return new Expr(TypeSymbol.STRING, ExprOperator.StringLiteral, text);
             case IDENTIFIER:
-                VariableIdentifierInfo info = ctx.registry.queryVariableInfo(text);
-                if (info == null) {
-                    ctx.errorReporter.report(node, Errors.E1001, text);
+                VariableSymbol info = ctx.getRegistry().lookupVariableSymbol(text, node);
+                if (info == null)
                     return null;
-                }
+
                 return new Expr(info.getType(), ExprOperator.VariableRef, text);
             default:
-                ctx.errorReporter.report(node, Fatals.F0001, "unsupported param0 expr. token: " + token);
+                ctx.getErrorReporter().report(node, Fatals.F0001, "unsupported param0 expr. token: " + token);
                 return null;
         }
     }
 
-    private static Expr resolveSingleParamExpr(SyntaxTreeNode node, Context ctx) {
+    private static Expr buildSingleParamExpr(SyntaxTreeNode node, Context ctx) {
         LexToken opToken = node.getChildren().get(0).getToken();
-        Expr param = resolveExpr(node.getChildren().get(1), ctx);
+        Expr param = buildExpr(node.getChildren().get(1), ctx);
 
         if (param == null)
             return null;
 
         switch ((NagisaLexTokenType) opToken.getType()) {
             case SYMBOL_SUB:
-                if (param.type != TypeIdentifierInfo.INTEGER)
-                    ctx.errorReporter.report(node, Errors.E1101, TypeIdentifierInfo.INTEGER, param.type);
-                return new Expr(TypeIdentifierInfo.INTEGER, ExprOperator.IntegerNegative, opToken.getText(), param);
+                if (param.type != TypeSymbol.INTEGER)
+                    ctx.getErrorReporter().report(node, Errors.E1101, TypeSymbol.INTEGER, param.type);
+                return new Expr(TypeSymbol.INTEGER, ExprOperator.IntegerNegative, opToken.getText(), param);
             case SYMBOL_NOT:
-                if (param.type != TypeIdentifierInfo.STRING)
-                    ctx.errorReporter.report(node, Errors.E1101, TypeIdentifierInfo.BOOLEAN, param.type);
-                return new Expr(TypeIdentifierInfo.BOOLEAN, ExprOperator.BooleanNot, opToken.getText(), param);
+                if (param.type != TypeSymbol.STRING)
+                    ctx.getErrorReporter().report(node, Errors.E1101, TypeSymbol.BOOLEAN, param.type);
+                return new Expr(TypeSymbol.BOOLEAN, ExprOperator.BooleanNot, opToken.getText(), param);
             default:
-                ctx.errorReporter.report(node, Fatals.F0001, "unsupported param1 expr. token: " + opToken);
+                ctx.getErrorReporter().report(node, Fatals.F0001, "unsupported param1 expr. token: " + opToken);
                 return null;
         }
     }
 
-    private static Expr resolveDoubleParamExpr(SyntaxTreeNode node, Context ctx) {
-        Expr left = resolveExpr(node.getChildren().get(0), ctx);
+    private static Expr buildDoubleParamExpr(SyntaxTreeNode node, Context ctx) {
+        Expr left = buildExpr(node.getChildren().get(0), ctx);
         LexToken opToken = node.getChildren().get(1).getToken();
-        Expr right = resolveExpr(node.getChildren().get(2), ctx);
+        Expr right = buildExpr(node.getChildren().get(2), ctx);
 
         if (left == null || right == null)
             return null;
@@ -227,12 +226,12 @@ public final class Expr {
                 return new Expr(info.resultType, info.operator, opToken.getText(), left, right);
 
         // 找不到，报错
-        ctx.errorReporter.report(node, Errors.E1102, left.type, right.type, opToken.getText());
+        ctx.getErrorReporter().report(node, Errors.E1102, left.type, right.type, opToken.getText());
         return null;
     }
 
-    private static Expr resolveParentheseExpr(SyntaxTreeNode node, Context ctx) {
-        Expr expr = resolveExpr(node.getChildren().get(1), ctx);
+    private static Expr buildParentheseExpr(SyntaxTreeNode node, Context ctx) {
+        Expr expr = buildExpr(node.getChildren().get(1), ctx);
         if (expr == null)
             return null;
 
@@ -243,51 +242,38 @@ public final class Expr {
         return new Expr(expr, true);
     }
 
-    private static Expr resolveFunctionCallExpr(SyntaxTreeNode node, Context ctx) {
+    private static Expr buildFunctionCallExpr(SyntaxTreeNode node, Context ctx) {
         // 函数名
         String name = node.getChildren().get(0).getToken().getText();
-        // 参数列表
+        // 实参列表
         List<SyntaxTreeNode> argNodes = node.getChildren().get(2).getChildren();
         List<Expr> args = argNodes.stream()
                 .map(n -> "RestArgument".equals(n.getRuleName()) ? n.getChildren().get(1) : n)
-                .map(n -> resolveExpr(n, ctx))
+                .map(n -> buildExpr(n, ctx))
                 .collect(Collectors.toList());
 
-        FunctionIdentifierInfo info = ctx.registry.queryFunctionInfo(name);
-        if (info == null) {
-            ctx.errorReporter.report(node, Errors.E1003, name);
-            return null;
-        }
+        // 实参类型列表
+        List<TypeSymbol> argTypes = args.stream()
+                .map(o -> o.getType())
+                .collect(Collectors.toList());
 
-        /*
-         * 进行一些检查
-         */
+        FunctionSymbol function = ctx.getRegistry().lookupFunctionSymbol(name, argTypes, true, node);
+        if (function == null)
+            // 随便拼一个什么东西返回去
+            return new Expr(TypeSymbol.VOID, ExprOperator.FunctionInvocation, name, args);
 
-        // 不能以表达式的方式调用方法
-        if (info.getType() == TypeIdentifierInfo.VOID)
-            ctx.errorReporter.report(node, Errors.E2003, info.getName());
-
-        // 检查形参和实参的数量是否匹配
-        if (args.size() != info.getParameters().size())
-            ctx.errorReporter.report(node, Errors.E2004, info.getName(), info.getParameters().size(), args.size());
-        else
-            // 检查形参和实参的类型是否匹配
-            for (int i = 0; i < args.size(); i++)
-                if (args.get(i).type != info.getParameters().get(i).getType())
-                    ctx.errorReporter.report(node, Errors.E2005, info.getName(), i, info.getParameters().get(i).getName(), info.getParameters().get(i).getType(), args.get(i).type);
-
-        return new Expr(info.getType(), ExprOperator.FunctionInvocation, info.getName(), args);
+        return new Expr(function.getType(), ExprOperator.FunctionInvocation, function.getName(), args);
     }
 
     private static class OperatorInfo {
         private final LexTokenType opTokenType;
-        private final TypeIdentifierInfo leftType;
-        private final TypeIdentifierInfo rightType;
+        private final TypeSymbol leftType;
+        private final TypeSymbol rightType;
 
         private final ExprOperator operator;
-        private final TypeIdentifierInfo resultType;
+        private final TypeSymbol resultType;
 
-        OperatorInfo(LexTokenType opTokenType, TypeIdentifierInfo leftType, TypeIdentifierInfo rightType, ExprOperator operator, TypeIdentifierInfo resultType) {
+        OperatorInfo(LexTokenType opTokenType, TypeSymbol leftType, TypeSymbol rightType, ExprOperator operator, TypeSymbol resultType) {
             this.opTokenType = opTokenType;
             this.leftType = leftType;
             this.rightType = rightType;
@@ -298,32 +284,32 @@ public final class Expr {
     }
 
     private static final List<OperatorInfo> OPERATORS = Arrays.asList(
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_ADD, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerAdd, TypeIdentifierInfo.INTEGER),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_SUB, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerSub, TypeIdentifierInfo.INTEGER),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_MUL, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerMul, TypeIdentifierInfo.INTEGER),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_DIV, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerDiv, TypeIdentifierInfo.INTEGER),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_MOD, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerMod, TypeIdentifierInfo.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_ADD, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerAdd, TypeSymbol.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_SUB, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerSub, TypeSymbol.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_MUL, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerMul, TypeSymbol.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_DIV, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerDiv, TypeSymbol.INTEGER),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_MOD, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerMod, TypeSymbol.INTEGER),
 
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_ADD, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.StringAdd, TypeIdentifierInfo.STRING),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_ADD, TypeSymbol.STRING, TypeSymbol.STRING, ExprOperator.StringAdd, TypeSymbol.STRING),
 
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerEq, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerNeq, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_GT, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerGt, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_GTE, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerGte, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_LT, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerLt, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_LTE, TypeIdentifierInfo.INTEGER, TypeIdentifierInfo.INTEGER, ExprOperator.IntegerLte, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerEq, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerNeq, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GT, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerGt, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GTE, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerGte, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LT, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerLt, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LTE, TypeSymbol.INTEGER, TypeSymbol.INTEGER, ExprOperator.IntegerLte, TypeSymbol.BOOLEAN),
 
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.StringEq, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.StringNeq, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_GT, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.StringGt, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_GTE, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.StringGte, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_LT, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.StringLt, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_LTE, TypeIdentifierInfo.STRING, TypeIdentifierInfo.STRING, ExprOperator.StringLte, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, TypeSymbol.STRING, TypeSymbol.STRING, ExprOperator.StringEq, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, TypeSymbol.STRING, TypeSymbol.STRING, ExprOperator.StringNeq, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GT, TypeSymbol.STRING, TypeSymbol.STRING, ExprOperator.StringGt, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_GTE, TypeSymbol.STRING, TypeSymbol.STRING, ExprOperator.StringGte, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LT, TypeSymbol.STRING, TypeSymbol.STRING, ExprOperator.StringLt, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_LTE, TypeSymbol.STRING, TypeSymbol.STRING, ExprOperator.StringLte, TypeSymbol.BOOLEAN),
 
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, TypeIdentifierInfo.BOOLEAN, TypeIdentifierInfo.BOOLEAN, ExprOperator.BooleanEq, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, TypeIdentifierInfo.BOOLEAN, TypeIdentifierInfo.BOOLEAN, ExprOperator.BooleanNeq, TypeIdentifierInfo.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_EQ, TypeSymbol.BOOLEAN, TypeSymbol.BOOLEAN, ExprOperator.BooleanEq, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_NEQ, TypeSymbol.BOOLEAN, TypeSymbol.BOOLEAN, ExprOperator.BooleanNeq, TypeSymbol.BOOLEAN),
 
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_AND, TypeIdentifierInfo.BOOLEAN, TypeIdentifierInfo.BOOLEAN, ExprOperator.BooleanAnd, TypeIdentifierInfo.BOOLEAN),
-            new OperatorInfo(NagisaLexTokenType.SYMBOL_OR, TypeIdentifierInfo.BOOLEAN, TypeIdentifierInfo.BOOLEAN, ExprOperator.BooleanOr, TypeIdentifierInfo.BOOLEAN)
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_AND, TypeSymbol.BOOLEAN, TypeSymbol.BOOLEAN, ExprOperator.BooleanAnd, TypeSymbol.BOOLEAN),
+            new OperatorInfo(NagisaLexTokenType.SYMBOL_OR, TypeSymbol.BOOLEAN, TypeSymbol.BOOLEAN, ExprOperator.BooleanOr, TypeSymbol.BOOLEAN)
             );
 }

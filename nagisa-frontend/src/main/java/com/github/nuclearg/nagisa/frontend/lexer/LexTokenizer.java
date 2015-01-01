@@ -51,6 +51,10 @@ public final class LexTokenizer {
      * 待解析的原始文本
      */
     private final String text;
+    /**
+     * 文件名
+     */
+    private final String fileName;
 
     /**
      * 读取完前一个词之后的快照
@@ -70,9 +74,10 @@ public final class LexTokenizer {
      */
     private int column;
 
-    LexTokenizer(LexDefinition definition, String text) {
+    LexTokenizer(LexDefinition definition, String text, String fileName) {
         this.definition = definition;
         this.text = text;
+        this.fileName = fileName;
     }
 
     /**
@@ -104,7 +109,7 @@ public final class LexTokenizer {
             return new LexToken(null, null, new Range(this.position(), this.position()));
 
         LexToken token = null;
-        this.prevPosition = new Position(this.pos, this.row, this.column);
+        this.prevPosition = new Position(this.fileName, this.pos, this.row, this.column);
 
         // 遍历所有词法规则进行匹配
         for (LexTokenType type : this.definition.getTypes()) {
@@ -115,7 +120,7 @@ public final class LexTokenizer {
                 if (this.text.toUpperCase().indexOf(type.literal().toUpperCase(), this.pos) == this.pos) {
                     str = type.literal();
 
-                    // 检查之后的字符不是[a-zA-Z0-9]，避免将“LET asdf = 0”中标识符“asdf”中的as解析为KEYWORD_AS
+                    // 检查之后的字符不是[a-zA-Z0-9]，避免将“LET asdf = 0”中符号“asdf”中的as解析为KEYWORD_AS
 
                     // 只有当前token的最后一个字符是[a-zA-Z0-9]时才需要进行这种检查，否则“let a=0”中的等于号会校验不过去
                     String lastChar = str.charAt(type.literal().length() - 1) + "";
@@ -182,7 +187,7 @@ public final class LexTokenizer {
      * @return 当前的快照
      */
     public Position position() {
-        return new Position(this.pos, this.row, this.column);
+        return new Position(this.fileName, this.pos, this.row, this.column);
     }
 
     /**

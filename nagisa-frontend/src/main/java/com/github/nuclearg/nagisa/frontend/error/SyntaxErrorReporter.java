@@ -75,8 +75,12 @@ public final class SyntaxErrorReporter {
     }
 
     /** 错误列表 */
-    public List<SyntaxErrorLogItem> getErrors() {
+    public Iterable<SyntaxErrorLogItem> getErrors() {
         return Collections.unmodifiableList(this.errors);
     }
 
+    /** 是否有错误 */
+    public boolean hasErrors() {
+        return !this.errors.isEmpty();
+    }
 }

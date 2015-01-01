@@ -1,7 +1,9 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.LN;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.TAB;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
@@ -31,6 +33,8 @@ public final class DefineNativeSubStmt extends DefineFunctionStmtBase {
 
         this.javaClassName = javaClassName;
         this.javaMethodName = javaMethodName;
+
+        ctx.popLevel();
     }
 
     /** 对应的java类名 */
@@ -45,9 +49,9 @@ public final class DefineNativeSubStmt extends DefineFunctionStmtBase {
 
     @Override
     protected String toString(String prefix) {
-        return prefix + "NATIVESUB " + this.name + " (" + StringUtils.join(this.parameters, ", ") + ")" + SystemUtils.LINE_SEPARATOR
-                + prefix + "    \"" + this.javaClassName + "\"" + SystemUtils.LINE_SEPARATOR
-                + prefix + "    \"" + this.javaMethodName + "\"" + SystemUtils.LINE_SEPARATOR
-                + prefix + "END SUB" + SystemUtils.LINE_SEPARATOR;
+        return prefix + "NATIVESUB " + this.name + " (" + StringUtils.join(this.parameters, ", ") + ")" + LN
+                + prefix + TAB + "\"" + this.javaClassName + "\"" + LN
+                + prefix + TAB + "\"" + this.javaMethodName + "\"" + LN
+                + prefix + "END SUB" + LN;
     }
 }

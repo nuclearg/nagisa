@@ -1,6 +1,6 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
-import org.apache.commons.lang3.SystemUtils;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.LN;
 
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
@@ -18,7 +18,7 @@ public final class ReturnStmt extends Stmt {
 
     ReturnStmt(SyntaxTreeNode node, Context ctx) {
         if (node.getChildren().size() > 2)
-            this.expr = Expr.resolveExpr(node.getChildren().get(1), ctx);
+            this.expr = Expr.buildExpr(node.getChildren().get(1), ctx);
         else
             this.expr = null;
     }
@@ -31,8 +31,8 @@ public final class ReturnStmt extends Stmt {
     @Override
     public String toString(String prefix) {
         if (this.expr == null)
-            return prefix + "RETURN" + SystemUtils.LINE_SEPARATOR;
+            return prefix + "RETURN" + LN;
         else
-            return prefix + " RETURN " + this.expr + SystemUtils.LINE_SEPARATOR;
+            return prefix + " RETURN " + this.expr + LN;
     }
 }

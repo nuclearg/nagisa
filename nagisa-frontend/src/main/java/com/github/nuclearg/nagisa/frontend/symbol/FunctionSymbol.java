@@ -1,15 +1,15 @@
-package com.github.nuclearg.nagisa.frontend.identifier;
+package com.github.nuclearg.nagisa.frontend.symbol;
 
 import java.util.Collections;
 import java.util.List;
 
 /**
- * 函数信息
+ * 函数符号
  * 
  * @author ng
  *
  */
-public final class FunctionIdentifierInfo {
+public final class FunctionSymbol {
     /**
      * 函数名
      */
@@ -17,13 +17,13 @@ public final class FunctionIdentifierInfo {
     /**
      * 返回类型
      */
-    private final TypeIdentifierInfo type;
+    private final TypeSymbol type;
     /**
      * 形参列表
      */
-    private final List<VariableIdentifierInfo> parameters;
+    private final List<VariableSymbol> parameters;
 
-    public FunctionIdentifierInfo(String name, TypeIdentifierInfo type, List<VariableIdentifierInfo> parameters) {
+    public FunctionSymbol(String name, TypeSymbol type, List<VariableSymbol> parameters) {
         this.name = name;
         this.type = type;
         this.parameters = Collections.unmodifiableList(parameters);
@@ -35,13 +35,12 @@ public final class FunctionIdentifierInfo {
     }
 
     /** 返回类型 */
-    public TypeIdentifierInfo getType() {
+    public TypeSymbol getType() {
         return this.type;
     }
 
     /** 形参列表 */
-    public List<VariableIdentifierInfo> getParameters() {
+    public List<VariableSymbol> getParameters() {
         return this.parameters;
     }
-
 }

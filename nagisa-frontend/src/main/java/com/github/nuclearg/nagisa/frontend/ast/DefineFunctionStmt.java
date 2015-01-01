@@ -1,7 +1,11 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.LN;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.TAB;
+
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
@@ -11,33 +15,30 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class DefineFunctionStmt extends DefineFunctionStmtBase implements StmtBlockSupported {
+public final class DefineFunctionStmt extends DefineFunctionStmtBase {
     /**
      * 函数体
      */
-    private final StmtBlock stmts;
+    private final List<Stmt> stmts;
 
     DefineFunctionStmt(SyntaxTreeNode node, Context ctx) {
         super(node, ctx);
 
-        this.stmts = new StmtBlock(node.getChildren().get(8).getChildren(), ctx);
+        this.stmts = Stmt.buildStmts(node.getChildren().get(8).getChildren(), ctx);
+
+        ctx.popLevel();
     }
 
     /** 函数体 */
-    public StmtBlock getStmts() {
+    public Iterable<Stmt> getStmts() {
         return this.stmts;
     }
 
     @Override
-    public void initStmtBlock() {
-        this.stmts.init();
-    }
-
-    @Override
     protected String toString(String prefix) {
-        return prefix + "FUNCTION " + this.name + " (" + StringUtils.join(this.parameters, ", ") + ") AS " + this.type + SystemUtils.LINE_SEPARATOR
-                + this.stmts.toString(prefix + "    ")
-                + prefix + "END FUNCTION" + SystemUtils.LINE_SEPARATOR;
+        return prefix + "FUNCTION " + this.name + " (" + StringUtils.join(this.parameters, ", ") + ") AS " + this.type + LN
+                + Stmt.toString(this.stmts, prefix + TAB)
+                + prefix + "END FUNCTION" + LN;
     }
 
 }

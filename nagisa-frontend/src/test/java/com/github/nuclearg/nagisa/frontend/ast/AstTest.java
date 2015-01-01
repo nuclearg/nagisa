@@ -15,7 +15,9 @@ import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
-import com.github.nuclearg.nagisa.frontend.ast.NagisaFrontend.LoadResult;
+import com.github.nuclearg.nagisa.frontend.NagisaFrontend;
+import com.github.nuclearg.nagisa.frontend.NagisaLoadResult;
+import com.github.nuclearg.nagisa.frontend.NagisaLoadSource;
 import com.github.nuclearg.nagisa.frontend.util.InputStreamUtils;
 
 @RunWith(AstTest.class)
@@ -47,11 +49,13 @@ public class AstTest extends ParentRunner<File> {
             public void evaluate() throws Throwable {
                 String code = InputStreamUtils.read(new FileInputStream(child), Charset.forName("utf-8"));
 
-                LoadResult result = NagisaFrontend.loadCompilationUnit(code);
+                NagisaLoadSource source = new NagisaLoadSource(code, child.getName());
 
-                System.out.println(result.getCu());
+                NagisaLoadResult result = NagisaFrontend.loadProgram(Arrays.asList(source));
 
-                Assert.assertTrue(result.getErrors().isEmpty());
+                Assert.assertTrue(result.isSuccess());
+
+                System.out.println(result.getProgram().getMainUnit());
             }
         };
         this.runLeaf(statement, this.describeChild(child), notifier);

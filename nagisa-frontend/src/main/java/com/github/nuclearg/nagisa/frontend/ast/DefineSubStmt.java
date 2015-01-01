@@ -1,7 +1,11 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.LN;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.TAB;
+
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
@@ -11,32 +15,29 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class DefineSubStmt extends DefineFunctionStmtBase implements StmtBlockSupported {
+public final class DefineSubStmt extends DefineFunctionStmtBase {
     /**
      * 方法体
      */
-    private final StmtBlock stmts;
+    private final List<Stmt> stmts;
 
     DefineSubStmt(SyntaxTreeNode node, Context ctx) {
         super(node, ctx);
 
-        this.stmts = new StmtBlock(node.getChildren().get(6).getChildren(), ctx);
+        this.stmts = Stmt.buildStmts(node.getChildren().get(6).getChildren(), ctx);
+
+        ctx.popLevel();
     }
 
     /** 方法体 */
-    public StmtBlock getStmts() {
+    public Iterable<Stmt> getStmts() {
         return this.stmts;
     }
 
     @Override
-    public void initStmtBlock() {
-        this.stmts.init();
-    }
-
-    @Override
     protected String toString(String prefix) {
-        return prefix + "SUB " + this.name + " (" + StringUtils.join(this.parameters, ", ") + ")" + SystemUtils.LINE_SEPARATOR
-                + this.stmts.toString(prefix + "    ")
-                + prefix + "END SUB" + SystemUtils.LINE_SEPARATOR;
+        return prefix + "SUB " + this.name + " (" + StringUtils.join(this.parameters, ", ") + ")" + LN
+                + Stmt.toString(this.stmts, prefix + TAB)
+                + prefix + "END SUB" + LN;
     }
 }

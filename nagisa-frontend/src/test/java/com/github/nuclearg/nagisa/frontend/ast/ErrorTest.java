@@ -15,7 +15,9 @@ import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
-import com.github.nuclearg.nagisa.frontend.ast.NagisaFrontend.LoadResult;
+import com.github.nuclearg.nagisa.frontend.NagisaFrontend;
+import com.github.nuclearg.nagisa.frontend.NagisaLoadResult;
+import com.github.nuclearg.nagisa.frontend.NagisaLoadSource;
 import com.github.nuclearg.nagisa.frontend.util.InputStreamUtils;
 
 @RunWith(ErrorTest.class)
@@ -47,15 +49,15 @@ public class ErrorTest extends ParentRunner<File> {
             public void evaluate() throws Throwable {
                 String code = InputStreamUtils.read(new FileInputStream(child), Charset.forName("utf-8"));
 
-                LoadResult result = NagisaFrontend.loadCompilationUnit(code);
+                NagisaLoadSource source = new NagisaLoadSource(code, child.getName());
 
-                System.out.println(result.getCu());
+                NagisaLoadResult result = NagisaFrontend.loadProgram(Arrays.asList(source));
 
                 // 检查是否有报错
-                Assert.assertFalse(result.getErrors().isEmpty());
+                Assert.assertFalse(result.isSuccess());
 
                 // 检查报的那条错误是否是期望的错误
-                String errorName = result.getErrors().get(0).getError().name();
+                String errorName = result.getErrors().iterator().next().getError().name();
                 String expected = child.getName().substring(0, child.getName().indexOf('.'));
                 Assert.assertEquals(expected, errorName);
             }

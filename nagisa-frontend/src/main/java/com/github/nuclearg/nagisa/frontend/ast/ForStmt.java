@@ -1,9 +1,12 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
-import org.apache.commons.lang3.SystemUtils;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.LN;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.TAB;
 
-import com.github.nuclearg.nagisa.frontend.identifier.TypeIdentifierInfo;
+import java.util.List;
+
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
+import com.github.nuclearg.nagisa.frontend.symbol.TypeSymbol;
 
 /**
  * for循环语句
@@ -11,7 +14,7 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class ForStmt extends Stmt implements StmtBlockSupported {
+public final class ForStmt extends Stmt {
     /**
      * 循环变量名
      */
@@ -27,15 +30,15 @@ public final class ForStmt extends Stmt implements StmtBlockSupported {
     /**
      * 循环体
      */
-    private final StmtBlock stmts;
+    private final List<Stmt> stmts;
 
     ForStmt(SyntaxTreeNode node, Context ctx) {
         this.symbol = node.getChildren().get(1).getToken().getText();
-        ctx.registry.registerVariableInfo(this.symbol, TypeIdentifierInfo.INTEGER, node.getChildren().get(1));
+        ctx.getRegistry().registerVariableInfo(this.symbol, TypeSymbol.INTEGER, node.getChildren().get(1));
 
-        this.initValue = Expr.resolveExpr(node.getChildren().get(3), ctx);
-        this.targetValue = Expr.resolveExpr(node.getChildren().get(5), ctx);
-        this.stmts = new StmtBlock(node.getChildren().get(7).getChildren(), ctx);
+        this.initValue = Expr.buildExpr(node.getChildren().get(3), ctx);
+        this.targetValue = Expr.buildExpr(node.getChildren().get(5), ctx);
+        this.stmts = Stmt.buildStmts(node.getChildren().get(7).getChildren(), ctx);
     }
 
     /** 循环变量名 */
@@ -59,15 +62,10 @@ public final class ForStmt extends Stmt implements StmtBlockSupported {
     }
 
     @Override
-    public void initStmtBlock() {
-        this.stmts.init();
-    }
-
-    @Override
     public String toString(String prefix) {
-        return prefix + "FOR " + this.symbol + " = " + this.initValue + " TO " + this.targetValue + SystemUtils.LINE_SEPARATOR
-                + this.stmts.toString(prefix + "    ")
-                + prefix + "NEXT" + SystemUtils.LINE_SEPARATOR;
+        return prefix + "FOR " + this.symbol + " = " + this.initValue + " TO " + this.targetValue + LN
+                + Stmt.toString(this.stmts, prefix + TAB)
+                + prefix + "NEXT" + LN;
     }
 
 }

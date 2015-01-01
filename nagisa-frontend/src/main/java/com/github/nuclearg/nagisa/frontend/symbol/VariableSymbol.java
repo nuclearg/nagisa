@@ -1,12 +1,12 @@
-package com.github.nuclearg.nagisa.frontend.identifier;
+package com.github.nuclearg.nagisa.frontend.symbol;
 
 /**
- * 变量信息
+ * 变量符号
  * 
  * @author ng
  *
  */
-public final class VariableIdentifierInfo {
+public final class VariableSymbol {
     /**
      * 变量名
      */
@@ -14,9 +14,9 @@ public final class VariableIdentifierInfo {
     /**
      * 类型
      */
-    private final TypeIdentifierInfo type;
+    private final TypeSymbol type;
 
-    public VariableIdentifierInfo(String name, TypeIdentifierInfo type) {
+    public VariableSymbol(String name, TypeSymbol type) {
         this.name = name;
         this.type = type;
     }
@@ -27,7 +27,7 @@ public final class VariableIdentifierInfo {
     }
 
     /** 类型 */
-    public TypeIdentifierInfo getType() {
+    public TypeSymbol getType() {
         return this.type;
     }
 
@@ -35,4 +35,5 @@ public final class VariableIdentifierInfo {
     public String toString() {
         return this.name + " AS " + this.type;
     }
+
 }

@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.github.nuclearg.nagisa.frontend.error.Errors;
-import com.github.nuclearg.nagisa.frontend.identifier.FunctionIdentifierInfo;
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
+import com.github.nuclearg.nagisa.frontend.symbol.FunctionSymbol;
+import com.github.nuclearg.nagisa.frontend.symbol.TypeSymbol;
 
 /**
  * 调用方法的语句
@@ -33,24 +33,18 @@ public final class CallSubStmt extends Stmt {
         List<SyntaxTreeNode> argNodes = node.getChildren().get(1).getChildren();
         List<Expr> arguments = argNodes.stream()
                 .map(n -> "RestArgument".equals(n.getRuleName()) ? n.getChildren().get(1) : n)
-                .map(n -> Expr.resolveExpr(n, ctx))
+                .map(n -> Expr.buildExpr(n, ctx))
+                .collect(Collectors.toList());
+        // 参数类型列表
+        List<TypeSymbol> argTypes = arguments.stream()
+                .map(a -> a.getType())
                 .collect(Collectors.toList());
 
-        FunctionIdentifierInfo info = ctx.registry.queryFunctionInfo(name);
-        if (info == null)
-            ctx.errorReporter.report(node, Errors.E1003, name);
-        else {
-            // 检查形参和实参的数量是否匹配
-            if (arguments.size() != info.getParameters().size())
-                ctx.errorReporter.report(node, Errors.E2004, info.getName(), info.getParameters().size(), arguments.size());
-            else
-                // 检查形参和实参的类型是否匹配
-                for (int i = 0; i < arguments.size(); i++)
-                    if (arguments.get(i).getType() != info.getParameters().get(i).getType())
-                        ctx.errorReporter.report(node, Errors.E2005, info.getName(), i, info.getParameters().get(i).getName(), info.getParameters().get(i).getType(), arguments.get(i).getType());
-        }
+        FunctionSymbol function = ctx.getRegistry().lookupFunctionSymbol(name, argTypes, false, node);
+        if (function != null)
+            name = function.getName();
 
-        this.name = info.getName();
+        this.name = name;
         this.arguments = Collections.unmodifiableList(arguments);
     }
 

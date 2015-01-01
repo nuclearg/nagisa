@@ -1,8 +1,10 @@
 package com.github.nuclearg.nagisa.frontend.ast;
 
-import java.util.Collections;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.LN;
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.TAB;
 
-import org.apache.commons.lang3.SystemUtils;
+import java.util.Collections;
+import java.util.List;
 
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 
@@ -12,7 +14,7 @@ import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
  * @author ng
  *
  */
-public final class IfStmt extends Stmt implements StmtBlockSupported {
+public final class IfStmt extends Stmt {
     /**
      * 条件表达式
      */
@@ -20,21 +22,21 @@ public final class IfStmt extends Stmt implements StmtBlockSupported {
     /**
      * 判断成功的操作
      */
-    private final StmtBlock thenStmts;
+    private final List<Stmt> thenStmts;
     /**
      * 判断失败的操作
      */
-    private final StmtBlock elseStmts;
+    private final List<Stmt> elseStmts;
 
     IfStmt(SyntaxTreeNode node, Context ctx) {
-        this.condition = Expr.resolveExpr(node.getChildren().get(1), ctx);
+        this.condition = Expr.buildExpr(node.getChildren().get(1), ctx);
 
-        this.thenStmts = new StmtBlock(node.getChildren().get(4).getChildren(), ctx);
+        this.thenStmts = Stmt.buildStmts(node.getChildren().get(4).getChildren(), ctx);
 
         if (!node.getChildren().get(7).getChildren().isEmpty())
-            this.elseStmts = new StmtBlock(node.getChildren().get(7).getChildren(), ctx);
+            this.elseStmts = Stmt.buildStmts(node.getChildren().get(7).getChildren(), ctx);
         else
-            this.elseStmts = new StmtBlock(Collections.emptyList(), ctx);
+            this.elseStmts = Stmt.buildStmts(Collections.emptyList(), ctx);
     }
 
     /** 条件表达式 */
@@ -53,17 +55,11 @@ public final class IfStmt extends Stmt implements StmtBlockSupported {
     }
 
     @Override
-    public void initStmtBlock() {
-        this.thenStmts.init();
-        this.elseStmts.init();
-    }
-
-    @Override
     public String toString(String prefix) {
-        return prefix + "IF " + this.condition + " THEN" + SystemUtils.LINE_SEPARATOR
-                + this.thenStmts.toString(prefix + "    ")
-                + prefix + "ELSE" + SystemUtils.LINE_SEPARATOR
-                + this.elseStmts.toString(prefix + "    ")
-                + prefix + "END IF" + SystemUtils.LINE_SEPARATOR;
+        return prefix + "IF " + this.condition + " THEN" + LN
+                + Stmt.toString(this.thenStmts, prefix + TAB)
+                + prefix + "ELSE" + LN
+                + Stmt.toString(this.elseStmts, prefix + TAB)
+                + prefix + "END IF" + LN;
     }
 }

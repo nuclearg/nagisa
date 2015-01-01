@@ -25,11 +25,13 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
      * 
      * @param text
      *            待解析的文本
+     * @param fileName
+     *            文件名
      * @return 解析出的语法节点树
      */
-    public static SyntaxTreeNode parse(String text, SyntaxErrorReporter errorReporter) {
+    public static SyntaxTreeNode parse(String text, String fileName, SyntaxErrorReporter errorReporter) {
         try {
-            LexTokenizer lexer = NagisaLexDefinition.lexer(text);
+            LexTokenizer lexer = NagisaLexDefinition.lexer(text, fileName);
 
             SyntaxTreeNode node = INSTANCE.getRule(ROOT_RULE).parse(lexer, errorReporter);
 
@@ -60,7 +62,7 @@ public final class NagisaSyntaxDefinition extends SyntaxDefinition {
                         seq(lex(SYMBOL_NOT), ref("AtomExprElement")), // 取反
                         seq(lex(SYMBOL_PARENTHESE_LEFT), ref("Expr"), lex(SYMBOL_PARENTHESE_RIGHT)), // 括号运算
                         seq(
-                                lex(IDENTIFIER), // 普通标识符
+                                lex(IDENTIFIER), // 普通符号
                                 opt(seq(lex(SYMBOL_PARENTHESE_LEFT), ref("ArgumentList"), lex(SYMBOL_PARENTHESE_RIGHT))))));// 函数调用
         define("MulDivModExprTerm",
                 seq(

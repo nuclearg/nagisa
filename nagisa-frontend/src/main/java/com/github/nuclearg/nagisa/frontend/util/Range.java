@@ -10,6 +10,10 @@ public final class Range {
     public static final Range EMPTY = new Range(Position.EMPTY, Position.EMPTY);
 
     /**
+     * 文件名
+     */
+    private final String fileName;
+    /**
      * 起始位置
      */
     private final Position startPosition;
@@ -36,12 +40,18 @@ public final class Range {
     private final int endColumn;
 
     public Range(Position startPosition, Position endPosition) {
+        this.fileName = startPosition.getFileName();
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.startRow = startPosition.getRow();
         this.startColumn = startPosition.getColumn();
         this.endRow = endPosition.getRow();
         this.endColumn = endPosition.getColumn();
+    }
+
+    /** 文件名 */
+    public String getFileName() {
+        return this.fileName;
     }
 
     /** 起始位置 */
