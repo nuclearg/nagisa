@@ -69,11 +69,13 @@ abstract class DefineFunctionStmtBase extends Stmt {
                     // 取形参类型
                     SyntaxTreeNode typeNode = n.getChildren().get(2);
                     String typeName = typeNode.getToken().getText();
-                    TypeSymbol type = ctx.getRegistry().lookupTypeSymbol(typeName, parametersNode, true);
+                    TypeSymbol type = ctx.getRegistry().lookupTypeSymbol(typeName, parametersNode);
 
                     // 注册形参
-                    ctx.getRegistry().registerVariableInfo(name, type, nameNode);
+                    if (type == null)
+                        type = TypeSymbol.VOID;
 
+                    ctx.getRegistry().registerVariableInfo(name, type, nameNode);
                     return new VariableSymbol(name, type);
                 })
                 .collect(Collectors.toList());

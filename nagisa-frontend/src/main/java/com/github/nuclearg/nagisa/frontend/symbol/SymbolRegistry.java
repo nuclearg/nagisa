@@ -108,34 +108,6 @@ public final class SymbolRegistry {
     }
 
     /**
-     * 查询一个变量符号
-     * 
-     * @param name
-     *            变量名
-     * @param type
-     *            期望类型
-     * @param node
-     *            引用这个变量的语法节点
-     * @return 变量信息，可能为null
-     */
-    public VariableSymbol lookupVariableSymbol(String name, TypeSymbol type, SyntaxTreeNode node) {
-        if (type == null)
-            throw new IllegalArgumentException("variable expected type is null");
-
-        VariableSymbol variable = this.lookupVariableSymbol(name, node);
-        if (variable == null)
-            return null;
-
-        // 变量类型必须与期望类型一致
-        if (variable.getType() != type) {
-            errorReporter.report(node, Errors.E1103, name, type, variable.getType());
-            return null;
-        }
-
-        return variable;
-    }
-
-    /**
      * 注册一个函数符号
      * 
      * @param name
@@ -251,28 +223,5 @@ public final class SymbolRegistry {
         }
 
         return this.typeMap.get(name.toUpperCase());
-    }
-
-    /**
-     * 查询一个类型符号
-     * 
-     * @param name
-     *            类型名称
-     * @param node
-     *            引用类型的语法节点
-     * @param checkNotVoid
-     *            取到的类型不应为VOID
-     * @return 类型符号，或为null
-     */
-    public TypeSymbol lookupTypeSymbol(String name, SyntaxTreeNode node, boolean checkNotVoid) {
-        TypeSymbol type = this.lookupTypeSymbol(name, node);
-        if (type == null)
-            return null;
-
-        // 必须不能为VOID
-        if (checkNotVoid && type == TypeSymbol.VOID)
-            this.errorReporter.report(node, Errors.E1104);
-
-        return type;
     }
 }

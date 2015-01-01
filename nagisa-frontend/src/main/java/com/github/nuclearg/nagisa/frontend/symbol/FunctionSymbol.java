@@ -3,6 +3,8 @@ package com.github.nuclearg.nagisa.frontend.symbol;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * 函数符号
  * 
@@ -42,5 +44,10 @@ public final class FunctionSymbol {
     /** 形参列表 */
     public List<VariableSymbol> getParameters() {
         return this.parameters;
+    }
+
+    @Override
+    public String toString() {
+        return "FUNCTION " + this.name + " (" + StringUtils.join(this.parameters, ",") + ") AS " + this.type;
     }
 }

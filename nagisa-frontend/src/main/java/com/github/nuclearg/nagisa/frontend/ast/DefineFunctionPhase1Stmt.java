@@ -7,6 +7,7 @@ class DefineFunctionPhase1Stmt extends DefineFunctionStmtBase {
 
     DefineFunctionPhase1Stmt(SyntaxTreeNode node, Context ctx) {
         super(node, ctx);
+        ctx.popLevel();
 
         boolean isFunction = this.functionKeywordType == NagisaLexTokenType.KEYWORD_FUNCTION || this.functionKeywordType == NagisaLexTokenType.KEYWORD_NATIVEFUNCTION;
 

@@ -54,7 +54,7 @@ public class ErrorTest extends ParentRunner<File> {
                 NagisaLoadResult result = NagisaFrontend.loadProgram(Arrays.asList(source));
 
                 // 检查是否有报错
-                Assert.assertFalse(result.isSuccess());
+                Assert.assertFalse("no error detected", result.isSuccess());
 
                 // 检查报的那条错误是否是期望的错误
                 String errorName = result.getErrors().iterator().next().getError().name();

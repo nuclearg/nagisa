@@ -1,8 +1,12 @@
 package com.github.nuclearg.nagisa.frontend.error;
 
+import static com.github.nuclearg.nagisa.frontend.util.NagisaStrings.LN;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.github.nuclearg.nagisa.frontend.parser.SyntaxTreeNode;
 import com.github.nuclearg.nagisa.frontend.util.Position;
@@ -82,5 +86,10 @@ public final class SyntaxErrorReporter {
     /** 是否有错误 */
     public boolean hasErrors() {
         return !this.errors.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return StringUtils.join(this.errors, LN);
     }
 }

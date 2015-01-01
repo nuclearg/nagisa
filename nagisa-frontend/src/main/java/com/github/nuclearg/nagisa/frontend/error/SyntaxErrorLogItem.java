@@ -61,7 +61,7 @@ public final class SyntaxErrorLogItem {
     public String toString() {
         String level = StringUtils.rightPad(this.error.level().name().toUpperCase(), 5, ' ');
 
-        return level + " " + this.position + " " + this.error.name() + ": " + this.message;
+        return level + " " + this.position + " " + this.error.name() + " " + this.message;
     }
 
 }

@@ -53,7 +53,7 @@ public class AstTest extends ParentRunner<File> {
 
                 NagisaLoadResult result = NagisaFrontend.loadProgram(Arrays.asList(source));
 
-                Assert.assertTrue(result.isSuccess());
+                Assert.assertTrue("error detected", result.isSuccess());
 
                 System.out.println(result.getProgram().getMainUnit());
             }

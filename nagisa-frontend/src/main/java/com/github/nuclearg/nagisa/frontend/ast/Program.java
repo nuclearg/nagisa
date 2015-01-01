@@ -34,7 +34,7 @@ public final class Program {
         trees.forEach(tree -> new CompilationUnit(tree, ctx));
 
         // 第二遍，解析所有语句
-        Context ctx2 = new Context(errorReporter, ScanPhase.ScanStmt);
+        Context ctx2 = new Context(ctx, ScanPhase.ScanStmt);
         List<CompilationUnit> units = trees.stream()
                 .map(tree -> new CompilationUnit(tree, ctx2))
                 .collect(Collectors.toList());
